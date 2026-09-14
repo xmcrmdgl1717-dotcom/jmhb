@@ -20,8 +20,7 @@
   .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
   .toolbar button{padding:8px 16px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;font-size:13px;transition:background .2s;}
   .toolbar button:hover{background:rgba(0,240,255,.1);}
-  .toolbar .spacer{flex:1;}
-  .toolbar .count{color:rgba(200,210,230,.6);font-size:13px;}
+  .toolbar .count{color:rgba(200,210,230,.6);font-size:13px;margin-left:auto;}
   .rec{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:13px;}
   .rec .addr{color:#7AF7FF;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;font-weight:600;margin-bottom:6px;font-size:12px;}
   .rec .meta{color:rgba(200,210,230,.6);font-size:11px;display:flex;gap:16px;flex-wrap:wrap;}
@@ -29,6 +28,20 @@
   .empty{color:rgba(200,210,230,.5);text-align:center;padding:60px 0;font-size:14px;}
   .copy-btn{margin-left:auto;padding:2px 8px;font-size:10px;border-radius:6px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;}
   .copy-btn:hover{background:rgba(0,240,255,.1);}
+  /* 修改密码模态框 */
+  .modal{position:fixed;inset:0;background:rgba(4,6,12,.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+  .modal.open{display:flex;}
+  .modal-card{width:min(380px,100%);background:linear-gradient(180deg,#1a1d2c,#10121a);border-radius:16px;padding:28px 24px;box-shadow:0 0 0 1px rgba(0,240,255,.3),0 24px 48px rgba(0,0,0,.6);}
+  .modal-card h3{margin:0 0 18px;color:#00F0FF;font-size:16px;text-align:center;letter-spacing:.06em;}
+  .modal-card label{display:block;font-size:12px;color:rgba(200,210,230,.75);margin-bottom:6px;margin-top:12px;}
+  .modal-card input{width:100%;height:44px;padding:0 14px;border-radius:10px;border:1px solid rgba(0,240,255,.35);background:#0a0c14;color:#fff;font-size:14px;outline:none;}
+  .modal-card input:focus{border-color:#00F0FF;box-shadow:0 0 14px rgba(0,240,255,.25);}
+  .modal-actions{display:flex;gap:10px;margin-top:20px;}
+  .modal-actions button{flex:1;height:44px;border:0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.04em;}
+  .btn-primary{background:linear-gradient(180deg,#67e8f9,#22d3ee);color:#041018;}
+  .btn-secondary{background:transparent;border:1px solid rgba(0,240,255,.35)!important;color:#00F0FF;}
+  .modal-err{color:#ff8aa0;font-size:12px;text-align:center;min-height:16px;margin-top:10px;}
+  .modal-ok{color:#7AF7FF;font-size:12px;text-align:center;min-height:16px;margin-top:10px;}
 </style>
 </head>
 <body>
@@ -44,16 +57,34 @@
     <div class="toolbar">
       <button id="refreshBtn">🔄 刷新</button>
       <button id="exportBtn">⬇ 导出 CSV</button>
+      <button id="changePwdBtn">🔑 修改密码</button>
       <button id="logoutBtn">🚪 退出</button>
       <span class="count" id="countInfo"></span>
     </div>
     <div id="listBox"></div>
   </div>
 
+  <!-- 修改密码弹窗 -->
+  <div class="modal" id="pwdModal">
+    <div class="modal-card">
+      <h3>🔑 修改管理员密码</h3>
+      <label>当前密码</label>
+      <input id="oldPwd" type="password" autocomplete="off"/>
+      <label>新密码（至少 6 位）</label>
+      <input id="newPwd" type="password" autocomplete="off"/>
+      <label>确认新密码</label>
+      <input id="newPwd2" type="password" autocomplete="off"/>
+      <div class="modal-err" id="pwdErr"></div>
+      <div class="modal-ok" id="pwdOk"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="pwdCancel">取消</button>
+        <button class="btn-primary" id="pwdSubmit">确认修改</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 (function(){
-  // ===== 配置：后端 API 地址 =====
-  // 同域部署保持空字符串；跨域部署改成 'https://api.yoursite.com'
   const API_BASE = '';
 
   const loginBox = document.getElementById('loginBox');
@@ -66,6 +97,15 @@
   const refreshBtn = document.getElementById('refreshBtn');
   const exportBtn = document.getElementById('exportBtn');
   const logoutBtn = document.getElementById('logoutBtn');
+  const changePwdBtn = document.getElementById('changePwdBtn');
+  const pwdModal = document.getElementById('pwdModal');
+  const oldPwd = document.getElementById('oldPwd');
+  const newPwd = document.getElementById('newPwd');
+  const newPwd2 = document.getElementById('newPwd2');
+  const pwdErr = document.getElementById('pwdErr');
+  const pwdOk = document.getElementById('pwdOk');
+  const pwdCancel = document.getElementById('pwdCancel');
+  const pwdSubmit = document.getElementById('pwdSubmit');
 
   let token = sessionStorage.getItem('admin_token') || '';
   let cacheRecords = [];
@@ -196,11 +236,65 @@
     listBox.innerHTML = '';
   }
 
+  // ===== 修改密码 =====
+  function openPwdModal(){
+    oldPwd.value = '';
+    newPwd.value = '';
+    newPwd2.value = '';
+    pwdErr.textContent = '';
+    pwdOk.textContent = '';
+    pwdModal.classList.add('open');
+    setTimeout(() => oldPwd.focus(), 100);
+  }
+  function closePwdModal(){
+    pwdModal.classList.remove('open');
+  }
+  async function submitPwdChange(){
+    pwdErr.textContent = '';
+    pwdOk.textContent = '';
+    if(!oldPwd.value){ pwdErr.textContent = '请输入当前密码'; return; }
+    if(!newPwd.value || newPwd.value.length < 6){ pwdErr.textContent = '新密码至少 6 位'; return; }
+    if(newPwd.value !== newPwd2.value){ pwdErr.textContent = '两次输入的新密码不一致'; return; }
+    pwdSubmit.disabled = true;
+    pwdSubmit.textContent = '提交中...';
+    try{
+      const res = await fetch(API_BASE + '/api/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ oldPassword: oldPwd.value, newPassword: newPwd.value })
+      });
+      if(res.status === 401){
+        pwdErr.textContent = '当前密码错误';
+        return;
+      }
+      if(!res.ok){
+        pwdErr.textContent = '修改失败 (' + res.status + ')';
+        return;
+      }
+      pwdOk.textContent = '✓ 密码修改成功，请重新登录';
+      setTimeout(() => {
+        closePwdModal();
+        logout();
+      }, 1500);
+    }catch(e){
+      pwdErr.textContent = '网络错误，请重试';
+    }finally{
+      pwdSubmit.disabled = false;
+      pwdSubmit.textContent = '确认修改';
+    }
+  }
+
   loginBtn.addEventListener('click', doLogin);
   passInput.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
   refreshBtn.addEventListener('click', loadRecords);
   exportBtn.addEventListener('click', exportCSV);
   logoutBtn.addEventListener('click', logout);
+  changePwdBtn.addEventListener('click', openPwdModal);
+  pwdCancel.addEventListener('click', closePwdModal);
+  pwdSubmit.addEventListener('click', submitPwdChange);
 
   if(token) showPanel();
 })();
