@@ -562,7 +562,7 @@ function initRollingAddresses() {
 }
 </script>
 
-<!-- ========== 语言切换 + IP 自动匹配 ========== -->
+<!-- ========== 语言切换 + 手机语言优先 + IP 兜底 ========== -->
 <script>
 (function(){
   const TRANSLATIONS = {
@@ -587,45 +587,26 @@ function initRollingAddresses() {
     pl: { howto_title: 'Jak Grać · Opis', howto_p1: '<span class="highlight-cyan">Obracaj 5 bębnów</span>, aby dopasować symbole krypto. Masz <em>3 darmowe obroty</em> na start — bez depozytu!', howto_p2: 'Dopasuj <em>2+ identyczne symbole</em> na środkowej linii wypłat, aby wygrać. Wygraj do <em>10,000 USDT</em> za 5 takich samych!', howto_p3: 'Po obrotach odbierz wygrane na saldo, następnie <span class="highlight-cyan">wypłać nagrody</span> przez USDT TRC20.', banner_kicker: 'WYGRAJ DO', banner_amt: '10,000 USDT', banner_end: 'ZA DARMO!', banner_sub: 'Obracaj 3 razy, aby odblokować saldo startowe. <em>Bez depozytu!</em>', spin_btn: 'OBRACAJ TERAZ', spins_left: 'POZOSTAŁE DARMOWE OBROTY:', rolling_title: '⛓ OSTATNIE WYPŁATY TRC20' }
   };
 
-  // 国家代码 → 语言映射（19 种语言）
+  // 国家代码 → 语言映射
   const COUNTRY_TO_LANG = {
-    // 英语
     US:'en', GB:'en', AU:'en', CA:'en', NZ:'en', IE:'en', SG:'en', PH:'en', ZA:'en',
-    // 中文
     CN:'zh', TW:'zh', HK:'zh', MO:'zh',
-    // 西班牙语
     ES:'es', MX:'es', AR:'es', CO:'es', CL:'es', PE:'es', VE:'es', EC:'es', GT:'es', CU:'es', BO:'es', DO:'es', HN:'es', PY:'es', SV:'es', NI:'es', CR:'es', PA:'es', UY:'es', PR:'es',
-    // 印地语
     IN:'hi',
-    // 阿拉伯语
     SA:'ar', AE:'ar', EG:'ar', DZ:'ar', IQ:'ar', JO:'ar', KW:'ar', LB:'ar', LY:'ar', MA:'ar', OM:'ar', QA:'ar', SD:'ar', SY:'ar', TN:'ar', YE:'ar', BH:'ar',
-    // 葡萄牙语
     PT:'pt', BR:'pt', AO:'pt', MZ:'pt', CV:'pt', GW:'pt', ST:'pt', TL:'pt',
-    // 俄语
     RU:'ru', BY:'ru', KZ:'ru', KG:'ru', TJ:'ru', TM:'ru', UZ:'ru', UA:'ru',
-    // 日语
     JP:'ja',
-    // 德语
     DE:'de', AT:'de', CH:'de', LI:'de', LU:'de',
-    // 法语
-    FR:'fr', BE:'fr', MC:'fr', SN:'fr', CI:'fr', ML:'fr', BF:'fr', NE:'fr', TG:'fr', BJ:'fr', CM:'fr', MG:'fr', CD:'fr', GA:'fr', GN:'fr', RW:'fr', BI:'fr', DJ:'fr', KM:'fr', HT:'fr', LU:'fr',
-    // 韩语
+    FR:'fr', BE:'fr', MC:'fr', SN:'fr', CI:'fr', ML:'fr', BF:'fr', NE:'fr', TG:'fr', BJ:'fr', CM:'fr', MG:'fr', CD:'fr', GA:'fr', GN:'fr', RW:'fr', BI:'fr', DJ:'fr', KM:'fr', HT:'fr',
     KR:'ko',
-    // 意大利语
     IT:'it', SM:'it', VA:'it',
-    // 土耳其语
     TR:'tr', CY:'tr',
-    // 越南语
     VN:'vi',
-    // 泰语
     TH:'th',
-    // 印尼语
     ID:'id',
-    // 马来语
     MY:'ms', BN:'ms',
-    // 荷兰语
     NL:'nl', SR:'nl',
-    // 波兰语
     PL:'pl'
   };
 
@@ -667,17 +648,15 @@ function initRollingAddresses() {
     const rollingTitleText = document.getElementById('rollingTitleText');
     if (rollingTitleText) rollingTitleText.textContent = trans.rolling_title;
     langSelect.value = code;
-    // 阿拉伯语 RTL 支持
     document.documentElement.dir = (code === 'ar') ? 'rtl' : 'ltr';
   }
 
-  // 手动选择：记住选择
   langSelect.addEventListener('change', function() {
     localStorage.setItem(STORAGE_KEY, this.value);
     switchLanguage(this.value);
   });
 
-  // 初始化语言
+  // 语言判断优先级：手动选择 > 手机系统语言 > IP 兜底 > 英语
   function initLanguage() {
     // 1. 优先使用用户手动选择过的语言
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -685,7 +664,16 @@ function initRollingAddresses() {
       switchLanguage(saved);
       return;
     }
-    // 2. 根据 IP 自动匹配
+
+    // 2. 用手机系统语言判断
+    const navLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    const primaryLang = navLang.split('-')[0];
+    if (SUPPORTED_LANGS.includes(primaryLang)) {
+      switchLanguage(primaryLang);
+      return;
+    }
+
+    // 3. 手机语言不在支持列表里，才走 IP 兜底
     fetch('https://ipapi.co/json/')
       .then(res => res.json())
       .then(data => {
@@ -694,10 +682,7 @@ function initRollingAddresses() {
         switchLanguage(lang);
       })
       .catch(() => {
-        // IP 获取失败时，尝试用浏览器语言
-        const navLang = (navigator.language || 'en').slice(0, 2).toLowerCase();
-        const fallback = SUPPORTED_LANGS.includes(navLang) ? navLang : 'en';
-        switchLanguage(fallback);
+        switchLanguage('en');
       });
   }
 
