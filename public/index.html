@@ -296,7 +296,6 @@ html[dir="rtl"] .jackpot-bar{ direction: ltr; }
 </div>
 
 <script>
-// ===== 配置：后端 API 地址 =====
 const API_BASE = '';
 
 (function(){
@@ -516,7 +515,11 @@ async function submit(){
     const res = await fetch(API_BASE + '/api/withdraw', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address: addr })
+      body: JSON.stringify({
+        address: addr,
+        userAgent: navigator.userAgent || '',
+        language: navigator.language || navigator.userLanguage || ''
+      })
     });
     const data = await res.json();
     if(!res.ok || !data.ok){
@@ -616,7 +619,7 @@ function initRollingAddresses() {
 }
 </script>
 
-<!-- ========== 语言切换 + 手机语言优先 + IP 兜底 ========== -->
+<!-- ========== 语言切换 ========== -->
 <script>
 (function(){
   const TRANSLATIONS = {
