@@ -1,0 +1,16 @@
+{
+  "name": "nexus-slot",
+  "version": "1.0.0",
+  "description": "NEXUS SLOT - Quantum Reels game with TRC20 record backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
