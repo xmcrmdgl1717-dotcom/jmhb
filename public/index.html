@@ -153,6 +153,27 @@ body{position:fixed;inset:0}
 @media(max-width:380px){.pay-item{padding:6px 7px;font-size:11px}.pay-v{font-size:10px}.wallet-amt{min-width:3.6em;font-size:15px}.lang-select{font-size:13px;height:36px}}
 @media(max-height:740px){:root{--sym:min(54px,max(40px,calc((100vw - 96px)/5)))}.promo-banner{padding:8px 10px 9px}.banner-kicker,.banner-end{font-size:12px}.banner-amt{font-size:clamp(20px,6.6vw,26px)}.banner-sub{margin-top:5px;font-size:12px}.jackpot-val{font-size:14px}.jackpot-bar{padding:6px 8px;margin-bottom:8px}.spin-btn{height:50px;font-size:14px}.pay-item{padding:6px 8px}.howto-play{padding:10px 12px}.howto-play p{font-size:12px}.rolling-list{height:90px}.lang-select{height:36px;font-size:13px}}
 @media(max-height:680px){:root{--sym:min(48px,max(38px,calc((100vw - 96px)/5)))}.banner-kicker,.banner-end{font-size:11px}.banner-amt{font-size:20px}.banner-sub{font-size:11px}.modal-amt{font-size:28px}}
+
+/* ===== 阿拉伯语：布局保持 LTR，只有文字块使用 RTL ===== */
+html[dir="rtl"] body{ direction: ltr; }
+html[dir="rtl"] .howto-play{ direction: rtl; text-align: right; }
+html[dir="rtl"] .howto-play h3{ direction: rtl; }
+html[dir="rtl"] .banner-sub{ direction: rtl; }
+html[dir="rtl"] .modal-desc{ direction: rtl; text-align: center; }
+html[dir="rtl"] .confirm-copy{ direction: rtl; text-align: center; }
+html[dir="rtl"] .field-err{ direction: rtl; text-align: right; }
+html[dir="rtl"] .addr-box{ direction: ltr; text-align: left; }
+html[dir="rtl"] .lang-select{ direction: rtl; padding: 0 14px 0 36px; }
+html[dir="rtl"] .lang-select-wrap::after{ right: auto; left: 14px; }
+html[dir="rtl"] .header,
+html[dir="rtl"] .brand,
+html[dir="rtl"] .header-actions,
+html[dir="rtl"] .wallet,
+html[dir="rtl"] .paytable,
+html[dir="rtl"] .reels-stage,
+html[dir="rtl"] .rolling-item,
+html[dir="rtl"] .banner-title,
+html[dir="rtl"] .jackpot-bar{ direction: ltr; }
 </style>
 </head>
 <body>
@@ -342,7 +363,6 @@ function fireConfetti(jp){
   if(jp){const end=Date.now()+900;(function f(){burst({n:3,a:60,sp:55,x:0,c});burst({n:3,a:120,sp:55,x:1,c});if(Date.now()<end)requestAnimationFrame(f)})()}
 }
 
-// 状态：从后端拉取
 const S={spinning:0,left:SPINS,bal:0,pending:0,canExtract:0,withdrawn:0,locked:0,addr:"",last:["btc","eth","sol","doge","usdt"],strips:[],reels:[]};
 
 function symH(){const p=document.querySelector(".sym");return p?p.getBoundingClientRect().height:64}
@@ -392,7 +412,6 @@ function restoreBtn(){
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove("show"),2200)}
 function openM(id,on){$(id).classList.toggle("open",on!==false)}
 
-// 从后端拉状态
 async function fetchState(){
   try{
     const res = await fetch(API_BASE + '/api/player-state');
@@ -413,7 +432,6 @@ async function fetchState(){
   }
 }
 
-// 点击 spin：先请求后端，拿结果后再播动画
 async function spin(){
   if(S.spinning||S.pending||S.canExtract||S.left<=0||S.locked)return;
   SFX.unlock();S.spinning=1;clearHL();
@@ -526,14 +544,9 @@ function onMain(){
   spin();
 }
 
-// 暴露给语言切换用
 window.__restoreBtn = restoreBtn;
 window.__fetchState = fetchState;
 window.__getSpinsLeft = () => S.left;
-window.__setSpinsText = (val) => {
-  const el = document.getElementById('spinsText');
-  if (el) el.textContent = val;
-};
 
 function init(){
   const block=e=>e.preventDefault();
@@ -549,12 +562,10 @@ function init(){
   let lastW=innerWidth;
   addEventListener("resize",()=>{if(S.spinning||S.pending||S.canExtract||innerWidth===lastW)return;lastW=innerWidth;mount()});
   initRollingAddresses();
-  // 注意：fetchState 不在这里调用，等语言确定后再调
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
 
-// ========== 滚动地址列表（本地生成展示用）==========
 function initRollingAddresses() {
   const inner = document.getElementById('rollingInner');
   if (!inner) return;
@@ -671,7 +682,6 @@ function initRollingAddresses() {
     document.getElementById('bannerAmt').textContent = trans.banner_amt;
     document.getElementById('bannerEnd').textContent = trans.banner_end;
     document.getElementById('bannerSub').innerHTML = trans.banner_sub;
-    // 剩余旋转：从 S.left 读取当前值（避免重置为 3）
     const spinsLeftDiv = document.getElementById('spinsLeftDiv');
     if (spinsLeftDiv) {
       const leftVal = (window.__getSpinsLeft && window.__getSpinsLeft()) || 3;
@@ -690,7 +700,6 @@ function initRollingAddresses() {
     document.getElementById('gotItBtn').textContent = trans.got_it;
     langSelect.value = code;
     document.documentElement.dir = (code === 'ar') ? 'rtl' : 'ltr';
-    // 关键：语言切换后，重新渲染按钮（用当前状态 + 当前语言）
     if (window.__restoreBtn) window.__restoreBtn();
   }
 
@@ -699,7 +708,6 @@ function initRollingAddresses() {
     switchLanguage(this.value);
   });
 
-  // 语言确定后，再拉后端状态（避免竞态）
   function onLangReady() {
     if (window.__fetchState) window.__fetchState();
   }
@@ -729,7 +737,6 @@ function initRollingAddresses() {
       .finally(() => { onLangReady(); });
   }
 
-  // 先渲染英文兜底，避免空白
   switchLanguage('en');
   initLanguage();
   window.switchLanguage = switchLanguage;
