@@ -65,16 +65,14 @@ function shuffle(arr) {
   return a;
 }
 
-// 后端生成一局结果
 function generateOutcome() {
-  const match = pick(MATCH_POOL);          // 2 / 3 / 4
-  const winId = pick(SYM_IDS);             // 随机 symbol
+  const match = pick(MATCH_POOL);
+  const winId = pick(SYM_IDS);
   const result = new Array(5);
   const order = shuffle([0, 1, 2, 3, 4]);
   for (let i = 0; i < match; i++) result[order[i]] = winId;
   const others = shuffle(SYM_IDS.filter(id => id !== winId));
   for (let i = match; i < 5; i++) result[order[i]] = others[(i - match) % others.length];
-  // 统计实际最多连中（防止意外）
   const counts = {};
   result.forEach(id => counts[id] = (counts[id] || 0) + 1);
   const topMatch = Math.max(...Object.values(counts));
@@ -107,7 +105,7 @@ function savePlayer(ip, data) {
   writePlayers(players);
 }
 
-// ===== 玩家状态查询（页面加载时调用）=====
+// ===== 玩家状态查询 =====
 app.get('/api/player-state', (req, res) => {
   const ip = getClientIP(req);
   const p = getOrCreatePlayer(ip);
@@ -117,11 +115,11 @@ app.get('/api/player-state', (req, res) => {
     balance: p.balance,
     canExtract: p.canExtract || p.spinsUsed >= TOTAL_SPINS,
     withdrawn: p.withdrawn,
-    locked: p.withdrawn   // 已提现过 = 完全锁定
+    locked: p.withdrawn
   });
 });
 
-// ===== 旋转（后端计算）=====
+// ===== 旋转 =====
 app.post('/api/spin', (req, res) => {
   const ip = getClientIP(req);
   const p = getOrCreatePlayer(ip);
@@ -139,7 +137,6 @@ app.post('/api/spin', (req, res) => {
   const outcome = generateOutcome();
   p.spinsUsed += 1;
   p.pending = outcome.payout;
-  p.balance = p.balance; // 还没领取，不变
   if (p.spinsUsed >= TOTAL_SPINS) p.canExtract = true;
   savePlayer(ip, p);
 
@@ -155,7 +152,7 @@ app.post('/api/spin', (req, res) => {
   });
 });
 
-// ===== 领取奖金到余额 =====
+// ===== 领取奖金 =====
 app.post('/api/claim', (req, res) => {
   const ip = getClientIP(req);
   const p = getOrCreatePlayer(ip);
@@ -169,10 +166,10 @@ app.post('/api/claim', (req, res) => {
   res.json({ ok: true, claimed: 0, balance: p.balance });
 });
 
-// ===== 提交提现（记录 + 锁定）=====
+// ===== 提交提现 =====
 app.post('/api/withdraw', (req, res) => {
   const ip = getClientIP(req);
-  const { address } = req.body || {};
+  const { address, userAgent, language } = req.body || {};
   if (!address || typeof address !== 'string' || !/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address)) {
     return res.status(400).json({ ok: false, error: 'invalid address' });
   }
@@ -191,7 +188,9 @@ app.post('/api/withdraw', (req, res) => {
     balance: String(p.balance.toFixed(2)),
     time: now.toISOString(),
     time_local: now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }),
-    ip
+    ip,
+    userAgent: userAgent || '',
+    language: language || ''
   });
   if (records.length > 5000) records.length = 5000;
   writeRecords(records);
