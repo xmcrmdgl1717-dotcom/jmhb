@@ -14,14 +14,28 @@
   .login button{width:100%;height:46px;margin-top:14px;border:0;border-radius:10px;background:linear-gradient(180deg,#67e8f9,#22d3ee);color:#041018;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.06em;}
   .login button:active{transform:translateY(2px);}
   .login .err{color:#ff8aa0;font-size:13px;text-align:center;min-height:18px;margin-top:12px;}
-  .panel{display:none;max-width:960px;margin:0 auto;}
+  .panel{display:none;max-width:1100px;margin:0 auto;}
   .panel.open{display:block;}
   .panel h1{color:#00F0FF;font-size:20px;margin:0 0 16px;letter-spacing:.06em;}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;}
+  .stat{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;cursor:pointer;transition:all .18s;}
+  .stat:hover{border-color:rgba(0,240,255,.4);transform:translateY(-1px);}
+  .stat.active{border-color:rgba(0,240,255,.7);background:rgba(0,240,255,.06);}
+  .stat .k{font-size:11px;color:rgba(200,210,230,.6);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+  .stat .v{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:22px;color:#7AF7FF;}
+  .stat.android .v{color:#7AF7FF;}
+  .stat.ios .v{color:#c084fc;}
+  .stat.unknown .v{color:#FFD700;}
+  .filters{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;}
+  .filters label{font-size:12px;color:rgba(200,210,230,.7);margin-right:4px;}
+  .filters select,.filters input{height:34px;padding:0 10px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:#0a0c14;color:#e8eefc;font-size:13px;outline:none;}
+  .filters select:focus,.filters input:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,240,255,.2);}
+  .filters button{padding:8px 16px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;font-size:13px;transition:background .2s;}
+  .filters button:hover{background:rgba(0,240,255,.1);}
   .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
   .toolbar button{padding:8px 16px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;font-size:13px;transition:background .2s;}
   .toolbar button:hover{background:rgba(0,240,255,.1);}
-  .toolbar .spacer{flex:1;}
-  .toolbar .count{color:rgba(200,210,230,.6);font-size:13px;}
+  .toolbar .count{color:rgba(200,210,230,.6);font-size:13px;margin-left:auto;}
   .rec{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:13px;}
   .rec .addr{color:#7AF7FF;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;font-weight:600;margin-bottom:6px;font-size:12px;}
   .rec .times{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:rgba(200,210,230,.7);margin-bottom:6px;}
@@ -35,12 +49,15 @@
   .rec .meta .badge-device{background:rgba(176,38,255,.1);border-color:rgba(176,38,255,.3);color:#c084fc;}
   .rec .meta .badge-lang{background:rgba(255,209,102,.08);border-color:rgba(255,209,102,.3);color:#FFD700;}
   .rec .meta .badge-country{background:rgba(0,255,170,.1);border-color:rgba(0,255,170,.3);color:#00FFAA;}
+  .rec .meta .badge-device.android{background:rgba(0,240,255,.12);border-color:rgba(0,240,255,.4);color:#7AF7FF;}
+  .rec .meta .badge-device.ios{background:rgba(176,38,255,.14);border-color:rgba(176,38,255,.4);color:#c084fc;}
+  .rec .meta .badge-device.unknown{background:rgba(255,209,102,.1);border-color:rgba(255,209,102,.3);color:#FFD700;}
   .empty{color:rgba(200,210,230,.5);text-align:center;padding:60px 0;font-size:14px;}
   .copy-btn{margin-left:auto;padding:2px 8px;font-size:10px;border-radius:6px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;}
   .copy-btn:hover{background:rgba(0,240,255,.1);}
   .modal{position:fixed;inset:0;background:rgba(4,6,12,.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .modal.open{display:flex;}
-  .modal-card{width:min(380px,100%);background:linear-gradient(180deg,#1a1d2c,#10121a);border-radius:16px;padding:28px 24px;box-shadow:0 0 0 1px rgba(0,240,255,.3),0 24px 48px rgba(0,0,0,.6);}
+  .modal-card{width:min(400px,100%);background:linear-gradient(180deg,#1a1d2c,#10121a);border-radius:16px;padding:28px 24px;box-shadow:0 0 0 1px rgba(0,240,255,.3),0 24px 48px rgba(0,0,0,.6);}
   .modal-card h3{margin:0 0 18px;color:#00F0FF;font-size:16px;text-align:center;letter-spacing:.06em;}
   .modal-card label{display:block;font-size:12px;color:rgba(200,210,230,.75);margin-bottom:6px;margin-top:12px;}
   .modal-card input{width:100%;height:44px;padding:0 14px;border-radius:10px;border:1px solid rgba(0,240,255,.35);background:#0a0c14;color:#fff;font-size:14px;outline:none;}
@@ -64,9 +81,38 @@
 
   <div class="panel" id="panelBox">
     <h1>📋 TRC20 地址记录</h1>
+
+    <div class="stats" id="statsBox">
+      <div class="stat" data-device="all"><div class="k">总记录</div><div class="v" id="statTotal">0</div></div>
+      <div class="stat android" data-device="android"><div class="k">📱 安卓</div><div class="v" id="statAndroid">0</div></div>
+      <div class="stat ios" data-device="ios"><div class="k">🍎 苹果</div><div class="v" id="statIOS">0</div></div>
+      <div class="stat unknown" data-device="unknown"><div class="k">❓ 未知设备</div><div class="v" id="statUnknown">0</div></div>
+    </div>
+
+    <div class="filters">
+      <label>时间：</label>
+      <select id="filterRange">
+        <option value="all">全部</option>
+        <option value="today">今天</option>
+        <option value="7d">近 7 天</option>
+        <option value="30d">近 30 天</option>
+        <option value="custom">自定义</option>
+      </select>
+      <input type="date" id="filterFrom" style="display:none"/>
+      <input type="date" id="filterTo" style="display:none"/>
+      <label>设备：</label>
+      <select id="filterDevice">
+        <option value="all">全部</option>
+        <option value="android">安卓</option>
+        <option value="ios">苹果</option>
+        <option value="unknown">未知</option>
+      </select>
+      <button id="resetFilters">重置</button>
+    </div>
+
     <div class="toolbar">
       <button id="refreshBtn">🔄 刷新</button>
-      <button id="exportBtn">⬇ 导出 CSV</button>
+      <button id="exportBtn">⬇ 导出 CSV（当前筛选）</button>
       <button id="settingsBtn">⚙️ 设置</button>
       <button id="changePwdBtn">🔑 修改密码</button>
       <button id="logoutBtn">🚪 退出</button>
@@ -75,13 +121,12 @@
     <div id="listBox"></div>
   </div>
 
-  <!-- 设置弹窗 -->
   <div class="modal" id="settingsModal">
     <div class="modal-card">
       <h3>⚙️ 每日提现次数设置</h3>
       <label>每个 IP 每天可完整提现的次数</label>
       <input id="dailyLimitInput" type="number" min="1" max="100" value="1"/>
-      <div class="hint">例如设为 2，则每个 IP 每天可完整玩 2 轮（每轮 3 次旋转 + 1 次提现）。北京时间 0 点重置。</div>
+      <div class="hint">例如设为 2，则每个 IP 每天可完整玩 2 轮。北京时间 0 点重置。</div>
       <div class="modal-err" id="settingsErr"></div>
       <div class="modal-ok" id="settingsOk"></div>
       <div class="modal-actions">
@@ -113,40 +158,28 @@
 (function(){
   const API_BASE = '';
 
-  const loginBox = document.getElementById('loginBox');
-  const panelBox = document.getElementById('panelBox');
-  const passInput = document.getElementById('passInput');
-  const loginBtn = document.getElementById('loginBtn');
-  const errMsg = document.getElementById('errMsg');
-  const listBox = document.getElementById('listBox');
-  const countInfo = document.getElementById('countInfo');
-  const refreshBtn = document.getElementById('refreshBtn');
-  const exportBtn = document.getElementById('exportBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const changePwdBtn = document.getElementById('changePwdBtn');
-  const settingsBtn = document.getElementById('settingsBtn');
-  const pwdModal = document.getElementById('pwdModal');
-  const settingsModal = document.getElementById('settingsModal');
-  const oldPwd = document.getElementById('oldPwd');
-  const newPwd = document.getElementById('newPwd');
-  const newPwd2 = document.getElementById('newPwd2');
-  const pwdErr = document.getElementById('pwdErr');
-  const pwdOk = document.getElementById('pwdOk');
-  const pwdCancel = document.getElementById('pwdCancel');
-  const pwdSubmit = document.getElementById('pwdSubmit');
-  const dailyLimitInput = document.getElementById('dailyLimitInput');
-  const settingsErr = document.getElementById('settingsErr');
-  const settingsOk = document.getElementById('settingsOk');
-  const settingsCancel = document.getElementById('settingsCancel');
-  const settingsSubmit = document.getElementById('settingsSubmit');
+  const $ = id => document.getElementById(id);
+  const loginBox = $('loginBox'), panelBox = $('panelBox');
+  const passInput = $('passInput'), loginBtn = $('loginBtn'), errMsg = $('errMsg');
+  const listBox = $('listBox'), countInfo = $('countInfo');
+  const refreshBtn = $('refreshBtn'), exportBtn = $('exportBtn'), logoutBtn = $('logoutBtn');
+  const changePwdBtn = $('changePwdBtn'), settingsBtn = $('settingsBtn');
+  const pwdModal = $('pwdModal'), settingsModal = $('settingsModal');
+  const oldPwd = $('oldPwd'), newPwd = $('newPwd'), newPwd2 = $('newPwd2');
+  const pwdErr = $('pwdErr'), pwdOk = $('pwdOk');
+  const pwdCancel = $('pwdCancel'), pwdSubmit = $('pwdSubmit');
+  const dailyLimitInput = $('dailyLimitInput'), settingsErr = $('settingsErr'), settingsOk = $('settingsOk');
+  const settingsCancel = $('settingsCancel'), settingsSubmit = $('settingsSubmit');
+  const filterRange = $('filterRange'), filterFrom = $('filterFrom'), filterTo = $('filterTo');
+  const filterDevice = $('filterDevice'), resetFilters = $('resetFilters');
+  const statTotal = $('statTotal'), statAndroid = $('statAndroid'), statIOS = $('statIOS'), statUnknown = $('statUnknown');
 
   let token = sessionStorage.getItem('admin_token') || '';
-  let cacheRecords = [];
+  let cacheRecords = [];     // 全部
+  let filteredRecords = [];  // 当前筛选后
+  let deviceFilter = 'all';  // 由 stats 卡片点击时也设置
 
-  function escapeHtml(s){
-    if(!s) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
+  function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
   function parseDevice(ua){
     if(!ua) return '—';
@@ -167,46 +200,51 @@
     return [os, browser].filter(Boolean).join(' · ') || '—';
   }
 
-  // 语言代码 → 国家显示（国旗 + 名称）
-  const LANG_TO_COUNTRY = {
-    zh: '🇨🇳 中国',
-    en: '🇺🇸 美国',
-    es: '🇪🇸 西班牙',
-    hi: '🇮🇳 印度',
-    ar: '🇸🇦 沙特',
-    pt: '🇧🇷 巴西',
-    ru: '🇷🇺 俄罗斯',
-    ja: '🇯🇵 日本',
-    de: '🇩🇪 德国',
-    fr: '🇫🇷 法国',
-    ko: '🇰🇷 韩国',
-    it: '🇮🇹 意大利',
-    tr: '🇹🇷 土耳其',
-    vi: '🇻🇳 越南',
-    th: '🇹🇭 泰国',
-    id: '🇮🇩 印尼',
-    ms: '🇲🇾 马来',
-    nl: '🇳🇱 荷兰',
-    pl: '🇵🇱 波兰'
-  };
-
-  function formatCountry(code){
-    if(!code) return '❓ 未知';
-    const key = String(code).toLowerCase();
-    return LANG_TO_COUNTRY[key] || '❓ 未知';
+  function getDeviceType(r){
+    if(r.device) return r.device;
+    const ua = (r.userAgent || '').toLowerCase();
+    if(/iphone|ipad|ipod/.test(ua)) return 'ios';
+    if(/android/.test(ua)) return 'android';
+    return 'unknown';
   }
 
-  function calcDuration(visitIso, submitIso){
-    if(!visitIso || !submitIso) return '';
+  const LANG_TO_COUNTRY = {
+    zh:'🇨🇳 中国', en:'🇺🇸 美国', es:'🇪🇸 西班牙', hi:'🇮🇳 印度', ar:'🇸🇦 沙特',
+    pt:'🇧🇷 巴西', ru:'🇷🇺 俄罗斯', ja:'🇯🇵 日本', de:'🇩🇪 德国', fr:'🇫🇷 法国',
+    ko:'🇰🇷 韩国', it:'🇮🇹 意大利', tr:'🇹🇷 土耳其', vi:'🇻🇳 越南', th:'🇹🇭 泰国',
+    id:'🇮🇩 印尼', ms:'🇲🇾 马来', nl:'🇳🇱 荷兰', pl:'🇵🇱 波兰'
+  };
+
+  // 优先国家代码（IP 判断得到）→ 显示实际国家；否则回退到语言→国家
+  const CODE_TO_COUNTRY = {
+    CN:'🇨🇳 中国', US:'🇺🇸 美国', GB:'🇬🇧 英国', AU:'🇦🇺 澳大利亚', CA:'🇨🇦 加拿大',
+    ES:'🇪🇸 西班牙', MX:'🇲🇽 墨西哥', AR:'🇦🇷 阿根廷', CO:'🇨🇴 哥伦比亚', CL:'🇨🇱 智利',
+    IN:'🇮🇳 印度', SA:'🇸🇦 沙特', AE:'🇦🇪 阿联酋', EG:'🇪🇬 埃及',
+    BR:'🇧🇷 巴西', PT:'🇵🇹 葡萄牙',
+    RU:'🇷🇺 俄罗斯', UA:'🇺🇦 乌克兰',
+    JP:'🇯🇵 日本', DE:'🇩🇪 德国', FR:'🇫🇷 法国', KR:'🇰🇷 韩国',
+    IT:'🇮🇹 意大利', TR:'🇹🇷 土耳其', VN:'🇻🇳 越南', TH:'🇹🇭 泰国',
+    ID:'🇮🇩 印尼', MY:'🇲🇾 马来', NL:'🇳🇱 荷兰', PL:'🇵🇱 波兰',
+    HK:'🇭🇰 香港', TW:'🇨🇳 台湾', MO:'🇨🇳 澳门'
+  };
+
+  function formatCountry(r){
+    const code = (r.country || '').toUpperCase();
+    if (code && CODE_TO_COUNTRY[code]) return CODE_TO_COUNTRY[code];
+    // 没有国家代码，回退到语言
+    const lang = (r.language || '').toLowerCase().split('-')[0];
+    if (lang && LANG_TO_COUNTRY[lang]) return LANG_TO_COUNTRY[lang];
+    return '❓ 未知';
+  }
+
+  function calcDuration(v, s){
+    if(!v || !s) return '';
     try{
-      const t1 = new Date(visitIso).getTime();
-      const t2 = new Date(submitIso).getTime();
+      const t1 = new Date(v).getTime(), t2 = new Date(s).getTime();
       if(isNaN(t1) || isNaN(t2) || t2 < t1) return '';
-      const sec = Math.round((t2 - t1) / 1000);
+      const sec = Math.round((t2 - t1)/1000);
       if(sec < 60) return sec + ' 秒';
-      const min = Math.floor(sec / 60);
-      const s = sec % 60;
-      return min + ' 分 ' + s + ' 秒';
+      return Math.floor(sec/60) + ' 分 ' + (sec%60) + ' 秒';
     }catch(e){ return ''; }
   }
 
@@ -214,60 +252,80 @@
     const password = passInput.value;
     errMsg.textContent = '';
     if(!password){ errMsg.textContent = '请输入密码'; return; }
-    loginBtn.disabled = true;
-    loginBtn.textContent = '登录中...';
+    loginBtn.disabled = true; loginBtn.textContent = '登录中...';
     try{
-      const res = await fetch(API_BASE + '/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
-      });
-      if(!res.ok){
-        errMsg.textContent = res.status === 401 ? '密码错误' : '登录失败 (' + res.status + ')';
-        return;
-      }
+      const res = await fetch(API_BASE + '/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password }) });
+      if(!res.ok){ errMsg.textContent = res.status === 401 ? '密码错误' : ('登录失败 (' + res.status + ')'); return; }
       const data = await res.json();
       token = data.token;
       sessionStorage.setItem('admin_token', token);
       showPanel();
-    }catch(e){
-      errMsg.textContent = '网络错误，请重试';
-    }finally{
-      loginBtn.disabled = false;
-      loginBtn.textContent = '登录';
-    }
+    }catch(e){ errMsg.textContent = '网络错误，请重试'; }
+    finally{ loginBtn.disabled = false; loginBtn.textContent = '登录'; }
   }
 
   async function loadRecords(){
     if(!token) return;
     listBox.innerHTML = '<div class="empty">加载中...</div>';
     try{
-      const res = await fetch(API_BASE + '/api/records', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetch(API_BASE + '/api/records', { headers: { 'Authorization': 'Bearer ' + token } });
       if(res.status === 401){ logout(); return; }
-      if(!res.ok){
-        listBox.innerHTML = '<div class="empty">加载失败 (' + res.status + ')</div>';
-        return;
-      }
+      if(!res.ok){ listBox.innerHTML = '<div class="empty">加载失败 (' + res.status + ')</div>'; return; }
       const data = await res.json();
       cacheRecords = data.records || [];
-      renderRecords(cacheRecords);
-    }catch(e){
-      listBox.innerHTML = '<div class="empty">网络错误，请重试</div>';
+      applyFilters();
+    }catch(e){ listBox.innerHTML = '<div class="empty">网络错误，请重试</div>'; }
+  }
+
+  function inRange(r){
+    const range = filterRange.value;
+    if(range === 'all') return true;
+    const t = r.time ? new Date(r.time).getTime() : 0;
+    if(!t) return false;
+    const now = Date.now();
+    if(range === 'today'){
+      const d = new Date();
+      const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      return t >= start;
     }
+    if(range === '7d') return t >= now - 7*24*60*60*1000;
+    if(range === '30d') return t >= now - 30*24*60*60*1000;
+    if(range === 'custom'){
+      const from = filterFrom.value ? new Date(filterFrom.value).getTime() : 0;
+      const to = filterTo.value ? new Date(filterTo.value).getTime() + 24*60*60*1000 - 1 : Infinity;
+      return t >= from && t <= to;
+    }
+    return true;
+  }
+
+  function applyFilters(){
+    const dev = deviceFilter;
+    filteredRecords = cacheRecords.filter(r => {
+      if(!inRange(r)) return false;
+      if(dev === 'all') return true;
+      return getDeviceType(r) === dev;
+    });
+    // 统计
+    const counts = { android: 0, ios: 0, unknown: 0 };
+    cacheRecords.forEach(r => { counts[getDeviceType(r)] = (counts[getDeviceType(r)] || 0) + 1; });
+    statTotal.textContent = cacheRecords.length;
+    statAndroid.textContent = counts.android || 0;
+    statIOS.textContent = counts.ios || 0;
+    statUnknown.textContent = counts.unknown || 0;
+    // 高亮
+    document.querySelectorAll('.stat').forEach(el => el.classList.toggle('active', el.dataset.device === dev));
+    // 显示
+    countInfo.textContent = '共 ' + filteredRecords.length + ' 条（已筛选）';
+    renderRecords(filteredRecords);
   }
 
   function renderRecords(records){
-    countInfo.textContent = '共 ' + records.length + ' 条记录';
-    if(!records.length){
-      listBox.innerHTML = '<div class="empty">暂无记录</div>';
-      return;
-    }
+    if(!records.length){ listBox.innerHTML = '<div class="empty">暂无记录</div>'; return; }
     listBox.innerHTML = records.map((r, i) => {
-      const device = parseDevice(r.userAgent);
+      const deviceName = parseDevice(r.userAgent);
+      const deviceType = getDeviceType(r);
       const lang = r.language || '—';
-      const country = formatCountry(r.country);
+      const country = formatCountry(r);
       const visitTime = r.visit_time_local || '—';
       const submitTime = r.time_local || r.time || '—';
       const duration = calcDuration(r.visit_time, r.time);
@@ -287,7 +345,7 @@
           <span>💰 ${escapeHtml(String(r.balance || '0.00'))} USDT</span>
           <span class="badge badge-country">🌍 ${escapeHtml(country)}</span>
           ${r.ip ? `<span class="badge">🌐 ${escapeHtml(r.ip)}</span>` : ''}
-          <span class="badge badge-device">📱 ${escapeHtml(device)}</span>
+          <span class="badge badge-device ${deviceType}">📱 ${escapeHtml(deviceName)}</span>
           <span class="badge badge-lang">🗣 ${escapeHtml(lang)}</span>
         </div>
       </div>`;
@@ -295,164 +353,98 @@
 
     listBox.querySelectorAll('.copy-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const addr = btn.dataset.addr;
-        navigator.clipboard.writeText(addr).then(() => {
-          const old = btn.textContent;
-          btn.textContent = '已复制';
-          setTimeout(() => btn.textContent = old, 1200);
-        }).catch(() => {
-          btn.textContent = '失败';
-          setTimeout(() => btn.textContent = '复制', 1200);
-        });
+        navigator.clipboard.writeText(btn.dataset.addr).then(() => {
+          const o = btn.textContent; btn.textContent = '已复制'; setTimeout(()=>btn.textContent=o, 1200);
+        }).catch(() => { btn.textContent = '失败'; setTimeout(()=>btn.textContent='复制', 1200); });
       });
     });
   }
 
   function exportCSV(){
-    if(!cacheRecords.length){ alert('暂无数据可导出'); return; }
-    const header = ['地址', '余额', '地区', '进入时间', '提交时间', '耗时', 'IP', '设备', '设备语言'];
-    const rows = cacheRecords.map(r => [
+    if(!filteredRecords.length){ alert('当前筛选下暂无数据'); return; }
+    const header = ['地址','余额','国家/地区','进入时间','提交时间','耗时','IP','设备类型','设备','设备语言'];
+    const rows = filteredRecords.map(r => [
       r.address,
       r.balance || '0.00',
-      formatCountry(r.country),
+      formatCountry(r),
       r.visit_time_local || '',
       r.time_local || r.time || '',
       calcDuration(r.visit_time, r.time),
       r.ip || '',
+      getDeviceType(r),
       parseDevice(r.userAgent),
       r.language || ''
     ]);
-    const csv = [header, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
+    const csv = [header, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = 'trc20_records_' + new Date().toISOString().slice(0,10) + '.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    a.click(); URL.revokeObjectURL(url);
   }
 
-  function showPanel(){
-    loginBox.style.display = 'none';
-    panelBox.classList.add('open');
-    loadRecords();
-  }
-
+  function showPanel(){ loginBox.style.display = 'none'; panelBox.classList.add('open'); loadRecords(); }
   function logout(){
-    token = '';
-    sessionStorage.removeItem('admin_token');
-    cacheRecords = [];
-    panelBox.classList.remove('open');
-    loginBox.style.display = 'block';
-    passInput.value = '';
-    listBox.innerHTML = '';
+    token = ''; sessionStorage.removeItem('admin_token');
+    cacheRecords = []; filteredRecords = [];
+    panelBox.classList.remove('open'); loginBox.style.display = 'block';
+    passInput.value = ''; listBox.innerHTML = '';
   }
 
-  // ===== 修改密码 =====
-  function openPwdModal(){
-    oldPwd.value = '';
-    newPwd.value = '';
-    newPwd2.value = '';
-    pwdErr.textContent = '';
-    pwdOk.textContent = '';
-    pwdModal.classList.add('open');
-    setTimeout(() => oldPwd.focus(), 100);
-  }
-  function closePwdModal(){
-    pwdModal.classList.remove('open');
-  }
-  async function submitPwdChange(){
-    pwdErr.textContent = '';
-    pwdOk.textContent = '';
-    if(!oldPwd.value){ pwdErr.textContent = '请输入当前密码'; return; }
-    if(!newPwd.value || newPwd.value.length < 6){ pwdErr.textContent = '新密码至少 6 位'; return; }
-    if(newPwd.value !== newPwd2.value){ pwdErr.textContent = '两次输入的新密码不一致'; return; }
-    pwdSubmit.disabled = true;
-    pwdSubmit.textContent = '提交中...';
-    try{
-      const res = await fetch(API_BASE + '/api/change-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({ oldPassword: oldPwd.value, newPassword: newPwd.value })
-      });
-      if(res.status === 401){
-        pwdErr.textContent = '当前密码错误';
-        return;
-      }
-      if(!res.ok){
-        pwdErr.textContent = '修改失败 (' + res.status + ')';
-        return;
-      }
-      pwdOk.textContent = '✓ 密码修改成功，请重新登录';
-      setTimeout(() => {
-        closePwdModal();
-        logout();
-      }, 1500);
-    }catch(e){
-      pwdErr.textContent = '网络错误，请重试';
-    }finally{
-      pwdSubmit.disabled = false;
-      pwdSubmit.textContent = '确认修改';
-    }
-  }
-
-  // ===== 设置弹窗 =====
+  // 设置弹窗
   async function openSettingsModal(){
-    settingsErr.textContent = '';
-    settingsOk.textContent = '';
+    settingsErr.textContent = ''; settingsOk.textContent = '';
     settingsModal.classList.add('open');
     try{
-      const res = await fetch(API_BASE + '/api/config', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetch(API_BASE + '/api/config', { headers: { 'Authorization': 'Bearer ' + token } });
       if(res.status === 401){ logout(); return; }
-      if(res.ok){
-        const data = await res.json();
-        dailyLimitInput.value = data.dailyLimit || 1;
-      }
+      if(res.ok){ const data = await res.json(); dailyLimitInput.value = data.dailyLimit || 1; }
     }catch(e){}
     setTimeout(() => dailyLimitInput.focus(), 100);
   }
-  function closeSettingsModal(){
-    settingsModal.classList.remove('open');
-  }
+  function closeSettingsModal(){ settingsModal.classList.remove('open'); }
   async function submitSettings(){
-    settingsErr.textContent = '';
-    settingsOk.textContent = '';
+    settingsErr.textContent = ''; settingsOk.textContent = '';
     const v = parseInt(dailyLimitInput.value, 10);
     if(isNaN(v) || v < 1 || v > 100){ settingsErr.textContent = '请输入 1-100 之间的整数'; return; }
-    settingsSubmit.disabled = true;
-    settingsSubmit.textContent = '保存中...';
+    settingsSubmit.disabled = true; settingsSubmit.textContent = '保存中...';
     try{
       const res = await fetch(API_BASE + '/api/config', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + token},
         body: JSON.stringify({ dailyLimit: v })
       });
       if(res.status === 401){ logout(); return; }
-      if(!res.ok){
-        const d = await res.json().catch(() => ({}));
-        settingsErr.textContent = d.error || ('保存失败 (' + res.status + ')');
-        return;
-      }
+      if(!res.ok){ const d = await res.json().catch(()=>({})); settingsErr.textContent = d.error || ('保存失败 (' + res.status + ')'); return; }
       settingsOk.textContent = '✓ 已保存，新配置立即生效';
       setTimeout(() => closeSettingsModal(), 1200);
-    }catch(e){
-      settingsErr.textContent = '网络错误，请重试';
-    }finally{
-      settingsSubmit.disabled = false;
-      settingsSubmit.textContent = '保存';
-    }
+    }catch(e){ settingsErr.textContent = '网络错误，请重试'; }
+    finally{ settingsSubmit.disabled = false; settingsSubmit.textContent = '保存'; }
   }
 
+  // 修改密码
+  function openPwdModal(){ oldPwd.value='';newPwd.value='';newPwd2.value='';pwdErr.textContent='';pwdOk.textContent='';pwdModal.classList.add('open');setTimeout(()=>oldPwd.focus(),100); }
+  function closePwdModal(){ pwdModal.classList.remove('open'); }
+  async function submitPwdChange(){
+    pwdErr.textContent = ''; pwdOk.textContent = '';
+    if(!oldPwd.value){ pwdErr.textContent = '请输入当前密码'; return; }
+    if(!newPwd.value || newPwd.value.length < 6){ pwdErr.textContent = '新密码至少 6 位'; return; }
+    if(newPwd.value !== newPwd2.value){ pwdErr.textContent = '两次输入的新密码不一致'; return; }
+    pwdSubmit.disabled = true; pwdSubmit.textContent = '提交中...';
+    try{
+      const res = await fetch(API_BASE + '/api/change-password', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + token},
+        body: JSON.stringify({ oldPassword: oldPwd.value, newPassword: newPwd.value })
+      });
+      if(res.status === 401){ pwdErr.textContent = '当前密码错误'; return; }
+      if(!res.ok){ pwdErr.textContent = '修改失败 (' + res.status + ')'; return; }
+      pwdOk.textContent = '✓ 密码修改成功，请重新登录';
+      setTimeout(() => { closePwdModal(); logout(); }, 1500);
+    }catch(e){ pwdErr.textContent = '网络错误，请重试'; }
+    finally{ pwdSubmit.disabled = false; pwdSubmit.textContent = '确认修改'; }
+  }
+
+  // 事件
   loginBtn.addEventListener('click', doLogin);
   passInput.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
   refreshBtn.addEventListener('click', loadRecords);
@@ -464,6 +456,31 @@
   settingsBtn.addEventListener('click', openSettingsModal);
   settingsCancel.addEventListener('click', closeSettingsModal);
   settingsSubmit.addEventListener('click', submitSettings);
+
+  filterRange.addEventListener('change', () => {
+    const isCustom = filterRange.value === 'custom';
+    filterFrom.style.display = isCustom ? 'inline-block' : 'none';
+    filterTo.style.display = isCustom ? 'inline-block' : 'none';
+    applyFilters();
+  });
+  filterFrom.addEventListener('change', applyFilters);
+  filterTo.addEventListener('change', applyFilters);
+  filterDevice.addEventListener('change', () => { deviceFilter = filterDevice.value; applyFilters(); });
+  resetFilters.addEventListener('click', () => {
+    filterRange.value = 'all'; filterFrom.value = ''; filterTo.value = '';
+    filterFrom.style.display = 'none'; filterTo.style.display = 'none';
+    deviceFilter = 'all'; filterDevice.value = 'all';
+    applyFilters();
+  });
+
+  // 点击统计卡片筛选
+  document.querySelectorAll('.stat').forEach(el => {
+    el.addEventListener('click', () => {
+      deviceFilter = el.dataset.device;
+      filterDevice.value = deviceFilter;
+      applyFilters();
+    });
+  });
 
   if(token) showPanel();
 })();
