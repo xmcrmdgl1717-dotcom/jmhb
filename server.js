@@ -101,7 +101,7 @@ function savePlayer(ip, data) {
   writePlayers(players);
 }
 
-// ===== 玩家状态查询 =====
+// ===== 玩家状态查询（新增返回 address）=====
 app.get('/api/player-state', (req, res) => {
   const ip = getClientIP(req);
   const p = getOrCreatePlayer(ip);
@@ -111,7 +111,8 @@ app.get('/api/player-state', (req, res) => {
     balance: p.balance,
     canExtract: p.canExtract || p.spinsUsed >= TOTAL_SPINS,
     withdrawn: p.withdrawn,
-    locked: p.withdrawn
+    locked: p.withdrawn,
+    address: p.address || ''   // ← 新增：返回已提交的地址
   });
 });
 
