@@ -160,6 +160,7 @@ body{position:fixed;inset:0}
 .receipt-row .v.amount{color:#FFD700;font-weight:700;font-size:16px}
 .receipt-row .v.status{color:#FFD700;font-weight:700;text-shadow:0 0 10px rgba(255,215,0,.4)}
 .receipt-row .v.empty{color:rgba(200,210,230,.4);font-style:italic}
+.receipt-section-title{margin:14px 0 6px;font-family:var(--d);font-size:10px;letter-spacing:.16em;color:#7AF7FF;text-transform:uppercase}
 
 .corner{position:absolute;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#d0d4e0,#4a5166);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 0 6px rgba(0,240,255,.3)}
 .corner.tl{top:10px;left:10px}.corner.tr{top:10px;right:10px}.corner.bl{bottom:10px;left:10px}.corner.br{bottom:10px;right:10px}
@@ -179,6 +180,7 @@ html[dir="rtl"] .lang-select{ direction: rtl; padding: 0 14px 0 36px; }
 html[dir="rtl"] .lang-select-wrap::after{ right: auto; left: 14px; }
 html[dir="rtl"] .receipt-row{ direction: rtl; text-align: right; }
 html[dir="rtl"] .receipt-row .v.addr{ direction: ltr; text-align: left; }
+html[dir="rtl"] .receipt-section-title{ direction: rtl; text-align: right; }
 html[dir="rtl"] .header,
 html[dir="rtl"] .brand,
 html[dir="rtl"] .header-actions,
@@ -371,7 +373,7 @@ function openM(id,on){$(id).classList.toggle("open",on!==false)}
 function renderWithdrawals(){
   const list = $("receiptList");
   const trans = (window.__TRANSLATIONS && window.__TRANSLATIONS[getLang()]) || {};
-  const arr = S.withdrawals || [];
+  const arr = (S.withdrawals || []).slice().reverse(); // 最新的在前
   if(!arr.length){
     list.innerHTML = '<div class="receipt-row"><span class="v empty">'+ (trans.receipt_empty || '—') +'</span></div>';
     return;
@@ -388,7 +390,9 @@ function renderWithdrawals(){
   `).join('');
 }
 
-function openReceipt(){
+async function openReceipt(){
+  // 打开前拉一次最新状态，确保 withdrawals 是最新的
+  await fetchState();
   $("receiptKicker").textContent = T('receipt_kicker');
   $("receiptTitle").textContent = T('receipt_title');
   $("receiptCloseBtn").textContent = T('receipt_close');
@@ -476,10 +480,16 @@ async function submit(){
     const data = await res.json();
     if(!res.ok || !data.ok){err.textContent = data.error === 'zero_balance' ? T('toast_zero_balance') : (data.error === 'already_withdrawn' ? T('toast_locked') : T('toast_error'));return;}
     S.withdrawn = 1;S.addr = addr;
+    // 立即把本次提现记录 push 到本地，弹窗马上能看到
+    if (Array.isArray(data.withdrawals)) {
+      S.withdrawals = data.withdrawals;
+    }
+    if (typeof data.balance === 'number') setBal(data.balance);
     openM("extractModal",false);
     $("confirmAddr").textContent=addr;
     openM("confirmModal");
-    restoreBtn();fetchState();
+    restoreBtn();
+    fetchState();
   }catch(e){err.textContent = T('toast_error');}
 }
 
@@ -544,7 +554,7 @@ function initRollingAddresses(){
 }
 </script>
 
-<!-- ========== 语言切换（IP 优先） ========== -->
+<!-- ========== 语言切换（IP → 手机语言 → 手动选 → 英语） ========== -->
 <script>
 (function(){
   const TRANSLATIONS = {
@@ -642,9 +652,8 @@ function initRollingAddresses(){
     if (window.__fetchState) window.__fetchState();
   }
 
-  // IP 优先 → 手机语言 → 英语兜底
+  // 判断顺序：IP → 手机语言 → 用户手动选过的 → 英语
   function initLanguage() {
-    // 1) IP 优先
     fetch('https://ipapi.co/json/')
       .then(res => res.json())
       .then(data => {
@@ -653,17 +662,16 @@ function initRollingAddresses(){
           localStorage.setItem(COUNTRY_STORAGE, country);
           if (window.__setCountry) window.__setCountry(country);
         }
-        const lang = COUNTRY_TO_LANG[country];
-        if (lang && SUPPORTED_LANGS.includes(lang)) {
-          switchLanguage(lang);
+        const ipLang = COUNTRY_TO_LANG[country];
+        if (ipLang && SUPPORTED_LANGS.includes(ipLang)) {
+          switchLanguage(ipLang);
           onLangReady();
           return;
         }
-        // IP 国家不在支持列表 → 走手机语言
+        // IP 国家不在支持列表 → 手机语言
         fallbackToNavigator();
       })
       .catch(() => {
-        // IP 失败 → 走手机语言
         fallbackToNavigator();
       });
   }
@@ -673,13 +681,23 @@ function initRollingAddresses(){
     const primaryLang = navLang.split('-')[0];
     if (SUPPORTED_LANGS.includes(primaryLang)) {
       switchLanguage(primaryLang);
+      onLangReady();
+      return;
+    }
+    // 手机语言也不支持 → 用户手动选过的
+    fallbackToSaved();
+  }
+
+  function fallbackToSaved() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && SUPPORTED_LANGS.includes(saved)) {
+      switchLanguage(saved);
     } else {
       switchLanguage('en');
     }
     onLangReady();
   }
 
-  // 默认先用英语渲染，避免空白
   switchLanguage('en');
   initLanguage();
   window.switchLanguage = switchLanguage;
