@@ -58,8 +58,30 @@ function getServerDate() {
   const bj = new Date(now.getTime() + 8 * 60 * 60 * 1000);
   return bj.toISOString().slice(0, 10);
 }
+function detectDevice(ua) {
+  if (!ua) return 'unknown';
+  const s = ua.toLowerCase();
+  if (/iphone|ipad|ipod/.test(s)) return 'ios';
+  if (/android/.test(s)) return 'android';
+  return 'unknown';
+}
 
 function playerKey(ip) { return ip + '_' + getServerDate(); }
+
+// 修复：无论新老记录，强制补全所有字段
+function normalizePlayer(p) {
+  if (!p || typeof p !== 'object') return null;
+  if (!Array.isArray(p.withdrawals)) p.withdrawals = [];
+  if (typeof p.balance !== 'number') p.balance = Number(p.balance) || 0;
+  if (typeof p.pending !== 'number') p.pending = Number(p.pending) || 0;
+  if (typeof p.roundsUsed !== 'number') p.roundsUsed = Number(p.roundsUsed) || 0;
+  if (typeof p.spinsUsed !== 'number') p.spinsUsed = Number(p.spinsUsed) || 0;
+  if (typeof p.address !== 'string') p.address = '';
+  if (typeof p.country !== 'string') p.country = '';
+  if (typeof p.canExtract !== 'boolean') p.canExtract = !!p.canExtract;
+  return p;
+}
+
 function getOrCreatePlayer(ip) {
   const players = readPlayers();
   const key = playerKey(ip);
@@ -70,12 +92,13 @@ function getOrCreatePlayer(ip) {
       balance: 0, pending: 0,
       canExtract: false, withdrawn: false,
       address: '', country: '',
-      withdrawals: [],   // 每次提现记录 { amount, at, at_local }
+      withdrawals: [],
       createdAt: new Date().toISOString()
     };
     writePlayers(players);
+  } else {
+    normalizePlayer(players[key]);
   }
-  if (!Array.isArray(players[key].withdrawals)) players[key].withdrawals = [];
   return players[key];
 }
 function savePlayer(ip, data) {
@@ -196,7 +219,7 @@ app.post('/api/withdraw', (req, res) => {
   if (records.length > 5000) records.length = 5000;
   writeRecords(records);
 
-  // 扣减余额 + 记录这次提现
+  // 扣减余额 + 记录提现
   p.balance = Number((p.balance - withdrawAmount).toFixed(2));
   if (p.balance < 0) p.balance = 0;
   p.withdrawals.push({
@@ -213,14 +236,6 @@ app.post('/api/withdraw', (req, res) => {
 
   res.json({ ok: true, balance: p.balance, roundsUsed: p.roundsUsed, withdrawals: p.withdrawals });
 });
-
-function detectDevice(ua) {
-  if (!ua) return 'unknown';
-  const s = ua.toLowerCase();
-  if (/iphone|ipad|ipod/.test(s)) return 'ios';
-  if (/android/.test(s)) return 'android';
-  return 'unknown';
-}
 
 // ===== 管理员 =====
 const tokens = new Map();
