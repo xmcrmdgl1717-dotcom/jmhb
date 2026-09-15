@@ -65,10 +65,12 @@ function detectDevice(ua) {
   if (/android/.test(s)) return 'android';
   return 'unknown';
 }
+function genId() {
+  return Date.now().toString(36) + '-' + crypto.randomBytes(4).toString('hex');
+}
 
 function playerKey(ip) { return ip + '_' + getServerDate(); }
 
-// 修复：无论新老记录，强制补全所有字段
 function normalizePlayer(p) {
   if (!p || typeof p !== 'object') return null;
   if (!Array.isArray(p.withdrawals)) p.withdrawals = [];
@@ -113,6 +115,17 @@ function savePlayer(ip, data) {
   if (changed) writePlayers(players);
 }
 
+// 兼容老记录：补 id 和 auditStatus
+function normalizeRecords(records) {
+  let changed = false;
+  records.forEach(r => {
+    if (!r.id) { r.id = genId(); changed = true; }
+    if (!r.auditStatus) { r.auditStatus = 'pending'; changed = true; }
+  });
+  if (changed) writeRecords(records);
+  return records;
+}
+
 // ===== 玩家状态查询 =====
 app.get('/api/player-state', (req, res) => {
   const ip = getClientIP(req);
@@ -137,6 +150,21 @@ app.get('/api/player-state', (req, res) => {
     country: p.country || '',
     withdrawals: p.withdrawals || []
   });
+});
+
+// ===== 我的提现记录（按 IP 从 records.json 查，含审核状态）=====
+app.get('/api/my-withdrawals', (req, res) => {
+  const ip = getClientIP(req);
+  const records = normalizeRecords(readRecords());
+  const mine = records.filter(r => r.ip === ip).map(r => ({
+    id: r.id,
+    address: r.address,
+    amount: r.balance,
+    at: r.time,
+    at_local: r.time_local,
+    status: r.auditStatus || 'pending'
+  }));
+  res.json({ withdrawals: mine });
 });
 
 // ===== 旋转 =====
@@ -202,8 +230,9 @@ app.post('/api/withdraw', (req, res) => {
   const visitDate = visitTime ? new Date(visitTime) : null;
   const localTime = now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
 
-  const records = readRecords();
-  records.unshift({
+  const records = normalizeRecords(readRecords());
+  const newRecord = {
+    id: genId(),
     address,
     balance: String(withdrawAmount),
     time: now.toISOString(),
@@ -214,18 +243,22 @@ app.post('/api/withdraw', (req, res) => {
     userAgent: userAgent || '',
     language: language || '',
     country: country || p.country || '',
-    device: detectDevice(userAgent || '')
-  });
+    device: detectDevice(userAgent || ''),
+    auditStatus: 'pending'
+  };
+  records.unshift(newRecord);
   if (records.length > 5000) records.length = 5000;
   writeRecords(records);
 
-  // 扣减余额 + 记录提现
   p.balance = Number((p.balance - withdrawAmount).toFixed(2));
   if (p.balance < 0) p.balance = 0;
   p.withdrawals.push({
+    id: newRecord.id,
     amount: withdrawAmount,
+    address,
     at: now.toISOString(),
-    at_local: localTime
+    at_local: localTime,
+    status: 'pending'
   });
   p.roundsUsed += 1;
   p.spinsUsed = 0;
@@ -250,7 +283,7 @@ app.post('/api/login', (req, res) => {
 });
 app.get('/api/records', (req, res) => {
   if (!verifyToken(getTokenFromReq(req))) return res.status(401).json({ ok: false, error: 'unauthorized' });
-  res.json({ records: readRecords() });
+  res.json({ records: normalizeRecords(readRecords()) });
 });
 app.post('/api/change-password', (req, res) => {
   if (!verifyToken(getTokenFromReq(req))) return res.status(401).json({ ok: false, error: 'unauthorized' });
@@ -274,5 +307,58 @@ app.post('/api/config', (req, res) => {
   const config = readConfig(); config.dailyLimit = n; writeConfig(config);
   res.json({ ok: true, dailyLimit: n });
 });
+
+// ===== 单条审核 =====
+app.post('/api/audit', (req, res) => {
+  if (!verifyToken(getTokenFromReq(req))) return res.status(401).json({ ok: false, error: 'unauthorized' });
+  const { id, status } = req.body || {};
+  if (!id) return res.status(400).json({ ok: false, error: 'missing id' });
+  if (!['pending', 'approved', 'rejected'].includes(status)) return res.status(400).json({ ok: false, error: 'invalid status' });
+  const records = normalizeRecords(readRecords());
+  const r = records.find(x => x.id === id);
+  if (!r) return res.status(404).json({ ok: false, error: 'record not found' });
+  r.auditStatus = status;
+  r.auditAt = new Date().toISOString();
+  writeRecords(records);
+  // 同步到 players.json 里对应的 withdrawal
+  syncPlayerWithdrawal(id, status);
+  res.json({ ok: true });
+});
+
+// ===== 批量审核 =====
+app.post('/api/audit-batch', (req, res) => {
+  if (!verifyToken(getTokenFromReq(req))) return res.status(401).json({ ok: false, error: 'unauthorized' });
+  const { ids, status } = req.body || {};
+  if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ ok: false, error: 'missing ids' });
+  if (!['pending', 'approved', 'rejected'].includes(status)) return res.status(400).json({ ok: false, error: 'invalid status' });
+  const records = normalizeRecords(readRecords());
+  const now = new Date().toISOString();
+  let n = 0;
+  records.forEach(r => {
+    if (ids.includes(r.id)) {
+      r.auditStatus = status;
+      r.auditAt = now;
+      n++;
+      syncPlayerWithdrawal(r.id, status);
+    }
+  });
+  writeRecords(records);
+  res.json({ ok: true, updated: n });
+});
+
+// 同步 players.json 里的 withdrawal 状态
+function syncPlayerWithdrawal(recordId, status) {
+  const players = readPlayers();
+  let changed = false;
+  Object.keys(players).forEach(k => {
+    const p = players[k];
+    if (p && Array.isArray(p.withdrawals)) {
+      p.withdrawals.forEach(w => {
+        if (w.id === recordId) { w.status = status; changed = true; }
+      });
+    }
+  });
+  if (changed) writePlayers(players);
+}
 
 app.listen(PORT, () => { console.log(`✅ Server running at http://localhost:${PORT}`); });
