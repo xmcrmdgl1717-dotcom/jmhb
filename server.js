@@ -15,7 +15,7 @@ const PLAYERS_FILE = path.join(DATA_DIR, 'players.json');
 const DEFAULT_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123456';
 const TOKEN_TTL = 24 * 60 * 60 * 1000;
 
-const TOTAL_SPINS = 3;
+const SPINS_PER_ROUND = 3;
 const PAYOUT_BY_MATCH = {2: 10, 3: 30, 4: 200, 5: 10000};
 const MATCH_POOL = [2, 3, 4];
 const SYM_IDS = ['btc', 'eth', 'sol', 'doge', 'usdt', 'trx'];
@@ -24,7 +24,7 @@ const SYM_IDS = ['btc', 'eth', 'sol', 'doge', 'usdt', 'trx'];
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(RECORDS_FILE)) fs.writeFileSync(RECORDS_FILE, '[]', 'utf8');
 if (!fs.existsSync(CONFIG_FILE)) {
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify({ adminPassword: DEFAULT_PASSWORD }, null, 2), 'utf8');
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify({ adminPassword: DEFAULT_PASSWORD, dailyLimit: 1 }, null, 2), 'utf8');
 }
 if (!fs.existsSync(PLAYERS_FILE)) fs.writeFileSync(PLAYERS_FILE, '{}', 'utf8');
 
@@ -37,7 +37,11 @@ function writeJSON(file, data) {
 }
 function readRecords() { return readJSON(RECORDS_FILE, []); }
 function writeRecords(r) { writeJSON(RECORDS_FILE, r); }
-function readConfig() { return readJSON(CONFIG_FILE, { adminPassword: DEFAULT_PASSWORD }); }
+function readConfig() {
+  const c = readJSON(CONFIG_FILE, { adminPassword: DEFAULT_PASSWORD, dailyLimit: 1 });
+  if (c.dailyLimit === undefined) c.dailyLimit = 1;
+  return c;
+}
 function writeConfig(c) { writeJSON(CONFIG_FILE, c); }
 function readPlayers() { return readJSON(PLAYERS_FILE, {}); }
 function writePlayers(p) { writeJSON(PLAYERS_FILE, p); }
@@ -77,57 +81,114 @@ function generateOutcome() {
   return { result, winId, match: topMatch, payout };
 }
 
-// ===== 玩家状态管理 =====
+// 服务器日期（北京时间 YYYY-MM-DD）
+function getServerDate() {
+  const now = new Date();
+  const bj = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+  return bj.toISOString().slice(0, 10);
+}
+
+// ===== 玩家状态管理（key = IP_日期）=====
+function playerKey(ip) {
+  return ip + '_' + getServerDate();
+}
+
 function getOrCreatePlayer(ip) {
   const players = readPlayers();
-  if (!players[ip]) {
-    players[ip] = {
+  const key = playerKey(ip);
+  if (!players[key]) {
+    players[key] = {
       ip,
-      spinsUsed: 0,
+      date: getServerDate(),
+      roundsUsed: 0,      // 已完成的轮数
+      spinsUsed: 0,       // 当前轮已用的 spin 次数
       balance: 0,
       pending: 0,
       canExtract: false,
       withdrawn: false,
       address: '',
+      country: '',
       createdAt: new Date().toISOString()
     };
     writePlayers(players);
   }
-  return players[ip];
+  return players[key];
 }
 function savePlayer(ip, data) {
   const players = readPlayers();
-  players[ip] = data;
+  const key = playerKey(ip);
+  players[key] = data;
   writePlayers(players);
+  // 清理 7 天前的旧记录
+  const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  let changed = false;
+  Object.keys(players).forEach(k => {
+    if (players[k].createdAt && players[k].createdAt < cutoff) {
+      delete players[k];
+      changed = true;
+    }
+  });
+  if (changed) writePlayers(players);
 }
 
-// ===== 玩家状态查询（新增返回 address）=====
+// ===== 玩家状态查询 =====
 app.get('/api/player-state', (req, res) => {
   const ip = getClientIP(req);
+  const config = readConfig();
   const p = getOrCreatePlayer(ip);
+
+  // 当天能玩多少轮
+  const dailyLimit = config.dailyLimit || 1;
+  const roundsLeft = Math.max(0, dailyLimit - p.roundsUsed);
+  // 当前轮剩余 spin
+  const spinsLeft = p.spinsUsed >= SPINS_PER_ROUND ? 0 : (SPINS_PER_ROUND - p.spinsUsed);
+  const canPlayToday = roundsLeft > 0 || p.spinsUsed > 0;
+
   res.json({
+    roundsUsed: p.roundsUsed,
+    roundsLeft,
+    dailyLimit,
     spinsUsed: p.spinsUsed,
-    spinsLeft: Math.max(0, TOTAL_SPINS - p.spinsUsed),
+    spinsLeft,
     balance: p.balance,
-    canExtract: p.canExtract || p.spinsUsed >= TOTAL_SPINS,
+    canExtract: p.canExtract || p.spinsUsed >= SPINS_PER_ROUND,
     withdrawn: p.withdrawn,
-    locked: p.withdrawn,
-    address: p.address || ''   // ← 新增：返回已提交的地址
+    locked: !canPlayToday,
+    address: p.address || '',
+    country: p.country || ''
   });
 });
 
 // ===== 旋转 =====
 app.post('/api/spin', (req, res) => {
   const ip = getClientIP(req);
+  const config = readConfig();
+  const dailyLimit = config.dailyLimit || 1;
   const p = getOrCreatePlayer(ip);
-  if (p.withdrawn) return res.status(403).json({ ok: false, error: 'locked' });
-  if (p.spinsUsed >= TOTAL_SPINS) return res.status(403).json({ ok: false, error: 'no_spins' });
-  if (p.pending > 0) return res.status(400).json({ ok: false, error: 'unclaimed' });
+  const { country } = req.body || {};
+  if (country && !p.country) p.country = country;
+
+  // 已提交提现
+  if (p.withdrawn) {
+    return res.status(403).json({ ok: false, error: 'locked' });
+  }
+  // 当天轮数用完
+  if (p.roundsUsed >= dailyLimit && p.spinsUsed === 0) {
+    return res.status(403).json({ ok: false, error: 'no_spins' });
+  }
+  // 当前轮还有未领取的奖金
+  if (p.pending > 0) {
+    return res.status(400).json({ ok: false, error: 'unclaimed' });
+  }
+  // 当前轮已用完 3 次 spin，必须先提现
+  if (p.spinsUsed >= SPINS_PER_ROUND) {
+    return res.status(403).json({ ok: false, error: 'round_done' });
+  }
 
   const outcome = generateOutcome();
   p.spinsUsed += 1;
   p.pending = outcome.payout;
-  if (p.spinsUsed >= TOTAL_SPINS) p.canExtract = true;
+  if (p.spinsUsed >= SPINS_PER_ROUND) p.canExtract = true;
   savePlayer(ip, p);
 
   res.json({
@@ -137,8 +198,11 @@ app.post('/api/spin', (req, res) => {
     match: outcome.match,
     payout: outcome.payout,
     spinsUsed: p.spinsUsed,
-    spinsLeft: Math.max(0, TOTAL_SPINS - p.spinsUsed),
-    canExtract: p.canExtract
+    spinsLeft: Math.max(0, SPINS_PER_ROUND - p.spinsUsed),
+    canExtract: p.canExtract,
+    roundsUsed: p.roundsUsed,
+    roundsLeft: Math.max(0, dailyLimit - p.roundsUsed),
+    dailyLimit
   });
 });
 
@@ -159,13 +223,14 @@ app.post('/api/claim', (req, res) => {
 // ===== 提交提现 =====
 app.post('/api/withdraw', (req, res) => {
   const ip = getClientIP(req);
-  const { address, userAgent, language, visitTime } = req.body || {};
+  const { address, userAgent, language, visitTime, country } = req.body || {};
   if (!address || typeof address !== 'string' || !/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address)) {
     return res.status(400).json({ ok: false, error: 'invalid address' });
   }
   const p = getOrCreatePlayer(ip);
-  if (p.withdrawn) return res.status(403).json({ ok: false, error: 'already_withdrawn' });
-  if (p.spinsUsed < TOTAL_SPINS) return res.status(400).json({ ok: false, error: 'not_finished' });
+  if (p.spinsUsed < SPINS_PER_ROUND) {
+    return res.status(400).json({ ok: false, error: 'not_finished' });
+  }
 
   const now = new Date();
   const visitDate = visitTime ? new Date(visitTime) : null;
@@ -179,17 +244,21 @@ app.post('/api/withdraw', (req, res) => {
     visit_time_local: visitDate ? visitDate.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }) : '',
     ip,
     userAgent: userAgent || '',
-    language: language || ''
+    language: language || '',
+    country: country || p.country || ''
   });
   if (records.length > 5000) records.length = 5000;
   writeRecords(records);
 
-  p.withdrawn = true;
-  p.address = address;
+  // 本轮结束，轮数 +1，重置当前轮状态
+  p.roundsUsed += 1;
+  p.spinsUsed = 0;
   p.canExtract = false;
+  p.pending = 0;
+  if (country) p.country = country;
   savePlayer(ip, p);
 
-  res.json({ ok: true, balance: p.balance });
+  res.json({ ok: true, balance: p.balance, roundsUsed: p.roundsUsed });
 });
 
 // ===== 管理员登录 =====
@@ -235,6 +304,28 @@ app.post('/api/change-password', (req, res) => {
   config.adminPassword = newPassword;
   writeConfig(config);
   res.json({ ok: true });
+});
+
+// ===== 读取/修改每日次数配置 =====
+app.get('/api/config', (req, res) => {
+  const token = getTokenFromReq(req);
+  if (!verifyToken(token)) return res.status(401).json({ ok: false, error: 'unauthorized' });
+  const config = readConfig();
+  res.json({ dailyLimit: config.dailyLimit || 1 });
+});
+
+app.post('/api/config', (req, res) => {
+  const token = getTokenFromReq(req);
+  if (!verifyToken(token)) return res.status(401).json({ ok: false, error: 'unauthorized' });
+  const { dailyLimit } = req.body || {};
+  const n = parseInt(dailyLimit, 10);
+  if (isNaN(n) || n < 1 || n > 100) {
+    return res.status(400).json({ ok: false, error: 'invalid dailyLimit (1-100)' });
+  }
+  const config = readConfig();
+  config.dailyLimit = n;
+  writeConfig(config);
+  res.json({ ok: true, dailyLimit: n });
 });
 
 app.listen(PORT, () => {
