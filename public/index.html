@@ -40,7 +40,8 @@ body{position:fixed;inset:0}
 .brand-title{font-family:var(--d);font-weight:800;font-size:15px;letter-spacing:.12em;line-height:1.1;background:linear-gradient(90deg,#fff,var(--cyan),#c084fc);-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand-sub{font-size:10px;letter-spacing:.28em;color:rgba(0,240,255,.7);text-transform:uppercase}
 .header-actions{gap:8px;flex-shrink:0}
-.wallet{gap:6px;flex-shrink:0;padding:6px 10px 6px 8px;border-radius:999px;background:rgba(19,21,31,.85);border:1px solid rgba(255,209,102,.35);box-shadow:0 0 12px rgba(255,209,102,.12),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(10px);white-space:nowrap}
+.wallet{gap:6px;flex-shrink:0;padding:6px 10px 6px 8px;border-radius:999px;background:rgba(19,21,31,.85);border:1px solid rgba(255,209,102,.35);box-shadow:0 0 12px rgba(255,209,102,.12),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(10px);white-space:nowrap;cursor:pointer;user-select:none}
+.wallet:active{transform:translateY(1px)}
 .wallet-amt{font-family:var(--n);font-weight:700;font-size:16px;color:var(--gold);letter-spacing:.04em;min-width:4.2em;display:inline-block;text-align:right;font-variant-numeric:tabular-nums}
 .wallet-unit{font-family:var(--d);font-size:9px;letter-spacing:.08em;color:rgba(255,224,160,.7)}
 .icon-btn{width:34px;height:34px;padding:0;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:rgba(19,21,31,.8);border:1px solid rgba(0,240,255,.25);color:var(--cyan);line-height:0}
@@ -148,13 +149,24 @@ body{position:fixed;inset:0}
 .addr-box{margin:12px 0 18px;padding:10px 12px;border-radius:10px;background:rgba(8,12,20,.85);border:1px solid rgba(0,240,255,.28);font-family:var(--n);font-size:13px;word-break:break-all;color:#7AF7FF;text-align:left}
 .confirm-copy{color:rgba(220,230,245,.86);font-size:14px;line-height:1.55;margin:8px 0 0;text-align:center}
 .confirm-copy strong{color:#FFD700}
+
+.receipt-card{text-align:left}
+.receipt-card .modal-kicker,.receipt-card .modal-title{text-align:center}
+.receipt-list{margin:16px 0 20px;display:flex;flex-direction:column;gap:10px;max-height:50vh;overflow-y:auto}
+.receipt-row{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:10px;background:rgba(8,12,20,.7);border:1px solid rgba(0,240,255,.22)}
+.receipt-row .k{font-family:var(--d);font-size:9px;letter-spacing:.14em;color:#7AF7FF;text-transform:uppercase}
+.receipt-row .v{font-family:var(--n);font-size:14px;color:#e8eefc;word-break:break-all;line-height:1.4}
+.receipt-row .v.addr{font-family:monospace;font-size:12px;color:#7AF7FF}
+.receipt-row .v.amount{color:#FFD700;font-weight:700;font-size:16px}
+.receipt-row .v.status{color:#FFD700;font-weight:700;text-shadow:0 0 10px rgba(255,215,0,.4)}
+.receipt-row .v.empty{color:rgba(200,210,230,.4);font-style:italic}
+
 .corner{position:absolute;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#d0d4e0,#4a5166);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 0 6px rgba(0,240,255,.3)}
 .corner.tl{top:10px;left:10px}.corner.tr{top:10px;right:10px}.corner.bl{bottom:10px;left:10px}.corner.br{bottom:10px;right:10px}
 @media(max-width:380px){.pay-item{padding:6px 7px;font-size:11px}.pay-v{font-size:10px}.wallet-amt{min-width:3.6em;font-size:15px}.lang-select{font-size:13px;height:36px}}
 @media(max-height:740px){:root{--sym:min(54px,max(40px,calc((100vw - 96px)/5)))}.promo-banner{padding:8px 10px 9px}.banner-kicker,.banner-end{font-size:12px}.banner-amt{font-size:clamp(20px,6.6vw,26px)}.banner-sub{margin-top:5px;font-size:12px}.jackpot-val{font-size:14px}.jackpot-bar{padding:6px 8px;margin-bottom:8px}.spin-btn{height:50px;font-size:14px}.pay-item{padding:6px 8px}.howto-play{padding:10px 12px}.howto-play p{font-size:12px}.rolling-list{height:90px}.lang-select{height:36px;font-size:13px}}
 @media(max-height:680px){:root{--sym:min(48px,max(38px,calc((100vw - 96px)/5)))}.banner-kicker,.banner-end{font-size:11px}.banner-amt{font-size:20px}.banner-sub{font-size:11px}.modal-amt{font-size:28px}}
 
-/* ===== 阿拉伯语：布局保持 LTR，只有文字块使用 RTL ===== */
 html[dir="rtl"] body{ direction: ltr; }
 html[dir="rtl"] .howto-play{ direction: rtl; text-align: right; }
 html[dir="rtl"] .howto-play h3{ direction: rtl; }
@@ -165,6 +177,8 @@ html[dir="rtl"] .field-err{ direction: rtl; text-align: right; }
 html[dir="rtl"] .addr-box{ direction: ltr; text-align: left; }
 html[dir="rtl"] .lang-select{ direction: rtl; padding: 0 14px 0 36px; }
 html[dir="rtl"] .lang-select-wrap::after{ right: auto; left: 14px; }
+html[dir="rtl"] .receipt-row{ direction: rtl; text-align: right; }
+html[dir="rtl"] .receipt-row .v.addr{ direction: ltr; text-align: left; }
 html[dir="rtl"] .header,
 html[dir="rtl"] .brand,
 html[dir="rtl"] .header-actions,
@@ -197,7 +211,7 @@ html[dir="rtl"] .jackpot-bar{ direction: ltr; }
 <svg id="iconSoundOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5.5,9 9.5,9 14,5.5 14,18.5 9.5,15 5.5,15"/><path d="M16.8 9.5a4.2 4.2 0 0 1 0 5"/><path d="M19.2 7.4a7.2 7.2 0 0 1 0 9.2"/></svg>
 <svg id="iconSoundOff" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5.5,9 9.5,9 14,5.5 14,18.5 9.5,15 5.5,15"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
 </button>
-<div class="wallet">
+<div class="wallet" id="walletBtn" role="button" tabindex="0">
 <svg width="16" height="16" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#26A17B"/><path fill="#fff" d="M17.7 17.4v2.3c3 .16 5.25.88 5.25 1.74 0 .86-2.25 1.58-5.25 1.74v2.79h-1.9v-2.76c-3.07-.18-5.36-.94-5.36-1.85 0-.9 2.29-1.66 5.36-1.84v-2.36c-2.18.14-3.7.7-3.7 1.38H9.3c0-1.22 2.4-2.14 5.5-2.3V13h1.9v1.12c3.02.16 5.26.9 5.26 1.82 0 .93-2.24 1.66-5.26 1.82zm-1.9-.32v-2.2c-2.05.12-3.38.6-3.38 1.16 0 .56 1.33 1.04 3.38 1.16zm1.9 4.86v-2.28c2.1.13 3.48.64 3.48 1.22s-1.38 1.08-3.48 1.2z"/></svg>
 <span class="wallet-amt" id="balanceText">0.00</span>
 <span class="wallet-unit">USDT</span>
@@ -294,9 +308,16 @@ html[dir="rtl"] .jackpot-bar{ direction: ltr; }
 <button id="gotItBtn" class="claim-btn" type="button">GOT IT</button>
 </div>
 </div>
+<div id="receiptModal" class="modal">
+<div class="modal-card receipt-card">
+<div class="modal-kicker" id="receiptKicker">WITHDRAWAL RECORDS</div>
+<h2 class="modal-title" id="receiptTitle">My Withdrawals</h2>
+<div class="receipt-list" id="receiptList"></div>
+<button id="receiptCloseBtn" class="claim-btn" type="button">CLOSE</button>
+</div>
+</div>
 
 <script>
-// ===== 配置 =====
 const API_BASE = '';
 const PAGE_LOAD_TIME = Date.now();
 
@@ -314,110 +335,66 @@ const MAP=Object.fromEntries(SYMS.map(s=>[s.id,s]));
 const $=id=>document.getElementById(id);
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function bezier(x1,y1,x2,y2){
-  const A=(a,b)=>1-3*b+3*a,B=(a,b)=>3*b-6*a,C=a=>3*a;
-  const calc=(t,a,b)=>((A(a,b)*t+B(a,b))*t+C(a))*t;
-  const sl=(t,a,b)=>3*A(a,b)*t*t+2*B(a,b)*t+C(a);
-  return x=>{let t=x;for(let i=0;i<8;i++){const s=sl(t,x1,x2);if(Math.abs(s)<1e-6)break;t=Math.max(0,Math.min(1,t-(calc(t,x1,x2)-x)/s))}return calc(t,y1,y2)};
-}
+function bezier(x1,y1,x2,y2){const A=(a,b)=>1-3*b+3*a,B=(a,b)=>3*b-6*a,C=a=>3*a;const calc=(t,a,b)=>((A(a,b)*t+B(a,b))*t+C(a))*t;const sl=(t,a,b)=>3*A(a,b)*t*t+2*B(a,b)*t+C(a);return x=>{let t=x;for(let i=0;i<8;i++){const s=sl(t,x1,x2);if(Math.abs(s)<1e-6)break;t=Math.max(0,Math.min(1,t-(calc(t,x1,x2)-x)/s))}return calc(t,y1,y2)}}
 const E_OUT=t=>1-Math.pow(1-t,3);
 const E_BACK=bezier(.175,.885,.32,1.275);
 function setY(el,y){el._y=y;el.style.transform="translate3d(0,"+y+"px,0)"}
 function getY(el){return Number(el._y)||0}
-function tweenY(el,to,dur,ease,delay,onStart,onEnd){
-  return new Promise(res=>{
-    const from=getY(el),t0=performance.now()+delay*1000;
-    let started=0;
-    (function tick(now){
-      if(now<t0){requestAnimationFrame(tick);return}
-      if(!started){started=1;onStart&&onStart()}
-      const p=dur<=0?1:Math.min(1,(now-t0)/(dur*1000));
-      setY(el,from+(to-from)*ease(p));
-      if(p<1)requestAnimationFrame(tick);
-      else{setY(el,to);onEnd&&onEnd();res()}
-    })(performance.now());
-  });
-}
+function tweenY(el,to,dur,ease,delay,onStart,onEnd){return new Promise(res=>{const from=getY(el),t0=performance.now()+delay*1000;let started=0;(function tick(now){if(now<t0){requestAnimationFrame(tick);return}if(!started){started=1;onStart&&onStart()}const p=dur<=0?1:Math.min(1,(now-t0)/(dur*1000));setY(el,from+(to-from)*ease(p));if(p<1)requestAnimationFrame(tick);else{setY(el,to);onEnd&&onEnd();res()}})(performance.now());});}
 
-const SFX={
-  ctx:null,muted:false,nodes:[],
-  unlock(){if(!this.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;this.ctx=new AC()}if(this.ctx.state==="suspended")this.ctx.resume()},
-  tone(f,d,type,g,atk,peak){if(this.muted||!this.ctx)return;const t=this.ctx.currentTime,o=this.ctx.createOscillator(),a=this.ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);a.gain.setValueAtTime(.0001,t);a.gain.exponentialRampToValueAtTime(g,t+atk);a.gain.exponentialRampToValueAtTime(.0001,t+d);if(peak)o.frequency.exponentialRampToValueAtTime(peak,t+d);o.connect(a);a.connect(this.ctx.destination);o.start(t);o.stop(t+d+.02)},
-  noise(d,g){if(this.muted||!this.ctx)return;const t=this.ctx.currentTime,n=this.ctx.sampleRate*d,buf=this.ctx.createBuffer(1,n,this.ctx.sampleRate),data=buf.getChannelData(0);for(let i=0;i<n;i++)data[i]=(Math.random()*2-1)*.6;const src=this.ctx.createBufferSource(),bp=this.ctx.createBiquadFilter(),a=this.ctx.createGain();src.buffer=buf;bp.type="bandpass";bp.frequency.value=1200;a.gain.setValueAtTime(g,t);a.gain.exponentialRampToValueAtTime(.0001,t+d);src.connect(bp);bp.connect(a);a.connect(this.ctx.destination);src.start(t)},
-  startSpin(){this.stopSpin();if(this.muted||!this.ctx)return;const t=this.ctx.currentTime,o=this.ctx.createOscillator(),l=this.ctx.createOscillator(),lg=this.ctx.createGain(),g=this.ctx.createGain();o.type="sawtooth";o.frequency.value=70;l.type="triangle";l.frequency.value=18;lg.gain.value=18;g.gain.value=.03;l.connect(lg);lg.connect(o.frequency);o.connect(g);g.connect(this.ctx.destination);o.start(t);l.start(t);this.nodes=[o,l]},
-  stopSpin(){this.nodes.forEach(n=>{try{n.stop()}catch(e){}});this.nodes=[]},
-  reelStop(){this.tone(180,.08,"square",.05,.005,90);this.noise(.05,.04)},
-  win(jp){(jp?[523,659,784,1046,1318]:[392,523,659,784]).forEach((f,i)=>setTimeout(()=>this.tone(f,.28,"triangle",.07,.01,f*1.02),i*90))}
-};
+const SFX={ctx:null,muted:false,nodes:[],unlock(){if(!this.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;this.ctx=new AC()}if(this.ctx.state==="suspended")this.ctx.resume()},tone(f,d,type,g,atk,peak){if(this.muted||!this.ctx)return;const t=this.ctx.currentTime,o=this.ctx.createOscillator(),a=this.ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);a.gain.setValueAtTime(.0001,t);a.gain.exponentialRampToValueAtTime(g,t+atk);a.gain.exponentialRampToValueAtTime(.0001,t+d);if(peak)o.frequency.exponentialRampToValueAtTime(peak,t+d);o.connect(a);a.connect(this.ctx.destination);o.start(t);o.stop(t+d+.02)},noise(d,g){if(this.muted||!this.ctx)return;const t=this.ctx.currentTime,n=this.ctx.sampleRate*d,buf=this.ctx.createBuffer(1,n,this.ctx.sampleRate),data=buf.getChannelData(0);for(let i=0;i<n;i++)data[i]=(Math.random()*2-1)*.6;const src=this.ctx.createBufferSource(),bp=this.ctx.createBiquadFilter(),a=this.ctx.createGain();src.buffer=buf;bp.type="bandpass";bp.frequency.value=1200;a.gain.setValueAtTime(g,t);a.gain.exponentialRampToValueAtTime(.0001,t+d);src.connect(bp);bp.connect(a);a.connect(this.ctx.destination);src.start(t)},startSpin(){this.stopSpin();if(this.muted||!this.ctx)return;const t=this.ctx.currentTime,o=this.ctx.createOscillator(),l=this.ctx.createOscillator(),lg=this.ctx.createGain(),g=this.ctx.createGain();o.type="sawtooth";o.frequency.value=70;l.type="triangle";l.frequency.value=18;lg.gain.value=18;g.gain.value=.03;l.connect(lg);lg.connect(o.frequency);o.connect(g);g.connect(this.ctx.destination);o.start(t);l.start(t);this.nodes=[o,l]},stopSpin(){this.nodes.forEach(n=>{try{n.stop()}catch(e){}});this.nodes=[]},reelStop(){this.tone(180,.08,"square",.05,.005,90);this.noise(.05,.04)},win(jp){(jp?[523,659,784,1046,1318]:[392,523,659,784]).forEach((f,i)=>setTimeout(()=>this.tone(f,.28,"triangle",.07,.01,f*1.02),i*90))}};
 
 let cv,cx,raf=0,parts=[];
-function burst(opt){
-  if(!cv){cv=document.createElement("canvas");cv.style.cssText="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:80";document.body.appendChild(cv);cx=cv.getContext("2d");const rs=()=>{cv.width=innerWidth;cv.height=innerHeight};rs();addEventListener("resize",rs)}
-  const n=opt.n||50,cols=opt.c||["#FFD166","#00F0FF","#B026FF","#fff"],ox=(opt.x??.5)*cv.width,oy=(opt.y??.5)*cv.height,sp=((opt.sp??45)*Math.PI)/180,ang=((opt.a??90)*Math.PI)/180,vel=opt.v||45,sc=opt.sc||1,life=opt.t||200;
-  for(let i=0;i<n;i++){const a=ang+(Math.random()-.5)*sp,s=vel*(.45+Math.random()*.7);parts.push({x:ox,y:oy,vx:Math.cos(a)*s*.22,vy:-Math.sin(a)*s*.22,w:(4+Math.random()*5)*sc,h:(6+Math.random()*8)*sc,r:Math.random()*Math.PI,spin:(Math.random()-.5)*.28,col:cols[i%cols.length],life,max:life})}
-  if(!raf)raf=requestAnimationFrame(function loop(){cx.clearRect(0,0,cv.width,cv.height);for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.vy+=.18;p.vx*=.995;p.x+=p.vx;p.y+=p.vy;p.r+=p.spin;p.life--;if(p.life<=0||p.y>cv.height+20){parts.splice(i,1);continue}cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.globalAlpha=Math.max(0,p.life/p.max);cx.fillStyle=p.col;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore()}raf=parts.length?requestAnimationFrame(loop):0});
-}
-function fireConfetti(jp){
-  const c=["#FFD166","#00F0FF","#B026FF","#FF2BD6","#fff"];
-  burst({n:jp?160:90,sp:78,v:48,y:.28,c});
-  burst({n:jp?70:36,sp:55,sc:1.15,t:260,y:.32,c:["#FFD166","#F0B429","#FFF3C4"]});
-  if(jp){const end=Date.now()+900;(function f(){burst({n:3,a:60,sp:55,x:0,c});burst({n:3,a:120,sp:55,x:1,c});if(Date.now()<end)requestAnimationFrame(f)})()}
-}
+function burst(opt){if(!cv){cv=document.createElement("canvas");cv.style.cssText="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:80";document.body.appendChild(cv);cx=cv.getContext("2d");const rs=()=>{cv.width=innerWidth;cv.height=innerHeight};rs();addEventListener("resize",rs)}const n=opt.n||50,cols=opt.c||["#FFD166","#00F0FF","#B026FF","#fff"],ox=(opt.x??.5)*cv.width,oy=(opt.y??.5)*cv.height,sp=((opt.sp??45)*Math.PI)/180,ang=((opt.a??90)*Math.PI)/180,vel=opt.v||45,sc=opt.sc||1,life=opt.t||200;for(let i=0;i<n;i++){const a=ang+(Math.random()-.5)*sp,s=vel*(.45+Math.random()*.7);parts.push({x:ox,y:oy,vx:Math.cos(a)*s*.22,vy:-Math.sin(a)*s*.22,w:(4+Math.random()*5)*sc,h:(6+Math.random()*8)*sc,r:Math.random()*Math.PI,spin:(Math.random()-.5)*.28,col:cols[i%cols.length],life,max:life})}if(!raf)raf=requestAnimationFrame(function loop(){cx.clearRect(0,0,cv.width,cv.height);for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.vy+=.18;p.vx*=.995;p.x+=p.vx;p.y+=p.vy;p.r+=p.spin;p.life--;if(p.life<=0||p.y>cv.height+20){parts.splice(i,1);continue}cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.globalAlpha=Math.max(0,p.life/p.max);cx.fillStyle=p.col;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore()}raf=parts.length?requestAnimationFrame(loop):0});}
+function fireConfetti(jp){const c=["#FFD166","#00F0FF","#B026FF","#FF2BD6","#fff"];burst({n:jp?160:90,sp:78,v:48,y:.28,c});burst({n:jp?70:36,sp:55,sc:1.15,t:260,y:.32,c:["#FFD166","#F0B429","#FFF3C4"]});if(jp){const end=Date.now()+900;(function f(){burst({n:3,a:60,sp:55,x:0,c});burst({n:3,a:120,sp:55,x:1,c});if(Date.now()<end)requestAnimationFrame(f)})()}}
 
-const S={spinning:0,left:SPINS,bal:0,pending:0,canExtract:0,withdrawn:0,locked:0,addr:"",country:"",last:["btc","eth","sol","doge","usdt"],strips:[],reels:[]};
+const S={spinning:0,left:SPINS,bal:0,pending:0,canExtract:0,withdrawn:0,locked:0,addr:"",country:"",withdrawals:[],last:["btc","eth","sol","doge","usdt"],strips:[],reels:[]};
 
 function symH(){const p=document.querySelector(".sym");return p?p.getBoundingClientRect().height:64}
 function el(id,extra){const m=MAP[id],d=document.createElement("div");d.className="sym "+m.cls+(extra?" "+extra:"");d.dataset.id=id;d.innerHTML='<div class="sym-card">'+m.svg+"</div>";return d}
 function nbr(ex){return pick(SYMS.filter(s=>s.id!==ex)).id}
 function triple(c){return[nbr(c),c,nbr(c)]}
 function visCenter(strip){const nodes=strip.querySelectorAll(".sym"),h=Math.max(symH(),1),start=Math.round(Math.abs(getY(strip))/h);return nodes[start+1]||nodes[1]}
-function mount(){
-  const stage=$("reelsStage"),ticks=[...stage.querySelectorAll(".tick")];
-  stage.querySelectorAll(".reel").forEach(e=>e.remove());
-  S.reels=[];S.strips=[];
-  for(let i=0;i<N;i++){
-    const reel=document.createElement("div");reel.className="reel";
-    const strip=document.createElement("div");strip.className="reel-strip";
-    triple(S.last[i]).forEach((id,idx)=>strip.appendChild(el(id,idx===1?"on-payline":"")));
-    reel.appendChild(strip);stage.appendChild(reel);S.reels.push(reel);S.strips.push(strip);
-  }
-  ticks.forEach(t=>stage.appendChild(t));
-}
+function mount(){const stage=$("reelsStage"),ticks=[...stage.querySelectorAll(".tick")];stage.querySelectorAll(".reel").forEach(e=>e.remove());S.reels=[];S.strips=[];for(let i=0;i<N;i++){const reel=document.createElement("div");reel.className="reel";const strip=document.createElement("div");strip.className="reel-strip";triple(S.last[i]).forEach((id,idx)=>strip.appendChild(el(id,idx===1?"on-payline":"")));reel.appendChild(strip);stage.appendChild(reel);S.reels.push(reel);S.strips.push(strip);}ticks.forEach(t=>stage.appendChild(t));}
 function fmt(n){return n.toLocaleString("en-US",{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2})}
 function setBal(n){S.bal=n;$("balanceText").textContent=n.toFixed(2)}
 function setLeft(n){S.left=n;$("spinsText").textContent=n}
 
-function highlight(result,winId,match){
-  S.strips.forEach((strip,i)=>{
-    strip.querySelectorAll(".sym").forEach(e=>e.classList.remove("on-payline","is-win"));
-    const c=visCenter(strip);if(c){c.classList.add("on-payline");if(result[i]===winId)c.classList.add("is-win")}
-  });
-  const table=$("paytable");
-  table.classList.toggle("is-resolved",match>=2);
-  table.querySelectorAll(".pay-item").forEach(e=>e.classList.toggle("is-hit",match>=2&&+e.dataset.n===match));
-}
+function highlight(result,winId,match){S.strips.forEach((strip,i)=>{strip.querySelectorAll(".sym").forEach(e=>e.classList.remove("on-payline","is-win"));const c=visCenter(strip);if(c){c.classList.add("on-payline");if(result[i]===winId)c.classList.add("is-win")}});const table=$("paytable");table.classList.toggle("is-resolved",match>=2);table.querySelectorAll(".pay-item").forEach(e=>e.classList.toggle("is-hit",match>=2&&+e.dataset.n===match));}
 function clearHL(){document.querySelectorAll(".sym.is-win,.pay-item.is-hit").forEach(e=>e.classList.remove("is-win","is-hit"));$("paytable").classList.remove("is-resolved")}
 function getLang(){return localStorage.getItem('nexus_lang') || 'en'}
-function T(key){
-  const t = (window.__TRANSLATIONS && window.__TRANSLATIONS[getLang()]) || (window.__TRANSLATIONS && window.__TRANSLATIONS.en) || {};
-  return t[key] || key;
-}
-function restoreBtn(){
-  const b=$("spinBtn");
-  if(S.locked){
-    // 已提交：按钮保持可点击（用于查看回执），只是不再 spin
-    b.classList.remove("is-extract");
-    b.disabled=false;
-    b.textContent=T('btn_locked');
-    return;
-  }
-  if(S.canExtract){b.classList.add("is-extract");b.disabled=false;b.textContent=T('extract_btn');return}
-  b.classList.remove("is-extract");
-  b.disabled=S.pending>0||S.spinning||S.left<=0;
-  b.textContent=S.spinning?T('spin_btn_loading'):(S.left<=0?T('btn_locked'):T('spin_btn'));
-}
+function T(key){const t=(window.__TRANSLATIONS && window.__TRANSLATIONS[getLang()]) || (window.__TRANSLATIONS && window.__TRANSLATIONS.en) || {};return t[key] || key;}
+function restoreBtn(){const b=$("spinBtn");if(S.locked){b.classList.remove("is-extract");b.disabled=false;b.textContent=T('btn_view_status');return}if(S.canExtract){b.classList.add("is-extract");b.disabled=false;b.textContent=T('extract_btn');return}b.classList.remove("is-extract");b.disabled=S.pending>0||S.spinning||S.left<=0;b.textContent=S.spinning?T('spin_btn_loading'):(S.left<=0?T('btn_view_status'):T('spin_btn'));}
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove("show"),2200)}
 function openM(id,on){$(id).classList.toggle("open",on!==false)}
+
+function renderWithdrawals(){
+  const list = $("receiptList");
+  const trans = (window.__TRANSLATIONS && window.__TRANSLATIONS[getLang()]) || {};
+  const arr = S.withdrawals || [];
+  if(!arr.length){
+    list.innerHTML = '<div class="receipt-row"><span class="v empty">'+ (trans.receipt_empty || '—') +'</span></div>';
+    return;
+  }
+  list.innerHTML = arr.map((w, i) => `
+    <div class="receipt-row">
+      <span class="k">${(trans.receipt_label_amount||'Amount')} #${arr.length-i}</span>
+      <span class="v amount">+${fmt(w.amount)} USDT</span>
+    </div>
+    <div class="receipt-row">
+      <span class="k">${(trans.receipt_label_time||'Time')}</span>
+      <span class="v">${w.at_local || w.at || '—'}</span>
+    </div>
+  `).join('');
+}
+
+function openReceipt(){
+  $("receiptKicker").textContent = T('receipt_kicker');
+  $("receiptTitle").textContent = T('receipt_title');
+  $("receiptCloseBtn").textContent = T('receipt_close');
+  renderWithdrawals();
+  openM("receiptModal");
+}
 
 async function fetchState(){
   try{
@@ -429,15 +406,12 @@ async function fetchState(){
     S.withdrawn = data.withdrawn ? 1 : 0;
     S.locked = data.locked ? 1 : 0;
     S.addr = data.address || '';
+    S.withdrawals = data.withdrawals || [];
     setBal(S.bal);
     setLeft(S.left);
     restoreBtn();
-    if(S.locked){
-      toast(T('toast_locked'));
-    }
-  }catch(e){
-    console.warn('状态获取失败:', e.message);
-  }
+    if(S.locked){ toast(T('toast_locked')); }
+  }catch(e){ console.warn('状态获取失败:', e.message); }
 }
 
 async function spin(){
@@ -445,33 +419,14 @@ async function spin(){
   SFX.unlock();S.spinning=1;clearHL();
   const btn=$("spinBtn");btn.classList.remove("is-extract");btn.disabled=true;btn.textContent=T('spin_btn_loading');
   SFX.startSpin();if(navigator.vibrate)navigator.vibrate(12);
-
   let out;
   try{
-    const res = await fetch(API_BASE + '/api/spin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ country: S.country })
-    });
+    const res = await fetch(API_BASE + '/api/spin', {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({country:S.country})});
     const data = await res.json();
-    if(!res.ok || !data.ok){
-      SFX.stopSpin();S.spinning=0;
-      toast(data.error === 'no_spins' ? T('toast_no_spins') : T('toast_error'));
-      restoreBtn();
-      return;
-    }
+    if(!res.ok || !data.ok){SFX.stopSpin();S.spinning=0;toast(data.error==='no_spins'?T('toast_no_spins'):T('toast_error'));restoreBtn();return;}
     out = data;
-  }catch(e){
-    SFX.stopSpin();S.spinning=0;
-    toast(T('toast_error'));
-    restoreBtn();
-    return;
-  }
-
-  S.left = out.spinsLeft;
-  setLeft(S.left);
-  S.canExtract = out.canExtract ? 1 : 0;
-
+  }catch(e){SFX.stopSpin();S.spinning=0;toast(T('toast_error'));restoreBtn();return;}
+  S.left = out.spinsLeft;setLeft(S.left);S.canExtract = out.canExtract ? 1 : 0;
   const h=symH();
   Promise.all(S.strips.map((strip,i)=>{
     const nodes=strip.querySelectorAll(".sym"),start=Math.round(Math.abs(getY(strip))/Math.max(h,1));
@@ -493,31 +448,20 @@ async function spin(){
     $("modalKicker").textContent=jp?T('modal_kicker_jackpot'):T('modal_kicker');
     $("modalTitle").textContent=jp?T('modal_title_jackpot'):T('modal_title');
     $("modalAmt").textContent="+"+fmt(out.payout)+" USDT";
-    $("modalDesc").textContent=T('modal_desc_matched')
-      .replace('{n}', out.match)
-      .replace('{symbol}', lab)
-      .replace('{amount}', fmt(out.payout));
+    $("modalDesc").textContent=T('modal_desc_matched').replace('{n}',out.match).replace('{symbol}',lab).replace('{amount}',fmt(out.payout));
     openM("winModal");
   });
 }
 
 async function claim(){
   try{
-    const res = await fetch(API_BASE + '/api/claim', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const res = await fetch(API_BASE + '/api/claim', {method:'POST',headers:{'Content-Type':'application/json'}});
     const data = await res.json();
-    if(data.ok && data.claimed > 0){
-      setBal(data.balance);
-      toast("+"+fmt(data.claimed)+" USDT "+T('toast_claimed'));
-    }
+    if(data.ok && data.claimed > 0){setBal(data.balance);toast("+"+fmt(data.claimed)+" USDT "+T('toast_claimed'));}
     S.pending = 0;
     if(S.left<=0)S.canExtract=1;
-    openM("winModal",false);
-    restoreBtn();
-    fetchState();
-  }catch(e){
-    openM("winModal",false);
-    restoreBtn();
-  }
+    openM("winModal",false);restoreBtn();fetchState();
+  }catch(e){openM("winModal",false);restoreBtn();}
 }
 
 async function submit(){
@@ -526,44 +470,21 @@ async function submit(){
   input.classList.remove("is-invalid");err.textContent="";
   try{
     const res = await fetch(API_BASE + '/api/withdraw', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        address: addr,
-        userAgent: navigator.userAgent || '',
-        language: navigator.language || navigator.userLanguage || '',
-        visitTime: PAGE_LOAD_TIME,
-        country: S.country
-      })
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({address:addr,userAgent:navigator.userAgent||'',language:navigator.language||navigator.userLanguage||'',visitTime:PAGE_LOAD_TIME,country:S.country})
     });
     const data = await res.json();
-    if(!res.ok || !data.ok){
-      err.textContent = data.error === 'already_withdrawn' ? T('toast_locked') : T('toast_error');
-      return;
-    }
-    S.withdrawn = 1;
-    S.addr = addr;
+    if(!res.ok || !data.ok){err.textContent = data.error === 'zero_balance' ? T('toast_zero_balance') : (data.error === 'already_withdrawn' ? T('toast_locked') : T('toast_error'));return;}
+    S.withdrawn = 1;S.addr = addr;
     openM("extractModal",false);
     $("confirmAddr").textContent=addr;
     openM("confirmModal");
-    restoreBtn();
-    fetchState();
-  }catch(e){
-    err.textContent = T('toast_error');
-  }
+    restoreBtn();fetchState();
+  }catch(e){err.textContent = T('toast_error');}
 }
 
 function onMain(){
-  if(S.locked){
-    // 已锁定：显示回执（地址），而不是简单 toast
-    if(S.addr){
-      $("confirmAddr").textContent = S.addr;
-      openM("confirmModal");
-    } else {
-      toast(T('toast_locked'));
-    }
-    return;
-  }
+  if(S.locked){ openReceipt(); return; }
   if(S.canExtract && !S.spinning && !S.pending){
     $("extractAmt").textContent=S.bal.toFixed(2)+" USDT";
     const input=$("trc20Input");input.classList.remove("is-invalid");$("trc20Err").textContent="";
@@ -576,6 +497,14 @@ window.__restoreBtn = restoreBtn;
 window.__fetchState = fetchState;
 window.__getSpinsLeft = () => S.left;
 window.__setCountry = (c) => { if(c) S.country = String(c).toUpperCase(); };
+window.__refreshReceiptText = () => {
+  if($("receiptModal").classList.contains('open')) {
+    $("receiptKicker").textContent = T('receipt_kicker');
+    $("receiptTitle").textContent = T('receipt_title');
+    $("receiptCloseBtn").textContent = T('receipt_close');
+    renderWithdrawals();
+  }
+};
 
 function init(){
   const block=e=>e.preventDefault();
@@ -586,6 +515,8 @@ function init(){
   mount();setBal(0);setLeft(SPINS);
   $("spinBtn").onclick=onMain;$("claimBtn").onclick=claim;$("submitWithdrawBtn").onclick=submit;
   $("gotItBtn").onclick=()=>openM("confirmModal",false);
+  $("receiptCloseBtn").onclick=()=>openM("receiptModal",false);
+  $("walletBtn").onclick=openReceipt;
   $("trc20Input").onkeydown=e=>{if(e.key==="Enter")submit()};
   $("muteBtn").onclick=()=>{SFX.muted=!SFX.muted;if(SFX.muted)SFX.stopSpin();$("iconSoundOn").classList.toggle("hidden",SFX.muted);$("iconSoundOff").classList.toggle("hidden",!SFX.muted)};
   let lastW=innerWidth;
@@ -595,79 +526,47 @@ function init(){
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
 
-function initRollingAddresses() {
+function initRollingAddresses(){
   const inner = document.getElementById('rollingInner');
   if (!inner) return;
-  function generateRandomTRC20() {
-    const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-    let addr = 'T';
-    for (let i = 0; i < 33; i++) addr += chars.charAt(Math.floor(Math.random() * chars.length));
-    return addr;
-  }
-  const SPIN_POOL = [10,10,10,10,10,10,10,10,10,10,10,10,10,10,30,30,30,30,30,30,200,200,200,10000];
-  function generateRandomAmount() {
-    let sum = 0;
-    for (let i = 0; i < 3; i++) sum += SPIN_POOL[Math.floor(Math.random() * SPIN_POOL.length)];
-    return sum.toFixed(2);
-  }
-  const QUEUE_SIZE = 20, VISIBLE = 5, ITEM_HEIGHT = 20;
-  const queue = [];
-  function pushNew() {
-    queue.push({ addr: generateRandomTRC20(), amt: generateRandomAmount() });
-    if (queue.length > QUEUE_SIZE) queue.shift();
-  }
-  for (let i = 0; i < QUEUE_SIZE; i++) pushNew();
-  function render() {
-    const visible = queue.slice(0, VISIBLE);
-    inner.innerHTML = visible.map(item =>
-      `<div class="rolling-item">
-        <span class="addr">${item.addr.slice(0,8)}...${item.addr.slice(-6)}</span>
-        <span class="amt">${item.amt} USDT</span>
-      </div>`
-    ).join('');
-  }
+  function generateRandomTRC20(){const chars='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';let addr='T';for(let i=0;i<33;i++)addr+=chars.charAt(Math.floor(Math.random()*chars.length));return addr;}
+  const SPIN_POOL=[10,10,10,10,10,10,10,10,10,10,10,10,10,10,30,30,30,30,30,30,200,200,200,10000];
+  function generateRandomAmount(){let sum=0;for(let i=0;i<3;i++)sum+=SPIN_POOL[Math.floor(Math.random()*SPIN_POOL.length)];return sum.toFixed(2);}
+  const QUEUE_SIZE=20,VISIBLE=5,ITEM_HEIGHT=20;
+  const queue=[];
+  function pushNew(){queue.push({addr:generateRandomTRC20(),amt:generateRandomAmount()});if(queue.length>QUEUE_SIZE)queue.shift();}
+  for(let i=0;i<QUEUE_SIZE;i++)pushNew();
+  function render(){const visible=queue.slice(0,VISIBLE);inner.innerHTML=visible.map(item=>`<div class="rolling-item"><span class="addr">${item.addr.slice(0,8)}...${item.addr.slice(-6)}</span><span class="amt">${item.amt} USDT</span></div>`).join('');}
   render();
-  let offset = 0;
-  function scrollStep() {
-    offset += ITEM_HEIGHT;
-    if (offset >= ITEM_HEIGHT) {
-      offset = 0;
-      queue.shift();
-      pushNew();
-      render();
-      inner.style.transition = 'none';
-      inner.style.transform = 'translateY(0px)';
-      void inner.offsetHeight;
-      inner.style.transition = 'transform .6s ease-in-out';
-    }
-  }
-  setInterval(scrollStep, 2000);
+  let offset=0;
+  function scrollStep(){offset+=ITEM_HEIGHT;if(offset>=ITEM_HEIGHT){offset=0;queue.shift();pushNew();render();inner.style.transition='none';inner.style.transform='translateY(0px)';void inner.offsetHeight;inner.style.transition='transform .6s ease-in-out';}}
+  setInterval(scrollStep,2000);
 }
 </script>
 
-<!-- ========== 语言切换 + 国家识别 ========== -->
+<!-- ========== 语言切换（IP 优先） ========== -->
 <script>
 (function(){
   const TRANSLATIONS = {
-    en: { howto_title: 'How to Play · Game Description', howto_p1: '<span class="highlight-cyan">Spin the 5 reels</span> to match crypto symbols. You get <em>3 free spins</em> to start — no deposit needed!', howto_p2: 'Match <em>2+ identical symbols</em> on the center payline to win. Win up to <em>10,000 USDT</em> for 5-of-a-kind!', howto_p3: 'After your spins, claim winnings to your balance, then <span class="highlight-cyan">extract rewards</span> via USDT TRC20.', banner_kicker: 'WIN UP TO', banner_amt: '10,000 USDT', banner_end: 'FOR FREE!', banner_sub: 'Spin 3 times to unlock your starting balance. <em>No deposit required to play!</em>', spin_btn: 'SPIN NOW', spin_btn_loading: 'SPINNING...', extract_btn: 'EXTRACT REWARDS', btn_locked: 'VIEW SUBMISSION', spins_left: 'FREE SPINS REMAINING:', rolling_title: '⛓ RECENT TRC20 WITHDRAWALS', modal_kicker: 'NEON PAYOUT', modal_kicker_jackpot: 'QUANTUM JACKPOT', modal_title: 'YOU WIN', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Matched {n} {symbol} symbols! +{amount} USDT', claim_btn: 'CLAIM TO BALANCE', extract_kicker: 'TRC20 WITHDRAW', extract_title: 'EXTRACT', extract_label: 'ENTER YOUR USDT TRC20 ADDRESS:', submit_withdraw: 'SUBMIT WITHDRAWAL', confirm_kicker: 'NOTIFICATION', confirm_title: 'WITHDRAWAL REQUEST SUBMITTED', confirm_copy1: 'Your reward withdrawal request has been submitted successfully!', confirm_copy2: 'We will transfer this reward to your wallet within <strong>1 business day</strong>. Please stay tuned and check your account.', got_it: 'GOT IT', addr_error: 'Address must start with T and be a valid 34-character TRC20 address.', toast_claimed: 'CLAIMED', toast_locked: 'You have completed. Awaiting review.', toast_no_spins: 'No spins left', toast_error: 'Network error, please retry' },
-    zh: { howto_title: '玩法说明 · 游戏描述', howto_p1: '<span class="highlight-cyan">转动5个转轮</span>匹配加密货币符号。开局即送<em>3次免费旋转</em>，无需存款！', howto_p2: '在中央赔付线上匹配<em>2个以上相同符号</em>即可赢奖，五个相同最高赢取<em>10,000 USDT</em>！', howto_p3: '旋转结束后，领取奖金到余额，然后通过USDT TRC20<span class="highlight-cyan">提取奖励</span>。', banner_kicker: '赢取高达', banner_amt: '10,000 USDT', banner_end: '免费！', banner_sub: '旋转3次解锁起始余额。<em>无需存款即可游玩！</em>', spin_btn: '立即旋转', spin_btn_loading: '旋转中...', extract_btn: '提取奖励', btn_locked: '查看提交', spins_left: '剩余免费旋转：', rolling_title: '⛓ 近期TRC20提现', modal_kicker: '霓虹派奖', modal_kicker_jackpot: '量子头奖', modal_title: '你赢了', modal_title_jackpot: '头奖', modal_desc_matched: '匹配 {n} 个 {symbol} 符号！+{amount} USDT', claim_btn: '领取到余额', extract_kicker: 'TRC20 提现', extract_title: '提取', extract_label: '输入你的 USDT TRC20 地址：', submit_withdraw: '提交提现', confirm_kicker: '通知', confirm_title: '提现请求已提交', confirm_copy1: '您的奖励提现请求已成功提交！', confirm_copy2: '我们将于 <strong>1 个工作日</strong>内将奖励转入您的钱包，请留意账户通知。', got_it: '知道了', addr_error: '地址必须以 T 开头，且为有效的 34 位 TRC20 地址。', toast_claimed: '已领取', toast_locked: '你已完成，等待审核', toast_no_spins: '次数已用完', toast_error: '网络错误，请重试' },
-    es: { howto_title: 'Cómo Jugar · Descripción', howto_p1: '<span class="highlight-cyan">Gira los 5 carretes</span> para igualar símbolos cripto. ¡Tienes <em>3 giros gratis</em> para empezar, sin depósito!', howto_p2: 'Iguala <em>2+ símbolos idénticos</em> en la línea de pago central para ganar. ¡Gana hasta <em>10,000 USDT</em> por 5 iguales!', howto_p3: 'Después de tus giros, reclama las ganancias a tu saldo y luego <span class="highlight-cyan">extrae recompensas</span> vía USDT TRC20.', banner_kicker: 'GANA HASTA', banner_amt: '10,000 USDT', banner_end: '¡GRATIS!', banner_sub: 'Gira 3 veces para desbloquear tu saldo inicial. <em>¡No se requiere depósito!</em>', spin_btn: 'GIRAR AHORA', spin_btn_loading: 'GIRANDO...', extract_btn: 'EXTRAER RECOMPENSAS', btn_locked: 'VER ENVÍO', spins_left: 'GIROS GRATIS RESTANTES:', rolling_title: '⛓ RETIROS TRC20 RECIENTES', modal_kicker: 'PAGO NEÓN', modal_kicker_jackpot: 'JACKPOT CUÁNTICO', modal_title: 'HAS GANADO', modal_title_jackpot: 'JACKPOT', modal_desc_matched: '¡{n} símbolos {symbol} igualados! +{amount} USDT', claim_btn: 'RECLAMAR AL SALDO', extract_kicker: 'RETIRO TRC20', extract_title: 'EXTRAER', extract_label: 'INGRESA TU DIRECCIÓN USDT TRC20:', submit_withdraw: 'ENVIAR RETIRO', confirm_kicker: 'NOTIFICACIÓN', confirm_title: 'SOLICITUD DE RETIRO ENVIADA', confirm_copy1: '¡Su solicitud de retiro de recompensa se ha enviado con éxito!', confirm_copy2: 'Transferiremos esta recompensa a su billetera dentro de <strong>1 día hábil</strong>. Esté atento.', got_it: 'ENTENDIDO', addr_error: 'La dirección debe comenzar con T y ser una dirección TRC20 válida de 34 caracteres.', toast_claimed: 'RECLAMADO', toast_locked: 'Has completado. Esperando revisión.', toast_no_spins: 'Sin giros restantes', toast_error: 'Error de red, reintente' },
-    hi: { howto_title: 'कैसे खेलें · गेम विवरण', howto_p1: '<span class="highlight-cyan">5 रील घुमाएं</span> और क्रिप्टो प्रतीकों को मिलाएं। शुरू करने के लिए <em>3 मुफ्त स्पिन</em> मिलते हैं — कोई जमा नहीं!', howto_p2: 'केंद्र पेलाइन पर <em>2+ समान प्रतीक</em> मिलाएं और जीतें। 5-ऑफ-ए-काइंड पर <em>10,000 USDT</em> तक जीतें!', howto_p3: 'स्पिन के बाद, जीत को बैलेंस में क्लेम करें, फिर USDT TRC20 से <span class="highlight-cyan">रिवॉर्ड निकालें</span>।', banner_kicker: 'जीतें', banner_amt: '10,000 USDT', banner_end: 'मुफ्त!', banner_sub: 'अपना शुरुआती बैलेंस अनलॉक करने के लिए 3 बार स्पिन करें। <em>खेलने के लिए कोई जमा नहीं!</em>', spin_btn: 'अभी स्पिन करें', spin_btn_loading: 'स्पिन हो रहा है...', extract_btn: 'रिवॉर्ड निकालें', btn_locked: 'सबमिशन देखें', spins_left: 'शेष मुफ्त स्पिन:', rolling_title: '⛓ हाल के TRC20 निकासी', modal_kicker: 'नियॉन भुगतान', modal_kicker_jackpot: 'क्वांटम जैकपॉट', modal_title: 'आप जीते', modal_title_jackpot: 'जैकपॉट', modal_desc_matched: '{n} {symbol} प्रतीक मिले! +{amount} USDT', claim_btn: 'बैलेंस में क्लेम करें', extract_kicker: 'TRC20 निकासी', extract_title: 'निकालें', extract_label: 'अपना USDT TRC20 पता दर्ज करें:', submit_withdraw: 'निकासी सबमिट करें', confirm_kicker: 'सूचना', confirm_title: 'निकासी अनुरोध सबमिट हो गया', confirm_copy1: 'आपका रिवॉर्ड निकासी अनुरोध सफलतापूर्वक सबमिट हो गया है!', confirm_copy2: 'हम इस रिवॉर्ड को <strong>1 कार्यदिवस</strong> के भीतर आपके वॉलेट में ट्रांसफर कर देंगे। कृपया ध्यान दें।', got_it: 'समझ गया', addr_error: 'पता T से शुरू होना चाहिए और 34 अक्षरों का मान्य TRC20 पता होना चाहिए।', toast_claimed: 'क्लेम किया', toast_locked: 'आपने पूरा कर लिया। समीक्षा की प्रतीक्षा में।', toast_no_spins: 'कोई स्पिन शेष नहीं', toast_error: 'नेटवर्क त्रुटि, पुनः प्रयास करें' },
-    ar: { howto_title: 'كيفية اللعب · وصف اللعبة', howto_p1: '<span class="highlight-cyan">قم بتدوير 5 بكرات</span> لمطابقة رموز العملات المشفرة. تحصل على <em>3 دورات مجانية</em> للبدء — بدون إيداع!', howto_p2: 'طابق <em>2+ رموز متطابقة</em> على خط الدفع المركزي للفوز. اربح حتى <em>10,000 USDT</em> لخمسة متطابقة!', howto_p3: 'بعد دوراتك، اطلب الأرباح إلى رصيدك، ثم <span class="highlight-cyan">استخرج المكافآت</span> عبر USDT TRC20.', banner_kicker: 'اربح حتى', banner_amt: '10,000 USDT', banner_end: 'مجانًا!', banner_sub: 'قم بالدوران 3 مرات لفتح رصيدك الأولي. <em>لا حاجة للإيداع للعب!</em>', spin_btn: 'قم بالدوران الآن', spin_btn_loading: 'جارٍ الدوران...', extract_btn: 'استخراج المكافآت', btn_locked: 'عرض الإرسال', spins_left: 'الدورات المجانية المتبقية:', rolling_title: '⛓ عمليات سحب TRC20 الأخيرة', modal_kicker: 'دفع نيون', modal_kicker_jackpot: 'الجاكبوت الكمي', modal_title: 'لقد فزت', modal_title_jackpot: 'الجاكبوت', modal_desc_matched: 'تم مطابقة {n} رموز {symbol}! +{amount} USDT', claim_btn: 'المطالبة بالرصيد', extract_kicker: 'سحب TRC20', extract_title: 'استخراج', extract_label: 'أدخل عنوان USDT TRC20 الخاص بك:', submit_withdraw: 'إرسال طلب السحب', confirm_kicker: 'إشعار', confirm_title: 'تم إرسال طلب السحب', confirm_copy1: 'تم إرسال طلب سحب المكافأة بنجاح!', confirm_copy2: 'سنقوم بتحويل هذه المكافأة إلى محفظتك خلال <strong>يوم عمل واحد</strong>. يرجى البقاء على اطلاع.', got_it: 'حسنًا', addr_error: 'يجب أن يبدأ العنوان بـ T وأن يكون عنوان TRC20 صالحًا مكونًا من 34 حرفًا.', toast_claimed: 'تم المطالبة', toast_locked: 'لقد أكملت. في انتظار المراجعة.', toast_no_spins: 'لا توجد دورات متبقية', toast_error: 'خطأ في الشبكة، حاول مرة أخرى' },
-    pt: { howto_title: 'Como Jogar · Descrição', howto_p1: '<span class="highlight-cyan">Gire os 5 rolos</span> para combinar símbolos cripto. Você ganha <em>3 giros grátis</em> para começar — sem depósito!', howto_p2: 'Combine <em>2+ símbolos idênticos</em> na linha de pagamento central para ganhar. Ganhe até <em>10,000 USDT</em> por 5 iguais!', howto_p3: 'Após seus giros, resgate os ganhos para o saldo e depois <span class="highlight-cyan">extraia recompensas</span> via USDT TRC20.', banner_kicker: 'GANHE ATÉ', banner_amt: '10,000 USDT', banner_end: 'GRÁTIS!', banner_sub: 'Gire 3 vezes para desbloquear seu saldo inicial. <em>Não é necessário depósito!</em>', spin_btn: 'GIRAR AGORA', spin_btn_loading: 'GIRANDO...', extract_btn: 'EXTRAIR RECOMPENSAS', btn_locked: 'VER ENVIO', spins_left: 'GIROS GRÁTIS RESTANTES:', rolling_title: '⛓ SAQUES TRC20 RECENTES', modal_kicker: 'PAGAMENTO NEON', modal_kicker_jackpot: 'JACKPOT QUÂNTICO', modal_title: 'VOCÊ GANHOU', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Combinou {n} símbolos {symbol}! +{amount} USDT', claim_btn: 'RESGATAR PARA O SALDO', extract_kicker: 'SAQUE TRC20', extract_title: 'EXTRAIR', extract_label: 'DIGITE SEU ENDEREÇO USDT TRC20:', submit_withdraw: 'ENVIAR SAQUE', confirm_kicker: 'NOTIFICAÇÃO', confirm_title: 'SOLICITAÇÃO DE SAQUE ENVIADA', confirm_copy1: 'Sua solicitação de saque de recompensa foi enviada com sucesso!', confirm_copy2: 'Transferiremos esta recompensa para sua carteira em <strong>1 dia útil</strong>. Fique atento.', got_it: 'ENTENDI', addr_error: 'O endereço deve começar com T e ser um endereço TRC20 válido de 34 caracteres.', toast_claimed: 'RESGATADO', toast_locked: 'Você concluiu. Aguardando revisão.', toast_no_spins: 'Sem giros restantes', toast_error: 'Erro de rede, tente novamente' },
-    ru: { howto_title: 'Как играть · Описание', howto_p1: '<span class="highlight-cyan">Вращайте 5 барабанов</span>, чтобы совпали крипто-символы. Вы получаете <em>3 бесплатных вращения</em> для начала — без депозита!', howto_p2: 'Совместите <em>2+ одинаковых символа</em> на центральной линии выплат, чтобы выиграть. Выигрывайте до <em>10,000 USDT</em> за 5 одинаковых!', howto_p3: 'После вращений заберите выигрыш на баланс, затем <span class="highlight-cyan">выведите награды</span> через USDT TRC20.', banner_kicker: 'ВЫИГРАЙТЕ ДО', banner_amt: '10,000 USDT', banner_end: 'БЕСПЛАТНО!', banner_sub: 'Вращайте 3 раза, чтобы разблокировать стартовый баланс. <em>Без депозита!</em>', spin_btn: 'ВРАЩАТЬ', spin_btn_loading: 'ВРАЩЕНИЕ...', extract_btn: 'ВЫВЕСТИ НАГРАДЫ', btn_locked: 'ПРОСМОТР ОТПРАВКИ', spins_left: 'ОСТАЛОСЬ БЕСПЛАТНЫХ ВРАЩЕНИЙ:', rolling_title: '⛓ ПОСЛЕДНИЕ ВЫВОДЫ TRC20', modal_kicker: 'НЕОНОВАЯ ВЫПЛАТА', modal_kicker_jackpot: 'КВАНТОВЫЙ ДЖЕКПОТ', modal_title: 'ВЫ ВЫИГРАЛИ', modal_title_jackpot: 'ДЖЕКПОТ', modal_desc_matched: 'Совпало {n} символов {symbol}! +{amount} USDT', claim_btn: 'ЗАБРАТЬ НА БАЛАНС', extract_kicker: 'ВЫВОД TRC20', extract_title: 'ВЫВЕСТИ', extract_label: 'ВВЕДИТЕ ВАШ АДРЕС USDT TRC20:', submit_withdraw: 'ОТПРАВИТЬ ЗАПРОС', confirm_kicker: 'УВЕДОМЛЕНИЕ', confirm_title: 'ЗАПРОС НА ВЫВОД ОТПРАВЛЕН', confirm_copy1: 'Ваш запрос на вывод награды успешно отправлен!', confirm_copy2: 'Мы переведём награду на ваш кошелёк в течение <strong>1 рабочего дня</strong>. Пожалуйста, следите за уведомлениями.', got_it: 'ПОНЯТНО', addr_error: 'Адрес должен начинаться с T и быть действительным 34-символьным адресом TRC20.', toast_claimed: 'ПОЛУЧЕНО', toast_locked: 'Вы завершили. Ожидание проверки.', toast_no_spins: 'Вращений не осталось', toast_error: 'Ошибка сети, повторите' },
-    ja: { howto_title: '遊び方 · ゲーム説明', howto_p1: '<span class="highlight-cyan">5つのリールを回して</span>暗号通貨シンボルを揃えよう。<em>3回の無料スピン</em>付き、デポジット不要！', howto_p2: '中央のペイラインに<em>2つ以上の同じシンボル</em>を揃えると勝利。5つ揃えば最大<em>10,000 USDT</em>！', howto_p3: 'スピン後、勝利金を残高にクレームし、USDT TRC20で<span class="highlight-cyan">報酬を引き出そう</span>。', banner_kicker: '最大', banner_amt: '10,000 USDT', banner_end: '無料！', banner_sub: '3回スピンして初期残高をアンロック。<em>デポジット不要！</em>', spin_btn: 'スピン', spin_btn_loading: 'スピン中...', extract_btn: '報酬を引き出す', btn_locked: '送信を表示', spins_left: '残り無料スピン：', rolling_title: '⛓ 最近のTRC20出金', modal_kicker: 'ネオン配当', modal_kicker_jackpot: '量子ジャックポット', modal_title: '勝利', modal_title_jackpot: 'ジャックポット', modal_desc_matched: '{n}個の{symbol}シンボルが一致！+{amount} USDT', claim_btn: '残高にクレーム', extract_kicker: 'TRC20出金', extract_title: '引き出し', extract_label: 'USDT TRC20アドレスを入力：', submit_withdraw: '出金を申請', confirm_kicker: '通知', confirm_title: '出金申請を送信しました', confirm_copy1: '報酬の出金申請が正常に送信されました！', confirm_copy2: '<strong>1営業日以内</strong>に報酬をウォレットに送金します。アカウントをご確認ください。', got_it: '了解', addr_error: 'アドレスはTで始まり、有効な34文字のTRC20アドレスである必要があります。', toast_claimed: '受取済み', toast_locked: '完了しました。審査をお待ちください。', toast_no_spins: 'スピンが残っていません', toast_error: 'ネットワークエラー、再試行してください' },
-    de: { howto_title: 'Spielanleitung · Beschreibung', howto_p1: '<span class="highlight-cyan">Drehen Sie die 5 Walzen</span>, um Krypto-Symbole zu treffen. Sie erhalten <em>3 Freispiele</em> zum Start — keine Einzahlung nötig!', howto_p2: 'Treffen Sie <em>2+ identische Symbole</em> auf der mittleren Gewinnlinie. Gewinnen Sie bis zu <em>10,000 USDT</em> für 5 gleiche!', howto_p3: 'Nach Ihren Drehungen fordern Sie Gewinne auf Ihr Guthaben an und <span class="highlight-cyan">extrahieren Belohnungen</span> über USDT TRC20.', banner_kicker: 'GEWINNEN SIE BIS ZU', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Drehen Sie 3 Mal, um Ihr Startguthaben freizuschalten. <em>Keine Einzahlung nötig!</em>', spin_btn: 'JETZT DREHEN', spin_btn_loading: 'DREHT...', extract_btn: 'BELOHNUNGEN EXTRAHIEREN', btn_locked: 'EINREICHUNG ANSEHEN', spins_left: 'VERBLEIBENDE FREISPIELE:', rolling_title: '⛓ LETZTE TRC20-AUSZAHLUNGEN', modal_kicker: 'NEON-AUSZAHLUNG', modal_kicker_jackpot: 'QUANTEN-JACKPOT', modal_title: 'SIE GEWINNEN', modal_title_jackpot: 'JACKPOT', modal_desc_matched: '{n} {symbol}-Symbole getroffen! +{amount} USDT', claim_btn: 'ZUM GUTHABEN', extract_kicker: 'TRC20-AUSZAHLUNG', extract_title: 'EXTRAHIEREN', extract_label: 'GEBEN SIE IHRE USDT TRC20-ADRESSE EIN:', submit_withdraw: 'AUSZAHLUNG SENDEN', confirm_kicker: 'BENACHRICHTIGUNG', confirm_title: 'AUSZAHLUNGSANTRAG GESENDET', confirm_copy1: 'Ihr Belohnungs-Auszahlungsantrag wurde erfolgreich übermittelt!', confirm_copy2: 'Wir überweisen diese Belohnung innerhalb von <strong>1 Werktag</strong> auf Ihre Wallet. Bitte bleiben Sie dran.', got_it: 'VERSTANDEN', addr_error: 'Die Adresse muss mit T beginnen und eine gültige 34-stellige TRC20-Adresse sein.', toast_claimed: 'ERHALTEN', toast_locked: 'Sie haben abgeschlossen. Warten auf Überprüfung.', toast_no_spins: 'Keine Spins übrig', toast_error: 'Netzwerkfehler, erneut versuchen' },
-    fr: { howto_title: 'Comment Jouer · Description', howto_p1: '<span class="highlight-cyan">Faites tourner les 5 rouleaux</span> pour aligner des symboles crypto. Vous avez <em>3 tours gratuits</em> pour commencer — sans dépôt !', howto_p2: 'Alignez <em>2+ symboles identiques</em> sur la ligne de paiement centrale pour gagner. Gagnez jusqu\'à <em>10,000 USDT</em> pour 5 identiques !', howto_p3: 'Après vos tours, réclamez les gains sur votre solde, puis <span class="highlight-cyan">extrayez les récompenses</span> via USDT TRC20.', banner_kicker: 'GAGNEZ JUSQU\'À', banner_amt: '10,000 USDT', banner_end: 'GRATUIT !', banner_sub: 'Tournez 3 fois pour débloquer votre solde de départ. <em>Aucun dépôt requis !</em>', spin_btn: 'TOURNER', spin_btn_loading: 'EN COURS...', extract_btn: 'EXTRAIRE LES RÉCOMPENSES', btn_locked: 'VOIR L\'ENVOI', spins_left: 'TOURS GRATUITS RESTANTS :', rolling_title: '⛓ RETRAITS TRC20 RÉCENTS', modal_kicker: 'PAIEMENT NÉON', modal_kicker_jackpot: 'JACKPOT QUANTIQUE', modal_title: 'VOUS GAGNEZ', modal_title_jackpot: 'JACKPOT', modal_desc_matched: '{n} symboles {symbol} alignés ! +{amount} USDT', claim_btn: 'RÉCLAMER AU SOLDE', extract_kicker: 'RETRAIT TRC20', extract_title: 'EXTRAIRE', extract_label: 'ENTREZ VOTRE ADRESSE USDT TRC20 :', submit_withdraw: 'ENVOYER LE RETRAIT', confirm_kicker: 'NOTIFICATION', confirm_title: 'DEMANDE DE RETRAIT ENVOYÉE', confirm_copy1: 'Votre demande de retrait de récompense a bien été envoyée !', confirm_copy2: 'Nous transférerons cette récompense vers votre portefeuille sous <strong>1 jour ouvré</strong>. Restez à l\'écoute.', got_it: 'COMPRIS', addr_error: 'L\'adresse doit commencer par T et être une adresse TRC20 valide de 34 caractères.', toast_claimed: 'RÉCLAMÉ', toast_locked: 'Vous avez terminé. En attente de validation.', toast_no_spins: 'Plus de tours disponibles', toast_error: 'Erreur réseau, réessayez' },
-    ko: { howto_title: '게임 방법 · 설명', howto_p1: '<span class="highlight-cyan">5개 릴을 돌려</span> 암호화폐 심볼을 맞추세요. 시작 시 <em>3회 무료 스핀</em> 제공 — 입금 불필요!', howto_p2: '중앙 페이라인에 <em>2개 이상 동일 심볼</em>을 맞추면 승리. 5개 일치 시 최대 <em>10,000 USDT</em> 획득!', howto_p3: '스핀 후 상금을 잔액으로 청구하고, USDT TRC20로 <span class="highlight-cyan">보상을 추출하세요</span>.', banner_kicker: '최대', banner_amt: '10,000 USDT', banner_end: '무료!', banner_sub: '3회 스핀하여 시작 잔액을 잠금 해제하세요. <em>입금 불필요!</em>', spin_btn: '스핀', spin_btn_loading: '스핀 중...', extract_btn: '보상 추출', btn_locked: '제출 보기', spins_left: '남은 무료 스핀:', rolling_title: '⛓ 최근 TRC20 출금', modal_kicker: '네온 지급', modal_kicker_jackpot: '퀀텀 잭팟', modal_title: '당첨', modal_title_jackpot: '잭팟', modal_desc_matched: '{n}개의 {symbol} 심볼 일치! +{amount} USDT', claim_btn: '잔액으로 청구', extract_kicker: 'TRC20 출금', extract_title: '추출', extract_label: 'USDT TRC20 주소를 입력하세요:', submit_withdraw: '출금 신청', confirm_kicker: '알림', confirm_title: '출금 요청 제출됨', confirm_copy1: '보상 출금 요청이 성공적으로 제출되었습니다!', confirm_copy2: '<strong>영업일 1일</strong> 이내에 보상을 지갑으로 전송해 드립니다. 계정을 확인해 주세요.', got_it: '확인', addr_error: '주소는 T로 시작해야 하며 유효한 34자리 TRC20 주소여야 합니다.', toast_claimed: '청구됨', toast_locked: '완료되었습니다. 검토 대기 중.', toast_no_spins: '남은 스핀 없음', toast_error: '네트워크 오류, 다시 시도' },
-    it: { howto_title: 'Come Giocare · Descrizione', howto_p1: '<span class="highlight-cyan">Gira i 5 rulli</span> per abbinare simboli crypto. Hai <em>3 giri gratis</em> per iniziare — nessun deposito!', howto_p2: 'Abbina <em>2+ simboli identici</em> sulla linea di pagamento centrale per vincere. Vinci fino a <em>10,000 USDT</em> per 5 uguali!', howto_p3: 'Dopo i giri, riscatta le vincite sul saldo, poi <span class="highlight-cyan">estrai le ricompense</span> via USDT TRC20.', banner_kicker: 'VINCI FINO A', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Gira 3 volte per sbloccare il saldo iniziale. <em>Nessun deposito richiesto!</em>', spin_btn: 'GIRA ORA', spin_btn_loading: 'GIRANDO...', extract_btn: 'ESTRAI RICOMPENSE', btn_locked: 'VEDI INVIO', spins_left: 'GIRI GRATIS RIMANENTI:', rolling_title: '⛓ PRELIEVI TRC20 RECENTI', modal_kicker: 'PAGAMENTO NEON', modal_kicker_jackpot: 'JACKPOT QUANTISTICO', modal_title: 'HAI VINTO', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Abbinati {n} simboli {symbol}! +{amount} USDT', claim_btn: 'RISCATTA SUL SALDO', extract_kicker: 'PRELIEVO TRC20', extract_title: 'ESTRAI', extract_label: 'INSERISCI IL TUO INDIRIZZO USDT TRC20:', submit_withdraw: 'INVIA PRELIEVO', confirm_kicker: 'NOTIFICA', confirm_title: 'RICHIESTA DI PRELIEVO INVIATA', confirm_copy1: 'La tua richiesta di prelievo ricompensa è stata inviata con successo!', confirm_copy2: 'Trasferiremo questa ricompensa al tuo portafoglio entro <strong>1 giorno lavorativo</strong>. Resta sintonizzato.', got_it: 'CAPITO', addr_error: 'L\'indirizzo deve iniziare con T ed essere un indirizzo TRC20 valido di 34 caratteri.', toast_claimed: 'RISCATTATO', toast_locked: 'Hai completato. In attesa di revisione.', toast_no_spins: 'Nessun giro rimasto', toast_error: 'Errore di rete, riprova' },
-    tr: { howto_title: 'Nasıl Oynanır · Açıklama', howto_p1: '<span class="highlight-cyan">5 makarayı çevir</span> ve kripto sembollerini eşleştir. Başlamak için <em>3 ücretsiz çevirme</em> hakkın var — para yatırmaya gerek yok!', howto_p2: 'Orta ödeme hattında <em>2+ aynı sembolü</em> eşleştir ve kazan. 5 aynı için <em>10,000 USDT</em>\'ye kadar kazan!', howto_p3: 'Çevirmelerinden sonra kazançları bakiyene al, ardından USDT TRC20 ile <span class="highlight-cyan">ödülleri çek</span>.', banner_kicker: 'KAZAN', banner_amt: '10,000 USDT', banner_end: 'ÜCRETSİZ!', banner_sub: 'Başlangıç bakiyeni açmak için 3 kez çevir. <em>Para yatırmaya gerek yok!</em>', spin_btn: 'ŞİMDİ ÇEVİR', spin_btn_loading: 'ÇEVİRİLİYOR...', extract_btn: 'ÖDÜLLERİ ÇEK', btn_locked: 'GÖNDERİMİ GÖR', spins_left: 'KALAN ÜCRETSİZ ÇEVİRME:', rolling_title: '⛓ SON TRC20 ÇEKİMLERİ', modal_kicker: 'NEON ÖDEME', modal_kicker_jackpot: 'KUANTUM JACKPOT', modal_title: 'KAZANDINIZ', modal_title_jackpot: 'JACKPOT', modal_desc_matched: '{n} {symbol} sembolü eşleşti! +{amount} USDT', claim_btn: 'BAKİYEYE AL', extract_kicker: 'TRC20 ÇEKİM', extract_title: 'ÇEK', extract_label: 'USDT TRC20 ADRESİNİZİ GİRİN:', submit_withdraw: 'ÇEKİM GÖNDER', confirm_kicker: 'BİLDİRİM', confirm_title: 'ÇEKİM TALEBİ GÖNDERİLDİ', confirm_copy1: 'Ödül çekim talebiniz başarıyla gönderildi!', confirm_copy2: 'Bu ödülü <strong>1 iş günü</strong> içinde cüzdanınıza aktaracağız. Lütfen takipte kalın.', got_it: 'ANLADIM', addr_error: 'Adres T ile başlamalı ve 34 karakterlik geçerli bir TRC20 adresi olmalıdır.', toast_claimed: 'ALINDI', toast_locked: 'Tamamladınız. İnceleme bekleniyor.', toast_no_spins: 'Çevirme kalmadı', toast_error: 'Ağ hatası, tekrar deneyin' },
-    vi: { howto_title: 'Cách Chơi · Mô Tả', howto_p1: '<span class="highlight-cyan">Quay 5 cuộn</span> để khớp các biểu tượng crypto. Bạn có <em>3 lượt quay miễn phí</em> để bắt đầu — không cần nạp tiền!', howto_p2: 'Khớp <em>2+ biểu tượng giống nhau</em> trên dòng thanh toán trung tâm để thắng. Thắng đến <em>10,000 USDT</em> cho 5 biểu tượng giống nhau!', howto_p3: 'Sau khi quay, nhận thưởng vào số dư, sau đó <span class="highlight-cyan">rút phần thưởng</span> qua USDT TRC20.', banner_kicker: 'THẮNG ĐẾN', banner_amt: '10,000 USDT', banner_end: 'MIỄN PHÍ!', banner_sub: 'Quay 3 lần để mở khóa số dư ban đầu. <em>Không cần nạp tiền!</em>', spin_btn: 'QUAY NGAY', spin_btn_loading: 'ĐANG QUAY...', extract_btn: 'RÚT PHẦN THƯỞNG', btn_locked: 'XEM ĐÃ GỬI', spins_left: 'LƯỢT QUAY MIỄN PHÍ CÒN LẠI:', rolling_title: '⛓ RÚT TRC20 GẦN ĐÂY', modal_kicker: 'THANH TOÁN NEON', modal_kicker_jackpot: 'JACKPOT LƯỢNG TỬ', modal_title: 'BẠN THẮNG', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Khớp {n} biểu tượng {symbol}! +{amount} USDT', claim_btn: 'NHẬN VÀO SỐ DƯ', extract_kicker: 'RÚT TRC20', extract_title: 'RÚT', extract_label: 'NHẬP ĐỊA CHỈ USDT TRC20 CỦA BẠN:', submit_withdraw: 'GỬI YÊU CẦU RÚT', confirm_kicker: 'THÔNG BÁO', confirm_title: 'YÊU CẦU RÚT ĐÃ ĐƯỢC GỬI', confirm_copy1: 'Yêu cầu rút phần thưởng của bạn đã được gửi thành công!', confirm_copy2: 'Chúng tôi sẽ chuyển phần thưởng này vào ví của bạn trong vòng <strong>1 ngày làm việc</strong>. Vui lòng theo dõi.', got_it: 'ĐÃ HIỂU', addr_error: 'Địa chỉ phải bắt đầu bằng T và là địa chỉ TRC20 hợp lệ gồm 34 ký tự.', toast_claimed: 'ĐÃ NHẬN', toast_locked: 'Bạn đã hoàn thành. Đang chờ xét duyệt.', toast_no_spins: 'Hết lượt quay', toast_error: 'Lỗi mạng, thử lại' },
-    th: { howto_title: 'วิธีเล่น · คำอธิบาย', howto_p1: '<span class="highlight-cyan">หมุน 5 รีล</span> เพื่อจับคู่สัญลักษณ์คริปโต คุณได้รับ <em>3 สปินฟรี</em> เริ่มต้น — ไม่ต้องฝากเงิน!', howto_p2: 'จับคู่ <em>2+ สัญลักษณ์เหมือนกัน</em> บนเพย์ไลน์กลางเพื่อชนะ รับสูงสุด <em>10,000 USDT</em> สำหรับ 5 สัญลักษณ์เหมือนกัน!', howto_p3: 'หลังหมุน รับเงินรางวัลเข้าสู่ยอดคงเหลือ แล้ว <span class="highlight-cyan">ถอนรางวัล</span> ผ่าน USDT TRC20', banner_kicker: 'ชนะสูงสุด', banner_amt: '10,000 USDT', banner_end: 'ฟรี!', banner_sub: 'หมุน 3 ครั้งเพื่อปลดล็อกยอดคงเหลือเริ่มต้น <em>ไม่ต้องฝากเงิน!</em>', spin_btn: 'หมุนเลย', spin_btn_loading: 'กำลังหมุน...', extract_btn: 'ถอนรางวัล', btn_locked: 'ดูการส่ง', spins_left: 'สปินฟรีที่เหลือ:', rolling_title: '⛓ การถอน TRC20 ล่าสุด', modal_kicker: 'การจ่ายนีออน', modal_kicker_jackpot: 'แจ็คพอตควอนตัม', modal_title: 'คุณชนะ', modal_title_jackpot: 'แจ็คพอต', modal_desc_matched: 'จับคู่ {n} สัญลักษณ์ {symbol}! +{amount} USDT', claim_btn: 'รับเข้าสู่ยอดคงเหลือ', extract_kicker: 'ถอน TRC20', extract_title: 'ถอน', extract_label: 'ป้อนที่อยู่ USDT TRC20 ของคุณ:', submit_withdraw: 'ส่งคำขอถอน', confirm_kicker: 'การแจ้งเตือน', confirm_title: 'ส่งคำขอถอนแล้ว', confirm_copy1: 'ส่งคำขอถอนรางวัลของคุณสำเร็จแล้ว!', confirm_copy2: 'เราจะโอนรางวัลนี้ไปยังกระเป๋าเงินของคุณภายใน <strong>1 วันทำการ</strong> โปรดติดตาม', got_it: 'เข้าใจแล้ว', addr_error: 'ที่อยู่ต้องขึ้นต้นด้วย T และเป็นที่อยู่ TRC20 ที่ถูกต้อง 34 ตัวอักษร', toast_claimed: 'รับแล้ว', toast_locked: 'คุณทำเสร็จแล้ว รอการตรวจสอบ', toast_no_spins: 'ไม่เหลือสปิน', toast_error: 'ข้อผิดพลาดเครือข่าย ลองใหม่' },
-    id: { howto_title: 'Cara Bermain · Deskripsi', howto_p1: '<span class="highlight-cyan">Putar 5 gulungan</span> untuk mencocokkan simbol crypto. Anda mendapat <em>3 putaran gratis</em> untuk memulai — tanpa deposit!', howto_p2: 'Cocokkan <em>2+ simbol identik</em> di payline tengah untuk menang. Menangkan hingga <em>10,000 USDT</em> untuk 5 simbol sama!', howto_p3: 'Setelah putaran, klaim kemenangan ke saldo, lalu <span class="highlight-cyan">tarik hadiah</span> via USDT TRC20.', banner_kicker: 'MENANG HINGGA', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Putar 3 kali untuk membuka saldo awal. <em>Tidak perlu deposit!</em>', spin_btn: 'PUTAR SEKARANG', spin_btn_loading: 'MEMUTAR...', extract_btn: 'TARIK HADIAH', btn_locked: 'LIHAT KIRIMAN', spins_left: 'PUTARAN GRATIS TERSISA:', rolling_title: '⛓ PENARIKAN TRC20 TERBARU', modal_kicker: 'PEMBAYARAN NEON', modal_kicker_jackpot: 'JACKPOT KUANTUM', modal_title: 'ANDA MENANG', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Cocok {n} simbol {symbol}! +{amount} USDT', claim_btn: 'KLAIM KE SALDO', extract_kicker: 'PENARIKAN TRC20', extract_title: 'TARIK', extract_label: 'MASUKKAN ALAMAT USDT TRC20 ANDA:', submit_withdraw: 'KIRIM PENARIKAN', confirm_kicker: 'NOTIFIKASI', confirm_title: 'PERMINTAAN PENARIKAN TERKIRIM', confirm_copy1: 'Permintaan penarikan hadiah Anda berhasil dikirim!', confirm_copy2: 'Kami akan mentransfer hadiah ini ke dompet Anda dalam <strong>1 hari kerja</strong>. Harap tunggu.', got_it: 'MENGERTI', addr_error: 'Alamat harus dimulai dengan T dan berupa alamat TRC20 valid 34 karakter.', toast_claimed: 'DIKLAIM', toast_locked: 'Anda telah selesai. Menunggu peninjauan.', toast_no_spins: 'Tidak ada putaran tersisa', toast_error: 'Kesalahan jaringan, coba lagi' },
-    ms: { howto_title: 'Cara Bermain · Penerangan', howto_p1: '<span class="highlight-cyan">Putar 5 gelendong</span> untuk memadankan simbol crypto. Anda mendapat <em>3 putaran percuma</em> untuk mula — tiada deposit!', howto_p2: 'Padankan <em>2+ simbol sama</em> pada payline tengah untuk menang. Menang sehingga <em>10,000 USDT</em> untuk 5 sama!', howto_p3: 'Selepas putaran, tuntut kemenangan ke baki, kemudian <span class="highlight-cyan">tarik ganjaran</span> melalui USDT TRC20.', banner_kicker: 'MENANG HINGGA', banner_amt: '10,000 USDT', banner_end: 'PERCUMA!', banner_sub: 'Putar 3 kali untuk membuka baki permulaan. <em>Tiada deposit diperlukan!</em>', spin_btn: 'PUTAR SEKARANG', spin_btn_loading: 'MEMUTAR...', extract_btn: 'TARIK GANJARAN', btn_locked: 'LIHAT PENGHANTARAN', spins_left: 'PUTARAN PERCUMA TINGGAL:', rolling_title: '⛓ PENGELUARAN TRC20 TERKINI', modal_kicker: 'BAYARAN NEON', modal_kicker_jackpot: 'JACKPOT KUANTUM', modal_title: 'ANDA MENANG', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Padan {n} simbol {symbol}! +{amount} USDT', claim_btn: 'TUNTUT KE BAKI', extract_kicker: 'PENGELUARAN TRC20', extract_title: 'TARIK', extract_label: 'MASUKKAN ALAMAT USDT TRC20 ANDA:', submit_withdraw: 'HANTAR PENGELUARAN', confirm_kicker: 'PEMBERITAHUAN', confirm_title: 'PERMINTAAN PENGELUARAN DIHANTAR', confirm_copy1: 'Permintaan pengeluaran ganjaran anda berjaya dihantar!', confirm_copy2: 'Kami akan memindahkan ganjaran ini ke dompet anda dalam <strong>1 hari bekerja</strong>. Sila tunggu.', got_it: 'FAHAM', addr_error: 'Alamat mesti bermula dengan T dan merupakan alamat TRC20 sah 34 aksara.', toast_claimed: 'DITUNTUT', toast_locked: 'Anda telah selesai. Menunggu semakan.', toast_no_spins: 'Tiada putaran tinggal', toast_error: 'Ralat rangkaian, cuba lagi' },
-    nl: { howto_title: 'Hoe te Spelen · Beschrijving', howto_p1: '<span class="highlight-cyan">Draai de 5 rollen</span> om crypto-symbolen te matchen. Je krijgt <em>3 gratis spins</em> om te starten — geen storting nodig!', howto_p2: 'Match <em>2+ identieke symbolen</em> op de middelste payline om te winnen. Win tot <em>10,000 USDT</em> voor 5 dezelfde!', howto_p3: 'Na je spins, claim winsten naar je saldo en <span class="highlight-cyan">extraheer beloningen</span> via USDT TRC20.', banner_kicker: 'WIN TOT', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Draai 3 keer om je startsaldo te ontgrendelen. <em>Geen storting nodig!</em>', spin_btn: 'NU DRAAIEN', spin_btn_loading: 'DRAAIT...', extract_btn: 'BELONINGEN EXTRAHEREN', btn_locked: 'INZENDING BEKIJKEN', spins_left: 'RESTERENDE GRATIS SPINS:', rolling_title: '⛓ RECENTE TRC20-OPNAMES', modal_kicker: 'NEON UITBETALING', modal_kicker_jackpot: 'QUANTUM JACKPOT', modal_title: 'JE WINT', modal_title_jackpot: 'JACKPOT', modal_desc_matched: '{n} {symbol}-symbolen gematcht! +{amount} USDT', claim_btn: 'CLAIM NAAR SALDO', extract_kicker: 'TRC20 OPNAME', extract_title: 'EXTRAHEREN', extract_label: 'VOER JE USDT TRC20-ADRES IN:', submit_withdraw: 'OPNAME VERZENDEN', confirm_kicker: 'MELDING', confirm_title: 'OPNAMEVERZOEK VERZONDEN', confirm_copy1: 'Je verzoek tot het opnemen van een beloning is succesvol verzonden!', confirm_copy2: 'We sturen deze beloning binnen <strong>1 werkdag</strong> naar je wallet. Houd je account in de gaten.', got_it: 'BEGREPEN', addr_error: 'Adres moet beginnen met T en een geldig 34-tekens TRC20-adres zijn.', toast_claimed: 'GEËIST', toast_locked: 'Je bent klaar. Wachten op beoordeling.', toast_no_spins: 'Geen spins meer', toast_error: 'Netwerkfout, probeer opnieuw' },
-    pl: { howto_title: 'Jak Grać · Opis', howto_p1: '<span class="highlight-cyan">Obracaj 5 bębnów</span>, aby dopasować symbole krypto. Masz <em>3 darmowe obroty</em> na start — bez depozytu!', howto_p2: 'Dopasuj <em>2+ identyczne symbole</em> na środkowej linii wypłat, aby wygrać. Wygraj do <em>10,000 USDT</em> za 5 takich samych!', howto_p3: 'Po obrotach odbierz wygrane na saldo, następnie <span class="highlight-cyan">wypłać nagrody</span> przez USDT TRC20.', banner_kicker: 'WYGRAJ DO', banner_amt: '10,000 USDT', banner_end: 'ZA DARMO!', banner_sub: 'Obracaj 3 razy, aby odblokować saldo startowe. <em>Bez depozytu!</em>', spin_btn: 'OBRACAJ TERAZ', spin_btn_loading: 'OBRACA...', extract_btn: 'WYPŁAĆ NAGRODY', btn_locked: 'ZOBACZ ZGŁOSZENIE', spins_left: 'POZOSTAŁE DARMOWE OBROTY:', rolling_title: '⛓ OSTATNIE WYPŁATY TRC20', modal_kicker: 'WYPŁATA NEON', modal_kicker_jackpot: 'KWANTOWY JACKPOT', modal_title: 'WYGRAŁEŚ', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Dopasowano {n} symboli {symbol}! +{amount} USDT', claim_btn: 'ODBIERZ NA SALDO', extract_kicker: 'WYPŁATA TRC20', extract_title: 'WYPROWADŹ', extract_label: 'WPROWADŹ SWÓJ ADRES USDT TRC20:', submit_withdraw: 'WYŚLIJ WYPŁATĘ', confirm_kicker: 'POWIADOMIENIE', confirm_title: 'WNIOSEK O WYPŁATĘ WYSŁANY', confirm_copy1: 'Twój wniosek o wypłatę nagrody został pomyślnie wysłany!', confirm_copy2: 'Przelejemy tę nagrodę na Twoje konto w ciągu <strong>1 dnia roboczego</strong>. Prosimy o cierpliwość.', got_it: 'ROZUMIEM', addr_error: 'Adres musi zaczynać się od T i być prawidłowym 34-znakowym adresem TRC20.', toast_claimed: 'ODEBRANO', toast_locked: 'Ukończono. Oczekiwanie na weryfikację.', toast_no_spins: 'Brak obrotów', toast_error: 'Błąd sieci, spróbuj ponownie' }
+    en: { howto_title: 'How to Play · Game Description', howto_p1: '<span class="highlight-cyan">Spin the 5 reels</span> to match crypto symbols. You get <em>3 free spins</em> to start — no deposit needed!', howto_p2: 'Match <em>2+ identical symbols</em> on the center payline to win. Win up to <em>10,000 USDT</em> for 5-of-a-kind!', howto_p3: 'After your spins, claim winnings to your balance, then <span class="highlight-cyan">extract rewards</span> via USDT TRC20.', banner_kicker: 'WIN UP TO', banner_amt: '10,000 USDT', banner_end: 'FOR FREE!', banner_sub: 'Spin 3 times to unlock your starting balance. <em>No deposit required to play!</em>', spin_btn: 'SPIN NOW', spin_btn_loading: 'SPINNING...', extract_btn: 'EXTRACT REWARDS', btn_view_status: 'VIEW STATUS', spins_left: 'FREE SPINS REMAINING:', rolling_title: '⛓ RECENT TRC20 WITHDRAWALS', modal_kicker: 'NEON PAYOUT', modal_kicker_jackpot: 'QUANTUM JACKPOT', modal_title: 'YOU WIN', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Matched {n} {symbol} symbols! +{amount} USDT', claim_btn: 'CLAIM TO BALANCE', extract_kicker: 'TRC20 WITHDRAW', extract_title: 'EXTRACT', extract_label: 'ENTER YOUR USDT TRC20 ADDRESS:', submit_withdraw: 'SUBMIT WITHDRAWAL', confirm_kicker: 'NOTIFICATION', confirm_title: 'WITHDRAWAL REQUEST SUBMITTED', confirm_copy1: 'Your reward withdrawal request has been submitted successfully!', confirm_copy2: 'We will transfer this reward to your wallet within <strong>1 business day</strong>. Please stay tuned and check your account.', got_it: 'GOT IT', addr_error: 'Address must start with T and be a valid 34-character TRC20 address.', toast_claimed: 'CLAIMED', toast_locked: 'You have completed. Awaiting review.', toast_no_spins: 'No spins left', toast_error: 'Network error, please retry', toast_zero_balance: 'No balance to withdraw', receipt_kicker: 'WITHDRAWAL RECORDS', receipt_title: 'My Withdrawals', receipt_label_amount: 'Amount', receipt_label_time: 'Time', receipt_close: 'CLOSE', receipt_empty: 'No withdrawals yet' },
+    zh: { howto_title: '玩法说明 · 游戏描述', howto_p1: '<span class="highlight-cyan">转动5个转轮</span>匹配加密货币符号。开局即送<em>3次免费旋转</em>，无需存款！', howto_p2: '在中央赔付线上匹配<em>2个以上相同符号</em>即可赢奖，五个相同最高赢取<em>10,000 USDT</em>！', howto_p3: '旋转结束后，领取奖金到余额，然后通过USDT TRC20<span class="highlight-cyan">提取奖励</span>。', banner_kicker: '赢取高达', banner_amt: '10,000 USDT', banner_end: '免费！', banner_sub: '旋转3次解锁起始余额。<em>无需存款即可游玩！</em>', spin_btn: '立即旋转', spin_btn_loading: '旋转中...', extract_btn: '提取奖励', btn_view_status: '查看状态', spins_left: '剩余免费旋转：', rolling_title: '⛓ 近期TRC20提现', modal_kicker: '霓虹派奖', modal_kicker_jackpot: '量子头奖', modal_title: '你赢了', modal_title_jackpot: '头奖', modal_desc_matched: '匹配 {n} 个 {symbol} 符号！+{amount} USDT', claim_btn: '领取到余额', extract_kicker: 'TRC20 提现', extract_title: '提取', extract_label: '输入你的 USDT TRC20 地址：', submit_withdraw: '提交提现', confirm_kicker: '通知', confirm_title: '提现请求已提交', confirm_copy1: '您的奖励提现请求已成功提交！', confirm_copy2: '我们将于 <strong>1 个工作日</strong>内将奖励转入您的钱包，请留意账户通知。', got_it: '知道了', addr_error: '地址必须以 T 开头，且为有效的 34 位 TRC20 地址。', toast_claimed: '已领取', toast_locked: '你已完成，等待审核', toast_no_spins: '次数已用完', toast_error: '网络错误，请重试', toast_zero_balance: '没有可提现的余额', receipt_kicker: '提现记录', receipt_title: '我的提现记录', receipt_label_amount: '金额', receipt_label_time: '时间', receipt_close: '关闭', receipt_empty: '暂无提现记录' },
+    es: { howto_title: 'Cómo Jugar · Descripción', howto_p1: '<span class="highlight-cyan">Gira los 5 carretes</span> para igualar símbolos cripto. ¡Tienes <em>3 giros gratis</em> para empezar, sin depósito!', howto_p2: 'Iguala <em>2+ símbolos idénticos</em> en la línea de pago central para ganar. ¡Gana hasta <em>10,000 USDT</em> por 5 iguales!', howto_p3: 'Después de tus giros, reclama las ganancias a tu saldo y luego <span class="highlight-cyan">extrae recompensas</span> vía USDT TRC20.', banner_kicker: 'GANA HASTA', banner_amt: '10,000 USDT', banner_end: '¡GRATIS!', banner_sub: 'Gira 3 veces para desbloquear tu saldo inicial. <em>¡No se requiere depósito!</em>', spin_btn: 'GIRAR AHORA', spin_btn_loading: 'GIRANDO...', extract_btn: 'EXTRAER RECOMPENSAS', btn_view_status: 'VER ESTADO', spins_left: 'GIROS GRATIS RESTANTES:', rolling_title: '⛓ RETIROS TRC20 RECIENTES', modal_kicker: 'PAGO NEÓN', modal_kicker_jackpot: 'JACKPOT CUÁNTICO', modal_title: 'HAS GANADO', modal_title_jackpot: 'JACKPOT', modal_desc_matched: '¡{n} símbolos {symbol} igualados! +{amount} USDT', claim_btn: 'RECLAMAR AL SALDO', extract_kicker: 'RETIRO TRC20', extract_title: 'EXTRAER', extract_label: 'INGRESA TU DIRECCIÓN USDT TRC20:', submit_withdraw: 'ENVIAR RETIRO', confirm_kicker: 'NOTIFICACIÓN', confirm_title: 'SOLICITUD DE RETIRO ENVIADA', confirm_copy1: '¡Su solicitud de retiro de recompensa se ha enviado con éxito!', confirm_copy2: 'Transferiremos esta recompensa a su billetera dentro de <strong>1 día hábil</strong>. Esté atento.', got_it: 'ENTENDIDO', addr_error: 'La dirección debe comenzar con T y ser una dirección TRC20 válida de 34 caracteres.', toast_claimed: 'RECLAMADO', toast_locked: 'Has completado. Esperando revisión.', toast_no_spins: 'Sin giros restantes', toast_error: 'Error de red, reintente', toast_zero_balance: 'Sin saldo para retirar', receipt_kicker: 'HISTORIAL DE RETIROS', receipt_title: 'Mis Retiros', receipt_label_amount: 'Cantidad', receipt_label_time: 'Hora', receipt_close: 'CERRAR', receipt_empty: 'Sin retiros aún' },
+    hi: { howto_title: 'कैसे खेलें · गेम विवरण', howto_p1: '<span class="highlight-cyan">5 रील घुमाएं</span> और क्रिप्टो प्रतीकों को मिलाएं। शुरू करने के लिए <em>3 मुफ्त स्पिन</em> मिलते हैं — कोई जमा नहीं!', howto_p2: 'केंद्र पेलाइन पर <em>2+ समान प्रतीक</em> मिलाएं और जीतें। 5-ऑफ-ए-काइंड पर <em>10,000 USDT</em> तक जीतें!', howto_p3: 'स्पिन के बाद, जीत को बैलेंस में क्लेम करें, फिर USDT TRC20 से <span class="highlight-cyan">रिवॉर्ड निकालें</span>।', banner_kicker: 'जीतें', banner_amt: '10,000 USDT', banner_end: 'मुफ्त!', banner_sub: 'अपना शुरुआती बैलेंस अनलॉक करने के लिए 3 बार स्पिन करें। <em>खेलने के लिए कोई जमा नहीं!</em>', spin_btn: 'अभी स्पिन करें', spin_btn_loading: 'स्पिन हो रहा है...', extract_btn: 'रिवॉर्ड निकालें', btn_view_status: 'स्थिति देखें', spins_left: 'शेष मुफ्त स्पिन:', rolling_title: '⛓ हाल के TRC20 निकासी', modal_kicker: 'नियॉन भुगतान', modal_kicker_jackpot: 'क्वांटम जैकपॉट', modal_title: 'आप जीते', modal_title_jackpot: 'जैकपॉट', modal_desc_matched: '{n} {symbol} प्रतीक मिले! +{amount} USDT', claim_btn: 'बैलेंस में क्लेम करें', extract_kicker: 'TRC20 निकासी', extract_title: 'निकालें', extract_label: 'अपना USDT TRC20 पता दर्ज करें:', submit_withdraw: 'निकासी सबमिट करें', confirm_kicker: 'सूचना', confirm_title: 'निकासी अनुरोध सबमिट हो गया', confirm_copy1: 'आपका रिवॉर्ड निकासी अनुरोध सफलतापूर्वक सबमिट हो गया है!', confirm_copy2: 'हम इस रिवॉर्ड को <strong>1 कार्यदिवस</strong> के भीतर आपके वॉलेट में ट्रांसफर कर देंगे। कृपया ध्यान दें।', got_it: 'समझ गया', addr_error: 'पता T से शुरू होना चाहिए और 34 अक्षरों का मान्य TRC20 पता होना चाहिए।', toast_claimed: 'क्लेम किया', toast_locked: 'आपने पूरा कर लिया। समीक्षा की प्रतीक्षा में।', toast_no_spins: 'कोई स्पिन शेष नहीं', toast_error: 'नेटवर्क त्रुटि, पुनः प्रयास करें', toast_zero_balance: 'निकालने के लिए कोई शेष नहीं', receipt_kicker: 'निकासी रिकॉर्ड', receipt_title: 'मेरी निकासी', receipt_label_amount: 'राशि', receipt_label_time: 'समय', receipt_close: 'बंद करें', receipt_empty: 'अभी तक कोई निकासी नहीं' },
+    ar: { howto_title: 'كيفية اللعب · وصف اللعبة', howto_p1: '<span class="highlight-cyan">قم بتدوير 5 بكرات</span> لمطابقة رموز العملات المشفرة. تحصل على <em>3 دورات مجانية</em> للبدء — بدون إيداع!', howto_p2: 'طابق <em>2+ رموز متطابقة</em> على خط الدفع المركزي للفوز. اربح حتى <em>10,000 USDT</em> لخمسة متطابقة!', howto_p3: 'بعد دوراتك، اطلب الأرباح إلى رصيدك، ثم <span class="highlight-cyan">استخرج المكافآت</span> عبر USDT TRC20.', banner_kicker: 'اربح حتى', banner_amt: '10,000 USDT', banner_end: 'مجانًا!', banner_sub: 'قم بالدوران 3 مرات لفتح رصيدك الأولي. <em>لا حاجة للإيداع للعب!</em>', spin_btn: 'قم بالدوران الآن', spin_btn_loading: 'جارٍ الدوران...', extract_btn: 'استخراج المكافآت', btn_view_status: 'عرض الحالة', spins_left: 'الدورات المجانية المتبقية:', rolling_title: '⛓ عمليات سحب TRC20 الأخيرة', modal_kicker: 'دفع نيون', modal_kicker_jackpot: 'الجاكبوت الكمي', modal_title: 'لقد فزت', modal_title_jackpot: 'الجاكبوت', modal_desc_matched: 'تم مطابقة {n} رموز {symbol}! +{amount} USDT', claim_btn: 'المطالبة بالرصيد', extract_kicker: 'سحب TRC20', extract_title: 'استخراج', extract_label: 'أدخل عنوان USDT TRC20 الخاص بك:', submit_withdraw: 'إرسال طلب السحب', confirm_kicker: 'إشعار', confirm_title: 'تم إرسال طلب السحب', confirm_copy1: 'تم إرسال طلب سحب المكافأة بنجاح!', confirm_copy2: 'سنقوم بتحويل هذه المكافأة إلى محفظتك خلال <strong>يوم عمل واحد</strong>. يرجى البقاء على اطلاع.', got_it: 'حسنًا', addr_error: 'يجب أن يبدأ العنوان بـ T وأن يكون عنوان TRC20 صالحًا مكونًا من 34 حرفًا.', toast_claimed: 'تم المطالبة', toast_locked: 'لقد أكملت. في انتظار المراجعة.', toast_no_spins: 'لا توجد دورات متبقية', toast_error: 'خطأ في الشبكة، حاول مرة أخرى', toast_zero_balance: 'لا يوجد رصيد للسحب', receipt_kicker: 'سجل السحوبات', receipt_title: 'سحوباتي', receipt_label_amount: 'المبلغ', receipt_label_time: 'الوقت', receipt_close: 'إغلاق', receipt_empty: 'لا توجد سحوبات بعد' },
+    pt: { howto_title: 'Como Jogar · Descrição', howto_p1: '<span class="highlight-cyan">Gire os 5 rolos</span> para combinar símbolos cripto. Você ganha <em>3 giros grátis</em> para começar — sem depósito!', howto_p2: 'Combine <em>2+ símbolos idênticos</em> na linha de pagamento central para ganhar. Ganhe até <em>10,000 USDT</em> por 5 iguais!', howto_p3: 'Após seus giros, resgate os ganhos para o saldo e depois <span class="highlight-cyan">extraia recompensas</span> via USDT TRC20.', banner_kicker: 'GANHE ATÉ', banner_amt: '10,000 USDT', banner_end: 'GRÁTIS!', banner_sub: 'Gire 3 vezes para desbloquear seu saldo inicial. <em>Não é necessário depósito!</em>', spin_btn: 'GIRAR AGORA', spin_btn_loading: 'GIRANDO...', extract_btn: 'EXTRAIR RECOMPENSAS', btn_view_status: 'VER STATUS', spins_left: 'GIROS GRÁTIS RESTANTES:', rolling_title: '⛓ SAQUES TRC20 RECENTES', modal_kicker: 'PAGAMENTO NEON', modal_kicker_jackpot: 'JACKPOT QUÂNTICO', modal_title: 'VOCÊ GANHOU', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Combinou {n} símbolos {symbol}! +{amount} USDT', claim_btn: 'RESGATAR PARA O SALDO', extract_kicker: 'SAQUE TRC20', extract_title: 'EXTRAIR', extract_label: 'DIGITE SEU ENDEREÇO USDT TRC20:', submit_withdraw: 'ENVIAR SAQUE', confirm_kicker: 'NOTIFICAÇÃO', confirm_title: 'SOLICITAÇÃO DE SAQUE ENVIADA', confirm_copy1: 'Sua solicitação de saque de recompensa foi enviada com sucesso!', confirm_copy2: 'Transferiremos esta recompensa para sua carteira em <strong>1 dia útil</strong>. Fique atento.', got_it: 'ENTENDI', addr_error: 'O endereço deve começar com T e ser um endereço TRC20 válido de 34 caracteres.', toast_claimed: 'RESGATADO', toast_locked: 'Você concluiu. Aguardando revisão.', toast_no_spins: 'Sem giros restantes', toast_error: 'Erro de rede, tente novamente', toast_zero_balance: 'Sem saldo para sacar', receipt_kicker: 'HISTÓRICO DE SAQUES', receipt_title: 'Meus Saques', receipt_label_amount: 'Valor', receipt_label_time: 'Hora', receipt_close: 'FECHAR', receipt_empty: 'Sem saques ainda' },
+    ru: { howto_title: 'Как играть · Описание', howto_p1: '<span class="highlight-cyan">Вращайте 5 барабанов</span>, чтобы совпали крипто-символы. Вы получаете <em>3 бесплатных вращения</em> для начала — без депозита!', howto_p2: 'Совместите <em>2+ одинаковых символа</em> на центральной линии выплат, чтобы выиграть. Выигрывайте до <em>10,000 USDT</em> за 5 одинаковых!', howto_p3: 'После вращений заберите выигрыш на баланс, затем <span class="highlight-cyan">выведите награды</span> через USDT TRC20.', banner_kicker: 'ВЫИГРАЙТЕ ДО', banner_amt: '10,000 USDT', banner_end: 'БЕСПЛАТНО!', banner_sub: 'Вращайте 3 раза, чтобы разблокировать стартовый баланс. <em>Без депозита!</em>', spin_btn: 'ВРАЩАТЬ', spin_btn_loading: 'ВРАЩЕНИЕ...', extract_btn: 'ВЫВЕСТИ НАГРАДЫ', btn_view_status: 'СТАТУС', spins_left: 'ОСТАЛОСЬ БЕСПЛАТНЫХ ВРАЩЕНИЙ:', rolling_title: '⛓ ПОСЛЕДНИЕ ВЫВОДЫ TRC20', modal_kicker: 'НЕОНОВАЯ ВЫПЛАТА', modal_kicker_jackpot: 'КВАНТОВЫЙ ДЖЕКПОТ', modal_title: 'ВЫ ВЫИГРАЛИ', modal_title_jackpot: 'ДЖЕКПОТ', modal_desc_matched: 'Совпало {n} символов {symbol}! +{amount} USDT', claim_btn: 'ЗАБРАТЬ НА БАЛАНС', extract_kicker: 'ВЫВОД TRC20', extract_title: 'ВЫВЕСТИ', extract_label: 'ВВЕДИТЕ ВАШ АДРЕС USDT TRC20:', submit_withdraw: 'ОТПРАВИТЬ ЗАПРОС', confirm_kicker: 'УВЕДОМЛЕНИЕ', confirm_title: 'ЗАПРОС НА ВЫВОД ОТПРАВЛЕН', confirm_copy1: 'Ваш запрос на вывод награды успешно отправлен!', confirm_copy2: 'Мы переведём награду на ваш кошелёк в течение <strong>1 рабочего дня</strong>. Пожалуйста, следите за уведомлениями.', got_it: 'ПОНЯТНО', addr_error: 'Адрес должен начинаться с T и быть действительным 34-символьным адресом TRC20.', toast_claimed: 'ПОЛУЧЕНО', toast_locked: 'Вы завершили. Ожидание проверки.', toast_no_spins: 'Вращений не осталось', toast_error: 'Ошибка сети, повторите', toast_zero_balance: 'Нет баланса для вывода', receipt_kicker: 'ИСТОРИЯ ВЫВОДОВ', receipt_title: 'Мои выводы', receipt_label_amount: 'Сумма', receipt_label_time: 'Время', receipt_close: 'ЗАКРЫТЬ', receipt_empty: 'Пока нет выводов' },
+    ja: { howto_title: '遊び方 · ゲーム説明', howto_p1: '<span class="highlight-cyan">5つのリールを回して</span>暗号通貨シンボルを揃えよう。<em>3回の無料スピン</em>付き、デポジット不要！', howto_p2: '中央のペイラインに<em>2つ以上の同じシンボル</em>を揃えると勝利。5つ揃えば最大<em>10,000 USDT</em>！', howto_p3: 'スピン後、勝利金を残高にクレームし、USDT TRC20で<span class="highlight-cyan">報酬を引き出そう</span>。', banner_kicker: '最大', banner_amt: '10,000 USDT', banner_end: '無料！', banner_sub: '3回スピンして初期残高をアンロック。<em>デポジット不要！</em>', spin_btn: 'スピン', spin_btn_loading: 'スピン中...', extract_btn: '報酬を引き出す', btn_view_status: 'ステータス確認', spins_left: '残り無料スピン：', rolling_title: '⛓ 最近のTRC20出金', modal_kicker: 'ネオン配当', modal_kicker_jackpot: '量子ジャックポット', modal_title: '勝利', modal_title_jackpot: 'ジャックポット', modal_desc_matched: '{n}個の{symbol}シンボルが一致！+{amount} USDT', claim_btn: '残高にクレーム', extract_kicker: 'TRC20出金', extract_title: '引き出し', extract_label: 'USDT TRC20アドレスを入力：', submit_withdraw: '出金を申請', confirm_kicker: '通知', confirm_title: '出金申請を送信しました', confirm_copy1: '報酬の出金申請が正常に送信されました！', confirm_copy2: '<strong>1営業日以内</strong>に報酬をウォレットに送金します。アカウントをご確認ください。', got_it: '了解', addr_error: 'アドレスはTで始まり、有効な34文字のTRC20アドレスである必要があります。', toast_claimed: '受取済み', toast_locked: '完了しました。審査をお待ちください。', toast_no_spins: 'スピンが残っていません', toast_error: 'ネットワークエラー、再試行してください', toast_zero_balance: '出金できる残高がありません', receipt_kicker: '出金履歴', receipt_title: '私の出金記録', receipt_label_amount: '金額', receipt_label_time: '時間', receipt_close: '閉じる', receipt_empty: 'まだ出金はありません' },
+    de: { howto_title: 'Spielanleitung · Beschreibung', howto_p1: '<span class="highlight-cyan">Drehen Sie die 5 Walzen</span>, um Krypto-Symbole zu treffen. Sie erhalten <em>3 Freispiele</em> zum Start — keine Einzahlung nötig!', howto_p2: 'Treffen Sie <em>2+ identische Symbole</em> auf der mittleren Gewinnlinie. Gewinnen Sie bis zu <em>10,000 USDT</em> für 5 gleiche!', howto_p3: 'Nach Ihren Drehungen fordern Sie Gewinne auf Ihr Guthaben an und <span class="highlight-cyan">extrahieren Belohnungen</span> über USDT TRC20.', banner_kicker: 'GEWINNEN SIE BIS ZU', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Drehen Sie 3 Mal, um Ihr Startguthaben freizuschalten. <em>Keine Einzahlung nötig!</em>', spin_btn: 'JETZT DREHEN', spin_btn_loading: 'DREHT...', extract_btn: 'BELOHNUNGEN EXTRAHIEREN', btn_view_status: 'STATUS ANSEHEN', spins_left: 'VERBLEIBENDE FREISPIELE:', rolling_title: '⛓ LETZTE TRC20-AUSZAHLUNGEN', modal_kicker: 'NEON-AUSZAHLUNG', modal_kicker_jackpot: 'QUANTEN-JACKPOT', modal_title: 'SIE GEWINNEN', modal_title_jackpot: 'JACKPOT', modal_desc_matched: '{n} {symbol}-Symbole getroffen! +{amount} USDT', claim_btn: 'ZUM GUTHABEN', extract_kicker: 'TRC20-AUSZAHLUNG', extract_title: 'EXTRAHIEREN', extract_label: 'GEBEN SIE IHRE USDT TRC20-ADRESSE EIN:', submit_withdraw: 'AUSZAHLUNG SENDEN', confirm_kicker: 'BENACHRICHTIGUNG', confirm_title: 'AUSZAHLUNGSANTRAG GESENDET', confirm_copy1: 'Ihr Belohnungs-Auszahlungsantrag wurde erfolgreich übermittelt!', confirm_copy2: 'Wir überweisen diese Belohnung innerhalb von <strong>1 Werktag</strong> auf Ihre Wallet. Bitte bleiben Sie dran.', got_it: 'VERSTANDEN', addr_error: 'Die Adresse muss mit T beginnen und eine gültige 34-stellige TRC20-Adresse sein.', toast_claimed: 'ERHALTEN', toast_locked: 'Sie haben abgeschlossen. Warten auf Überprüfung.', toast_no_spins: 'Keine Spins übrig', toast_error: 'Netzwerkfehler, erneut versuchen', toast_zero_balance: 'Kein Guthaben zum Abheben', receipt_kicker: 'AUSZAHLUNGSVERLAUF', receipt_title: 'Meine Auszahlungen', receipt_label_amount: 'Betrag', receipt_label_time: 'Zeit', receipt_close: 'SCHLIESSEN', receipt_empty: 'Noch keine Auszahlungen' },
+    fr: { howto_title: 'Comment Jouer · Description', howto_p1: '<span class="highlight-cyan">Faites tourner les 5 rouleaux</span> pour aligner des symboles crypto. Vous avez <em>3 tours gratuits</em> pour commencer — sans dépôt !', howto_p2: 'Alignez <em>2+ symboles identiques</em> sur la ligne de paiement centrale pour gagner. Gagnez jusqu\'à <em>10,000 USDT</em> pour 5 identiques !', howto_p3: 'Après vos tours, réclamez les gains sur votre solde, puis <span class="highlight-cyan">extrayez les récompenses</span> via USDT TRC20.', banner_kicker: 'GAGNEZ JUSQU\'À', banner_amt: '10,000 USDT', banner_end: 'GRATUIT !', banner_sub: 'Tournez 3 fois pour débloquer votre solde de départ. <em>Aucun dépôt requis !</em>', spin_btn: 'TOURNER', spin_btn_loading: 'EN COURS...', extract_btn: 'EXTRAIRE LES RÉCOMPENSES', btn_view_status: 'VOIR STATUT', spins_left: 'TOURS GRATUITS RESTANTS :', rolling_title: '⛓ RETRAITS TRC20 RÉCENTS', modal_kicker: 'PAIEMENT NÉON', modal_kicker_jackpot: 'JACKPOT QUANTIQUE', modal_title: 'VOUS GAGNEZ', modal_title_jackpot: 'JACKPOT', modal_desc_matched: '{n} symboles {symbol} alignés ! +{amount} USDT', claim_btn: 'RÉCLAMER AU SOLDE', extract_kicker: 'RETRAIT TRC20', extract_title: 'EXTRAIRE', extract_label: 'ENTREZ VOTRE ADRESSE USDT TRC20 :', submit_withdraw: 'ENVOYER LE RETRAIT', confirm_kicker: 'NOTIFICATION', confirm_title: 'DEMANDE DE RETRAIT ENVOYÉE', confirm_copy1: 'Votre demande de retrait de récompense a bien été envoyée !', confirm_copy2: 'Nous transférerons cette récompense vers votre portefeuille sous <strong>1 jour ouvré</strong>. Restez à l\'écoute.', got_it: 'COMPRIS', addr_error: 'L\'adresse doit commencer par T et être une adresse TRC20 valide de 34 caractères.', toast_claimed: 'RÉCLAMÉ', toast_locked: 'Vous avez terminé. En attente de validation.', toast_no_spins: 'Plus de tours disponibles', toast_error: 'Erreur réseau, réessayez', toast_zero_balance: 'Aucun solde à retirer', receipt_kicker: 'HISTORIQUE DES RETRAITS', receipt_title: 'Mes Retraits', receipt_label_amount: 'Montant', receipt_label_time: 'Heure', receipt_close: 'FERMER', receipt_empty: 'Aucun retrait pour l\'instant' },
+    ko: { howto_title: '게임 방법 · 설명', howto_p1: '<span class="highlight-cyan">5개 릴을 돌려</span> 암호화폐 심볼을 맞추세요. 시작 시 <em>3회 무료 스핀</em> 제공 — 입금 불필요!', howto_p2: '중앙 페이라인에 <em>2개 이상 동일 심볼</em>을 맞추면 승리. 5개 일치 시 최대 <em>10,000 USDT</em> 획득!', howto_p3: '스핀 후 상금을 잔액으로 청구하고, USDT TRC20로 <span class="highlight-cyan">보상을 추출하세요</span>.', banner_kicker: '최대', banner_amt: '10,000 USDT', banner_end: '무료!', banner_sub: '3회 스핀하여 시작 잔액을 잠금 해제하세요. <em>입금 불필요!</em>', spin_btn: '스핀', spin_btn_loading: '스핀 중...', extract_btn: '보상 추출', btn_view_status: '상태 보기', spins_left: '남은 무료 스핀:', rolling_title: '⛓ 최근 TRC20 출금', modal_kicker: '네온 지급', modal_kicker_jackpot: '퀀텀 잭팟', modal_title: '당첨', modal_title_jackpot: '잭팟', modal_desc_matched: '{n}개의 {symbol} 심볼 일치! +{amount} USDT', claim_btn: '잔액으로 청구', extract_kicker: 'TRC20 출금', extract_title: '추출', extract_label: 'USDT TRC20 주소를 입력하세요:', submit_withdraw: '출금 신청', confirm_kicker: '알림', confirm_title: '출금 요청 제출됨', confirm_copy1: '보상 출금 요청이 성공적으로 제출되었습니다!', confirm_copy2: '<strong>영업일 1일</strong> 이내에 보상을 지갑으로 전송해 드립니다. 계정을 확인해 주세요.', got_it: '확인', addr_error: '주소는 T로 시작해야 하며 유효한 34자리 TRC20 주소여야 합니다.', toast_claimed: '청구됨', toast_locked: '완료되었습니다. 검토 대기 중.', toast_no_spins: '남은 스핀 없음', toast_error: '네트워크 오류, 다시 시도', toast_zero_balance: '출금할 잔액이 없습니다', receipt_kicker: '출금 기록', receipt_title: '내 출금 내역', receipt_label_amount: '금액', receipt_label_time: '시간', receipt_close: '닫기', receipt_empty: '아직 출금 기록 없음' },
+    it: { howto_title: 'Come Giocare · Descrizione', howto_p1: '<span class="highlight-cyan">Gira i 5 rulli</span> per abbinare simboli crypto. Hai <em>3 giri gratis</em> per iniziare — nessun deposito!', howto_p2: 'Abbina <em>2+ simboli identici</em> sulla linea di pagamento centrale per vincere. Vinci fino a <em>10,000 USDT</em> per 5 uguali!', howto_p3: 'Dopo i giri, riscatta le vincite sul saldo, poi <span class="highlight-cyan">estrai le ricompense</span> via USDT TRC20.', banner_kicker: 'VINCI FINO A', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Gira 3 volte per sbloccare il saldo iniziale. <em>Nessun deposito richiesto!</em>', spin_btn: 'GIRA ORA', spin_btn_loading: 'GIRANDO...', extract_btn: 'ESTRAI RICOMPENSE', btn_view_status: 'VEDI STATO', spins_left: 'GIRI GRATIS RIMANENTI:', rolling_title: '⛓ PRELIEVI TRC20 RECENTI', modal_kicker: 'PAGAMENTO NEON', modal_kicker_jackpot: 'JACKPOT QUANTISTICO', modal_title: 'HAI VINTO', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Abbinati {n} simboli {symbol}! +{amount} USDT', claim_btn: 'RISCATTA SUL SALDO', extract_kicker: 'PRELIEVO TRC20', extract_title: 'ESTRAI', extract_label: 'INSERISCI IL TUO INDIRIZZO USDT TRC20:', submit_withdraw: 'INVIA PRELIEVO', confirm_kicker: 'NOTIFICA', confirm_title: 'RICHIESTA DI PRELIEVO INVIATA', confirm_copy1: 'La tua richiesta di prelievo ricompensa è stata inviata con successo!', confirm_copy2: 'Trasferiremo questa ricompensa al tuo portafoglio entro <strong>1 giorno lavorativo</strong>. Resta sintonizzato.', got_it: 'CAPITO', addr_error: 'L\'indirizzo deve iniziare con T ed essere un indirizzo TRC20 valido di 34 caratteri.', toast_claimed: 'RISCATTATO', toast_locked: 'Hai completato. In attesa di revisione.', toast_no_spins: 'Nessun giro rimasto', toast_error: 'Errore di rete, riprova', toast_zero_balance: 'Nessun saldo da prelevare', receipt_kicker: 'STORICO PRELIEVI', receipt_title: 'I Miei Prelievi', receipt_label_amount: 'Importo', receipt_label_time: 'Ora', receipt_close: 'CHIUDI', receipt_empty: 'Ancora nessun prelievo' },
+    tr: { howto_title: 'Nasıl Oynanır · Açıklama', howto_p1: '<span class="highlight-cyan">5 makarayı çevir</span> ve kripto sembollerini eşleştir. Başlamak için <em>3 ücretsiz çevirme</em> hakkın var — para yatırmaya gerek yok!', howto_p2: 'Orta ödeme hattında <em>2+ aynı sembolü</em> eşleştir ve kazan. 5 aynı için <em>10,000 USDT</em>\'ye kadar kazan!', howto_p3: 'Çevirmelerinden sonra kazançları bakiyene al, ardından USDT TRC20 ile <span class="highlight-cyan">ödülleri çek</span>.', banner_kicker: 'KAZAN', banner_amt: '10,000 USDT', banner_end: 'ÜCRETSİZ!', banner_sub: 'Başlangıç bakiyeni açmak için 3 kez çevir. <em>Para yatırmaya gerek yok!</em>', spin_btn: 'ŞİMDİ ÇEVİR', spin_btn_loading: 'ÇEVİRİLİYOR...', extract_btn: 'ÖDÜLLERİ ÇEK', btn_view_status: 'DURUMU GÖR', spins_left: 'KALAN ÜCRETSİZ ÇEVİRME:', rolling_title: '⛓ SON TRC20 ÇEKİMLERİ', modal_kicker: 'NEON ÖDEME', modal_kicker_jackpot: 'KUANTUM JACKPOT', modal_title: 'KAZANDINIZ', modal_title_jackpot: 'JACKPOT', modal_desc_matched: '{n} {symbol} sembolü eşleşti! +{amount} USDT', claim_btn: 'BAKİYEYE AL', extract_kicker: 'TRC20 ÇEKİM', extract_title: 'ÇEK', extract_label: 'USDT TRC20 ADRESİNİZİ GİRİN:', submit_withdraw: 'ÇEKİM GÖNDER', confirm_kicker: 'BİLDİRİM', confirm_title: 'ÇEKİM TALEBİ GÖNDERİLDİ', confirm_copy1: 'Ödül çekim talebiniz başarıyla gönderildi!', confirm_copy2: 'Bu ödülü <strong>1 iş günü</strong> içinde cüzdanınıza aktaracağız. Lütfen takipte kalın.', got_it: 'ANLADIM', addr_error: 'Adres T ile başlamalı ve 34 karakterlik geçerli bir TRC20 adresi olmalıdır.', toast_claimed: 'ALINDI', toast_locked: 'Tamamladınız. İnceleme bekleniyor.', toast_no_spins: 'Çevirme kalmadı', toast_error: 'Ağ hatası, tekrar deneyin', toast_zero_balance: 'Çekilecek bakiye yok', receipt_kicker: 'ÇEKİM GEÇMİŞİ', receipt_title: 'Çekimlerim', receipt_label_amount: 'Tutar', receipt_label_time: 'Zaman', receipt_close: 'KAPAT', receipt_empty: 'Henüz çekim yok' },
+    vi: { howto_title: 'Cách Chơi · Mô Tả', howto_p1: '<span class="highlight-cyan">Quay 5 cuộn</span> để khớp các biểu tượng crypto. Bạn có <em>3 lượt quay miễn phí</em> để bắt đầu — không cần nạp tiền!', howto_p2: 'Khớp <em>2+ biểu tượng giống nhau</em> trên dòng thanh toán trung tâm để thắng. Thắng đến <em>10,000 USDT</em> cho 5 biểu tượng giống nhau!', howto_p3: 'Sau khi quay, nhận thưởng vào số dư, sau đó <span class="highlight-cyan">rút phần thưởng</span> qua USDT TRC20.', banner_kicker: 'THẮNG ĐẾN', banner_amt: '10,000 USDT', banner_end: 'MIỄN PHÍ!', banner_sub: 'Quay 3 lần để mở khóa số dư ban đầu. <em>Không cần nạp tiền!</em>', spin_btn: 'QUAY NGAY', spin_btn_loading: 'ĐANG QUAY...', extract_btn: 'RÚT PHẦN THƯỞNG', btn_view_status: 'XEM TRẠNG THÁI', spins_left: 'LƯỢT QUAY MIỄN PHÍ CÒN LẠI:', rolling_title: '⛓ RÚT TRC20 GẦN ĐÂY', modal_kicker: 'THANH TOÁN NEON', modal_kicker_jackpot: 'JACKPOT LƯỢNG TỬ', modal_title: 'BẠN THẮNG', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Khớp {n} biểu tượng {symbol}! +{amount} USDT', claim_btn: 'NHẬN VÀO SỐ DƯ', extract_kicker: 'RÚT TRC20', extract_title: 'RÚT', extract_label: 'NHẬP ĐỊA CHỈ USDT TRC20 CỦA BẠN:', submit_withdraw: 'GỬI YÊU CẦU RÚT', confirm_kicker: 'THÔNG BÁO', confirm_title: 'YÊU CẦU RÚT ĐÃ ĐƯỢC GỬI', confirm_copy1: 'Yêu cầu rút phần thưởng của bạn đã được gửi thành công!', confirm_copy2: 'Chúng tôi sẽ chuyển phần thưởng này vào ví của bạn trong vòng <strong>1 ngày làm việc</strong>. Vui lòng theo dõi.', got_it: 'ĐÃ HIỂU', addr_error: 'Địa chỉ phải bắt đầu bằng T và là địa chỉ TRC20 hợp lệ gồm 34 ký tự.', toast_claimed: 'ĐÃ NHẬN', toast_locked: 'Bạn đã hoàn thành. Đang chờ xét duyệt.', toast_no_spins: 'Hết lượt quay', toast_error: 'Lỗi mạng, thử lại', toast_zero_balance: 'Không có số dư để rút', receipt_kicker: 'LỊCH SỬ RÚT', receipt_title: 'Lịch sử rút của tôi', receipt_label_amount: 'Số tiền', receipt_label_time: 'Thời gian', receipt_close: 'ĐÓNG', receipt_empty: 'Chưa có lượt rút nào' },
+    th: { howto_title: 'วิธีเล่น · คำอธิบาย', howto_p1: '<span class="highlight-cyan">หมุน 5 รีล</span> เพื่อจับคู่สัญลักษณ์คริปโต คุณได้รับ <em>3 สปินฟรี</em> เริ่มต้น — ไม่ต้องฝากเงิน!', howto_p2: 'จับคู่ <em>2+ สัญลักษณ์เหมือนกัน</em> บนเพย์ไลน์กลางเพื่อชนะ รับสูงสุด <em>10,000 USDT</em> สำหรับ 5 สัญลักษณ์เหมือนกัน!', howto_p3: 'หลังหมุน รับเงินรางวัลเข้าสู่ยอดคงเหลือ แล้ว <span class="highlight-cyan">ถอนรางวัล</span> ผ่าน USDT TRC20', banner_kicker: 'ชนะสูงสุด', banner_amt: '10,000 USDT', banner_end: 'ฟรี!', banner_sub: 'หมุน 3 ครั้งเพื่อปลดล็อกยอดคงเหลือเริ่มต้น <em>ไม่ต้องฝากเงิน!</em>', spin_btn: 'หมุนเลย', spin_btn_loading: 'กำลังหมุน...', extract_btn: 'ถอนรางวัล', btn_view_status: 'ดูสถานะ', spins_left: 'สปินฟรีที่เหลือ:', rolling_title: '⛓ การถอน TRC20 ล่าสุด', modal_kicker: 'การจ่ายนีออน', modal_kicker_jackpot: 'แจ็คพอตควอนตัม', modal_title: 'คุณชนะ', modal_title_jackpot: 'แจ็คพอต', modal_desc_matched: 'จับคู่ {n} สัญลักษณ์ {symbol}! +{amount} USDT', claim_btn: 'รับเข้าสู่ยอดคงเหลือ', extract_kicker: 'ถอน TRC20', extract_title: 'ถอน', extract_label: 'ป้อนที่อยู่ USDT TRC20 ของคุณ:', submit_withdraw: 'ส่งคำขอถอน', confirm_kicker: 'การแจ้งเตือน', confirm_title: 'ส่งคำขอถอนแล้ว', confirm_copy1: 'ส่งคำขอถอนรางวัลของคุณสำเร็จแล้ว!', confirm_copy2: 'เราจะโอนรางวัลนี้ไปยังกระเป๋าเงินของคุณภายใน <strong>1 วันทำการ</strong> โปรดติดตาม', got_it: 'เข้าใจแล้ว', addr_error: 'ที่อยู่ต้องขึ้นต้นด้วย T และเป็นที่อยู่ TRC20 ที่ถูกต้อง 34 ตัวอักษร', toast_claimed: 'รับแล้ว', toast_locked: 'คุณทำเสร็จแล้ว รอการตรวจสอบ', toast_no_spins: 'ไม่เหลือสปิน', toast_error: 'ข้อผิดพลาดเครือข่าย ลองใหม่', toast_zero_balance: 'ไม่มียอดคงเหลือให้ถอน', receipt_kicker: 'ประวัติการถอน', receipt_title: 'การถอนของฉัน', receipt_label_amount: 'จำนวน', receipt_label_time: 'เวลา', receipt_close: 'ปิด', receipt_empty: 'ยังไม่มีการถอน' },
+    id: { howto_title: 'Cara Bermain · Deskripsi', howto_p1: '<span class="highlight-cyan">Putar 5 gulungan</span> untuk mencocokkan simbol crypto. Anda mendapat <em>3 putaran gratis</em> untuk memulai — tanpa deposit!', howto_p2: 'Cocokkan <em>2+ simbol identik</em> di payline tengah untuk menang. Menangkan hingga <em>10,000 USDT</em> untuk 5 simbol sama!', howto_p3: 'Setelah putaran, klaim kemenangan ke saldo, lalu <span class="highlight-cyan">tarik hadiah</span> via USDT TRC20.', banner_kicker: 'MENANG HINGGA', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Putar 3 kali untuk membuka saldo awal. <em>Tidak perlu deposit!</em>', spin_btn: 'PUTAR SEKARANG', spin_btn_loading: 'MEMUTAR...', extract_btn: 'TARIK HADIAH', btn_view_status: 'LIHAT STATUS', spins_left: 'PUTARAN GRATIS TERSISA:', rolling_title: '⛓ PENARIKAN TRC20 TERBARU', modal_kicker: 'PEMBAYARAN NEON', modal_kicker_jackpot: 'JACKPOT KUANTUM', modal_title: 'ANDA MENANG', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Cocok {n} simbol {symbol}! +{amount} USDT', claim_btn: 'KLAIM KE SALDO', extract_kicker: 'PENARIKAN TRC20', extract_title: 'TARIK', extract_label: 'MASUKKAN ALAMAT USDT TRC20 ANDA:', submit_withdraw: 'KIRIM PENARIKAN', confirm_kicker: 'NOTIFIKASI', confirm_title: 'PERMINTAAN PENARIKAN TERKIRIM', confirm_copy1: 'Permintaan penarikan hadiah Anda berhasil dikirim!', confirm_copy2: 'Kami akan mentransfer hadiah ini ke dompet Anda dalam <strong>1 hari kerja</strong>. Harap tunggu.', got_it: 'MENGERTI', addr_error: 'Alamat harus dimulai dengan T dan berupa alamat TRC20 valid 34 karakter.', toast_claimed: 'DIKLAIM', toast_locked: 'Anda telah selesai. Menunggu peninjauan.', toast_no_spins: 'Tidak ada putaran tersisa', toast_error: 'Kesalahan jaringan, coba lagi', toast_zero_balance: 'Tidak ada saldo untuk ditarik', receipt_kicker: 'RIWAYAT PENARIKAN', receipt_title: 'Penarikan Saya', receipt_label_amount: 'Jumlah', receipt_label_time: 'Waktu', receipt_close: 'TUTUP', receipt_empty: 'Belum ada penarikan' },
+    ms: { howto_title: 'Cara Bermain · Penerangan', howto_p1: '<span class="highlight-cyan">Putar 5 gelendong</span> untuk memadankan simbol crypto. Anda mendapat <em>3 putaran percuma</em> untuk mula — tiada deposit!', howto_p2: 'Padankan <em>2+ simbol sama</em> pada payline tengah untuk menang. Menang sehingga <em>10,000 USDT</em> untuk 5 sama!', howto_p3: 'Selepas putaran, tuntut kemenangan ke baki, kemudian <span class="highlight-cyan">tarik ganjaran</span> melalui USDT TRC20.', banner_kicker: 'MENANG HINGGA', banner_amt: '10,000 USDT', banner_end: 'PERCUMA!', banner_sub: 'Putar 3 kali untuk membuka baki permulaan. <em>Tiada deposit diperlukan!</em>', spin_btn: 'PUTAR SEKARANG', spin_btn_loading: 'MEMUTAR...', extract_btn: 'TARIK GANJARAN', btn_view_status: 'LIHAT STATUS', spins_left: 'PUTARAN PERCUMA TINGGAL:', rolling_title: '⛓ PENGELUARAN TRC20 TERKINI', modal_kicker: 'BAYARAN NEON', modal_kicker_jackpot: 'JACKPOT KUANTUM', modal_title: 'ANDA MENANG', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Padan {n} simbol {symbol}! +{amount} USDT', claim_btn: 'TUNTUT KE BAKI', extract_kicker: 'PENGELUARAN TRC20', extract_title: 'TARIK', extract_label: 'MASUKKAN ALAMAT USDT TRC20 ANDA:', submit_withdraw: 'HANTAR PENGELUARAN', confirm_kicker: 'PEMBERITAHUAN', confirm_title: 'PERMINTAAN PENGELUARAN DIHANTAR', confirm_copy1: 'Permintaan pengeluaran ganjaran anda berjaya dihantar!', confirm_copy2: 'Kami akan memindahkan ganjaran ini ke dompet anda dalam <strong>1 hari bekerja</strong>. Sila tunggu.', got_it: 'FAHAM', addr_error: 'Alamat mesti bermula dengan T dan merupakan alamat TRC20 sah 34 aksara.', toast_claimed: 'DITUNTUT', toast_locked: 'Anda telah selesai. Menunggu semakan.', toast_no_spins: 'Tiada putaran tinggal', toast_error: 'Ralat rangkaian, cuba lagi', toast_zero_balance: 'Tiada baki untuk dikeluarkan', receipt_kicker: 'SEJARAH PENGELUARAN', receipt_title: 'Pengeluaran Saya', receipt_label_amount: 'Jumlah', receipt_label_time: 'Masa', receipt_close: 'TUTUP', receipt_empty: 'Belum ada pengeluaran' },
+    nl: { howto_title: 'Hoe te Spelen · Beschrijving', howto_p1: '<span class="highlight-cyan">Draai de 5 rollen</span> om crypto-symbolen te matchen. Je krijgt <em>3 gratis spins</em> om te starten — geen storting nodig!', howto_p2: 'Match <em>2+ identieke symbolen</em> op de middelste payline om te winnen. Win tot <em>10,000 USDT</em> voor 5 dezelfde!', howto_p3: 'Na je spins, claim winsten naar je saldo en <span class="highlight-cyan">extraheer beloningen</span> via USDT TRC20.', banner_kicker: 'WIN TOT', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Draai 3 keer om je startsaldo te ontgrendelen. <em>Geen storting nodig!</em>', spin_btn: 'NU DRAAIEN', spin_btn_loading: 'DRAAIT...', extract_btn: 'BELONINGEN EXTRAHEREN', btn_view_status: 'STATUS BEKIJKEN', spins_left: 'RESTERENDE GRATIS SPINS:', rolling_title: '⛓ RECENTE TRC20-OPNAMES', modal_kicker: 'NEON UITBETALING', modal_kicker_jackpot: 'QUANTUM JACKPOT', modal_title: 'JE WINT', modal_title_jackpot: 'JACKPOT', modal_desc_matched: '{n} {symbol}-symbolen gematcht! +{amount} USDT', claim_btn: 'CLAIM NAAR SALDO', extract_kicker: 'TRC20 OPNAME', extract_title: 'EXTRAHEREN', extract_label: 'VOER JE USDT TRC20-ADRES IN:', submit_withdraw: 'OPNAME VERZENDEN', confirm_kicker: 'MELDING', confirm_title: 'OPNAMEVERZOEK VERZONDEN', confirm_copy1: 'Je verzoek tot het opnemen van een beloning is succesvol verzonden!', confirm_copy2: 'We sturen deze beloning binnen <strong>1 werkdag</strong> naar je wallet. Houd je account in de gaten.', got_it: 'BEGREPEN', addr_error: 'Adres moet beginnen met T en een geldig 34-tekens TRC20-adres zijn.', toast_claimed: 'GEËIST', toast_locked: 'Je bent klaar. Wachten op beoordeling.', toast_no_spins: 'Geen spins meer', toast_error: 'Netwerkfout, probeer opnieuw', toast_zero_balance: 'Geen saldo om op te nemen', receipt_kicker: 'OPNAMEHISTORIE', receipt_title: 'Mijn Opnames', receipt_label_amount: 'Bedrag', receipt_label_time: 'Tijd', receipt_close: 'SLUITEN', receipt_empty: 'Nog geen opnames' },
+    pl: { howto_title: 'Jak Grać · Opis', howto_p1: '<span class="highlight-cyan">Obracaj 5 bębnów</span>, aby dopasować symbole krypto. Masz <em>3 darmowe obroty</em> na start — bez depozytu!', howto_p2: 'Dopasuj <em>2+ identyczne symbole</em> na środkowej linii wypłat, aby wygrać. Wygraj do <em>10,000 USDT</em> za 5 takich samych!', howto_p3: 'Po obrotach odbierz wygrane na saldo, następnie <span class="highlight-cyan">wypłać nagrody</span> przez USDT TRC20.', banner_kicker: 'WYGRAJ DO', banner_amt: '10,000 USDT', banner_end: 'ZA DARMO!', banner_sub: 'Obracaj 3 razy, aby odblokować saldo startowe. <em>Bez depozytu!</em>', spin_btn: 'OBRACAJ TERAZ', spin_btn_loading: 'OBRACA...', extract_btn: 'WYPŁAĆ NAGRODY', btn_view_status: 'ZOBACZ STATUS', spins_left: 'POZOSTAŁE DARMOWE OBROTY:', rolling_title: '⛓ OSTATNIE WYPŁATY TRC20', modal_kicker: 'WYPŁATA NEON', modal_kicker_jackpot: 'KWANTOWY JACKPOT', modal_title: 'WYGRAŁEŚ', modal_title_jackpot: 'JACKPOT', modal_desc_matched: 'Dopasowano {n} symboli {symbol}! +{amount} USDT', claim_btn: 'ODBIERZ NA SALDO', extract_kicker: 'WYPŁATA TRC20', extract_title: 'WYPROWADŹ', extract_label: 'WPROWADŹ SWÓJ ADRES USDT TRC20:', submit_withdraw: 'WYŚLIJ WYPŁATĘ', confirm_kicker: 'POWIADOMIENIE', confirm_title: 'WNIOSEK O WYPŁATĘ WYSŁANY', confirm_copy1: 'Twój wniosek o wypłatę nagrody został pomyślnie wysłany!', confirm_copy2: 'Przelejemy tę nagrodę na Twoje konto w ciągu <strong>1 dnia roboczego</strong>. Prosimy o cierpliwość.', got_it: 'ROZUMIEM', addr_error: 'Adres musi zaczynać się od T i być prawidłowym 34-znakowym adresem TRC20.', toast_claimed: 'ODEBRANO', toast_locked: 'Ukończono. Oczekiwanie na weryfikację.', toast_no_spins: 'Brak obrotów', toast_error: 'Błąd sieci, spróbuj ponownie', toast_zero_balance: 'Brak salda do wypłaty', receipt_kicker: 'HISTORIA WYPŁAT', receipt_title: 'Moje Wypłaty', receipt_label_amount: 'Kwota', receipt_label_time: 'Czas', receipt_close: 'ZAMKNIJ', receipt_empty: 'Brak wypłat' }
   };
 
   window.__TRANSLATIONS = TRANSLATIONS;
@@ -696,6 +595,7 @@ function initRollingAddresses() {
 
   const SUPPORTED_LANGS = ['en','zh','es','hi','ar','pt','ru','ja','de','fr','ko','it','tr','vi','th','id','ms','nl','pl'];
   const STORAGE_KEY = 'nexus_lang';
+  const COUNTRY_STORAGE = 'nexus_country';
 
   const langSelect = document.getElementById('langSelect');
   if (!langSelect) return;
@@ -729,6 +629,7 @@ function initRollingAddresses() {
     document.getElementById('gotItBtn').textContent = trans.got_it;
     langSelect.value = code;
     document.documentElement.dir = (code === 'ar') ? 'rtl' : 'ltr';
+    if (window.__refreshReceiptText) window.__refreshReceiptText();
     if (window.__restoreBtn) window.__restoreBtn();
   }
 
@@ -741,32 +642,44 @@ function initRollingAddresses() {
     if (window.__fetchState) window.__fetchState();
   }
 
+  // IP 优先 → 手机语言 → 英语兜底
   function initLanguage() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && SUPPORTED_LANGS.includes(saved)) {
-      switchLanguage(saved);
-      onLangReady();
-      return;
-    }
-    const navLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-    const primaryLang = navLang.split('-')[0];
-    if (SUPPORTED_LANGS.includes(primaryLang)) {
-      switchLanguage(primaryLang);
-      onLangReady();
-      return;
-    }
+    // 1) IP 优先
     fetch('https://ipapi.co/json/')
       .then(res => res.json())
       .then(data => {
         const country = (data.country_code || '').toUpperCase();
-        const lang = COUNTRY_TO_LANG[country] || 'en';
-        if (window.__setCountry) window.__setCountry(country);
-        switchLanguage(lang);
+        if (country) {
+          localStorage.setItem(COUNTRY_STORAGE, country);
+          if (window.__setCountry) window.__setCountry(country);
+        }
+        const lang = COUNTRY_TO_LANG[country];
+        if (lang && SUPPORTED_LANGS.includes(lang)) {
+          switchLanguage(lang);
+          onLangReady();
+          return;
+        }
+        // IP 国家不在支持列表 → 走手机语言
+        fallbackToNavigator();
       })
-      .catch(() => { switchLanguage('en'); })
-      .finally(() => { onLangReady(); });
+      .catch(() => {
+        // IP 失败 → 走手机语言
+        fallbackToNavigator();
+      });
   }
 
+  function fallbackToNavigator() {
+    const navLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    const primaryLang = navLang.split('-')[0];
+    if (SUPPORTED_LANGS.includes(primaryLang)) {
+      switchLanguage(primaryLang);
+    } else {
+      switchLanguage('en');
+    }
+    onLangReady();
+  }
+
+  // 默认先用英语渲染，避免空白
   switchLanguage('en');
   initLanguage();
   window.switchLanguage = switchLanguage;
