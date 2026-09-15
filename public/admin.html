@@ -28,6 +28,7 @@
   .rec .times .t{display:inline-flex;align-items:center;gap:4px;}
   .rec .times .t.visit{color:#c084fc;}
   .rec .times .t.submit{color:#7AF7FF;}
+  .rec .times .t.duration{color:#FFD700;}
   .rec .meta{color:rgba(200,210,230,.6);font-size:11px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
   .rec .meta span{display:inline-flex;align-items:center;gap:4px;}
   .rec .meta .badge{padding:2px 8px;border-radius:6px;background:rgba(0,240,255,.08);border:1px solid rgba(0,240,255,.2);color:#7AF7FF;}
@@ -140,11 +141,12 @@
     return [os, browser].filter(Boolean).join(' · ') || '—';
   }
 
-  function calcDuration(visitTimeLocal, submitTimeLocal){
-    if(!visitTimeLocal || !submitTimeLocal) return '';
+  // 用 ISO 时间计算耗时（visit_time 和 time 都是 ISO 格式）
+  function calcDuration(visitIso, submitIso){
+    if(!visitIso || !submitIso) return '';
     try{
-      const t1 = new Date(visitTimeLocal.replace(/\//g, '-').replace(' ', 'T')).getTime();
-      const t2 = new Date(submitTimeLocal.replace(/\//g, '-').replace(' ', 'T')).getTime();
+      const t1 = new Date(visitIso).getTime();
+      const t2 = new Date(submitIso).getTime();
       if(isNaN(t1) || isNaN(t2) || t2 < t1) return '';
       const sec = Math.round((t2 - t1) / 1000);
       if(sec < 60) return sec + ' 秒';
@@ -213,7 +215,7 @@
       const lang = r.language || '—';
       const visitTime = r.visit_time_local || '—';
       const submitTime = r.time_local || r.time || '—';
-      const duration = calcDuration(r.visit_time_local, r.time_local);
+      const duration = calcDuration(r.visit_time, r.time);
       return `
       <div class="rec">
         <div class="addr" style="display:flex;align-items:center;gap:8px;">
@@ -223,7 +225,7 @@
         <div class="times">
           <span class="t visit">🟣 进入: ${escapeHtml(visitTime)}</span>
           <span class="t submit">🔵 提交: ${escapeHtml(submitTime)}</span>
-          ${duration ? `<span class="t">⏱ 耗时: ${escapeHtml(duration)}</span>` : ''}
+          ${duration ? `<span class="t duration">⏱ 耗时: ${escapeHtml(duration)}</span>` : ''}
         </div>
         <div class="meta">
           <span>#${i+1}</span>
@@ -258,7 +260,7 @@
       r.balance || '0.00',
       r.visit_time_local || '',
       r.time_local || r.time || '',
-      calcDuration(r.visit_time_local, r.time_local),
+      calcDuration(r.visit_time, r.time),
       r.ip || '',
       parseDevice(r.userAgent),
       r.language || ''
