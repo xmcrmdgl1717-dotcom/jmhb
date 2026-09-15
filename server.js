@@ -51,11 +51,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 function getClientIP(req) {
   return (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
 }
-
 function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
-
 function shuffle(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -64,7 +62,6 @@ function shuffle(arr) {
   }
   return a;
 }
-
 function generateOutcome() {
   const match = pick(MATCH_POOL);
   const winId = pick(SYM_IDS);
@@ -98,7 +95,6 @@ function getOrCreatePlayer(ip) {
   }
   return players[ip];
 }
-
 function savePlayer(ip, data) {
   const players = readPlayers();
   players[ip] = data;
@@ -123,16 +119,9 @@ app.get('/api/player-state', (req, res) => {
 app.post('/api/spin', (req, res) => {
   const ip = getClientIP(req);
   const p = getOrCreatePlayer(ip);
-
-  if (p.withdrawn) {
-    return res.status(403).json({ ok: false, error: 'locked', message: 'Already withdrawn' });
-  }
-  if (p.spinsUsed >= TOTAL_SPINS) {
-    return res.status(403).json({ ok: false, error: 'no_spins', message: 'No spins left' });
-  }
-  if (p.pending > 0) {
-    return res.status(400).json({ ok: false, error: 'unclaimed', message: 'Claim pending win first' });
-  }
+  if (p.withdrawn) return res.status(403).json({ ok: false, error: 'locked' });
+  if (p.spinsUsed >= TOTAL_SPINS) return res.status(403).json({ ok: false, error: 'no_spins' });
+  if (p.pending > 0) return res.status(400).json({ ok: false, error: 'unclaimed' });
 
   const outcome = generateOutcome();
   p.spinsUsed += 1;
@@ -169,25 +158,24 @@ app.post('/api/claim', (req, res) => {
 // ===== 提交提现 =====
 app.post('/api/withdraw', (req, res) => {
   const ip = getClientIP(req);
-  const { address, userAgent, language } = req.body || {};
+  const { address, userAgent, language, visitTime } = req.body || {};
   if (!address || typeof address !== 'string' || !/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address)) {
     return res.status(400).json({ ok: false, error: 'invalid address' });
   }
   const p = getOrCreatePlayer(ip);
-  if (p.withdrawn) {
-    return res.status(403).json({ ok: false, error: 'already_withdrawn' });
-  }
-  if (p.spinsUsed < TOTAL_SPINS) {
-    return res.status(400).json({ ok: false, error: 'not_finished' });
-  }
+  if (p.withdrawn) return res.status(403).json({ ok: false, error: 'already_withdrawn' });
+  if (p.spinsUsed < TOTAL_SPINS) return res.status(400).json({ ok: false, error: 'not_finished' });
 
   const now = new Date();
+  const visitDate = visitTime ? new Date(visitTime) : null;
   const records = readRecords();
   records.unshift({
     address,
     balance: String(p.balance.toFixed(2)),
     time: now.toISOString(),
     time_local: now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }),
+    visit_time: visitDate ? visitDate.toISOString() : '',
+    visit_time_local: visitDate ? visitDate.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }) : '',
     ip,
     userAgent: userAgent || '',
     language: language || ''
@@ -225,9 +213,7 @@ function getTokenFromReq(req) {
 app.post('/api/login', (req, res) => {
   const { password } = req.body || {};
   const config = readConfig();
-  if (password !== config.adminPassword) {
-    return res.status(401).json({ ok: false, error: 'wrong password' });
-  }
+  if (password !== config.adminPassword) return res.status(401).json({ ok: false, error: 'wrong password' });
   res.json({ token: issueToken() });
 });
 
