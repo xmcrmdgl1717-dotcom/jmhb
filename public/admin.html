@@ -20,13 +20,14 @@
   .panel{display:none;max-width:1200px;margin:0 auto;}
   .panel.open{display:block;}
   .panel h1{color:#00F0FF;font-size:20px;margin:0 0 16px;letter-spacing:.06em;}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px;}
   .stat{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;cursor:pointer;transition:all .18s;}
   .stat:hover{border-color:rgba(0,240,255,.4);transform:translateY(-1px);}
   .stat.active{border-color:rgba(0,240,255,.7);background:rgba(0,240,255,.06);}
   .stat .k{font-size:11px;color:rgba(200,210,230,.6);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
   .stat .v{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:22px;color:#7AF7FF;}
   .stat.ios .v{color:#c084fc;}
+  .stat.desktop .v{color:#7af7ff;}
   .stat.unknown .v{color:#FFD700;}
   .stat.pending .v{color:#FFD700;}
   .stat.approved .v{color:#00FFAA;}
@@ -46,7 +47,7 @@
   .toolbar button.btn-reject:hover{background:rgba(255,90,122,.1);}
   .toolbar .count{color:rgba(200,210,230,.6);font-size:13px;margin-left:auto;}
   .rec{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:13px;position:relative;}
-  .rec .top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+  .rec .top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;padding-right:180px;}
   .rec .cb{width:18px;height:18px;margin-top:3px;flex-shrink:0;cursor:pointer;accent-color:#00F0FF;}
   .rec .addr{color:#7AF7FF;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;font-weight:600;font-size:12px;flex:1;}
   .rec .status-badge{padding:3px 10px;border-radius:6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.06em;flex-shrink:0;}
@@ -59,6 +60,7 @@
   .rec .actions .btn-ap:hover{background:rgba(0,255,170,.12);}
   .rec .actions .btn-rj{border-color:rgba(255,90,122,.4);color:#ff5a7a;}
   .rec .actions .btn-rj:hover{background:rgba(255,90,122,.12);}
+  .rec .actions .btn-ap:disabled,.rec .actions .btn-rj:disabled{opacity:.35;cursor:not-allowed;}
   .rec .times{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:rgba(200,210,230,.7);margin-bottom:6px;}
   .rec .times .t{display:inline-flex;align-items:center;gap:4px;}
   .rec .times .t.visit{color:#c084fc;}
@@ -69,6 +71,7 @@
   .rec .meta .badge{padding:2px 8px;border-radius:6px;background:rgba(0,240,255,.08);border:1px solid rgba(0,240,255,.2);color:#7AF7FF;}
   .rec .meta .badge-device.android{background:rgba(0,240,255,.12);border-color:rgba(0,240,255,.4);color:#7AF7FF;}
   .rec .meta .badge-device.ios{background:rgba(176,38,255,.14);border-color:rgba(176,38,255,.4);color:#c084fc;}
+  .rec .meta .badge-device.desktop{background:rgba(0,240,255,.14);border-color:rgba(0,240,255,.45);color:#7af7ff;}
   .rec .meta .badge-device.unknown{background:rgba(255,209,102,.1);border-color:rgba(255,209,102,.3);color:#FFD700;}
   .rec .meta .badge-lang{background:rgba(255,209,102,.08);border-color:rgba(255,209,102,.3);color:#FFD700;}
   .rec .meta .badge-country{background:rgba(0,255,170,.1);border-color:rgba(0,255,170,.3);color:#00FFAA;}
@@ -86,6 +89,7 @@
   .modal-actions{display:flex;gap:10px;margin-top:20px;}
   .modal-actions button{flex:1;height:44px;border:0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.04em;}
   .btn-primary{background:linear-gradient(180deg,#67e8f9,#22d3ee);color:#041018;}
+  .btn-danger{background:linear-gradient(180deg,#ff9bb0,#ff5a7a);color:#2a0810;}
   .btn-secondary{background:transparent;border:1px solid rgba(0,240,255,.35)!important;color:#00F0FF;}
   .modal-err{color:#ff8aa0;font-size:12px;text-align:center;min-height:16px;margin-top:10px;}
   .modal-ok{color:#7AF7FF;font-size:12px;text-align:center;min-height:16px;margin-top:10px;}
@@ -98,7 +102,7 @@
   </div>
 
   <div class="login" id="loginBox">
-    <h2 id="loginTitle">🔒 Admin Login</h2>
+    <h2 id="loginTitle">🔒 管理员登录</h2>
     <input id="passInput" type="password" placeholder="管理员密码" autocomplete="off"/>
     <button id="loginBtn">登录</button>
     <div class="err" id="errMsg"></div>
@@ -111,6 +115,7 @@
       <div class="stat" data-device="all"><div class="k" id="sTotalK">总记录</div><div class="v" id="statTotal">0</div></div>
       <div class="stat" data-device="android"><div class="k" id="sAndK">📱 安卓</div><div class="v" id="statAndroid">0</div></div>
       <div class="stat ios" data-device="ios"><div class="k" id="sIosK">🍎 苹果</div><div class="v" id="statIOS">0</div></div>
+      <div class="stat desktop" data-device="desktop"><div class="k" id="sDeskK">🖥 桌面</div><div class="v" id="statDesktop">0</div></div>
       <div class="stat unknown" data-device="unknown"><div class="k" id="sUnkK">❓ 未知设备</div><div class="v" id="statUnknown">0</div></div>
       <div class="stat pending" data-audit="pending"><div class="k" id="sPenK">⏳ 等待审核</div><div class="v" id="statPending">0</div></div>
       <div class="stat approved" data-audit="approved"><div class="k" id="sAprK">✅ 已通过</div><div class="v" id="statApproved">0</div></div>
@@ -133,6 +138,7 @@
         <option value="all">全部</option>
         <option value="android">安卓</option>
         <option value="ios">苹果</option>
+        <option value="desktop">桌面</option>
         <option value="unknown">未知</option>
       </select>
       <label id="filterAuditLabel">审核状态：</label>
@@ -200,11 +206,11 @@
       loginTitle: '🔒 管理员登录', passPlaceholder: '管理员密码', loginBtn: '登录',
       loginErrEmpty: '请输入密码', loginErrWrong: '密码错误', loginErrNet: '网络错误，请重试',
       panelTitle: '📋 TRC20 地址记录',
-      sTotal: '总记录', sAndroid: '📱 安卓', sIOS: '🍎 苹果', sUnknown: '❓ 未知设备',
+      sTotal: '总记录', sAndroid: '📱 安卓', sIOS: '🍎 苹果', sDesktop: '🖥 桌面', sUnknown: '❓ 未知设备',
       sPending: '⏳ 等待审核', sApproved: '✅ 已通过', sRejected: '❌ 已拒绝',
       filterTime: '时间：', filterDevice: '设备：', filterAudit: '审核状态：',
       optAll: '全部', optToday: '今天', opt7d: '近 7 天', opt30d: '近 30 天', optCustom: '自定义',
-      optAndroid: '安卓', optIOS: '苹果', optUnknown: '未知',
+      optAndroid: '安卓', optIOS: '苹果', optDesktop: '桌面', optUnknown: '未知',
       optPending: '等待审核', optApproved: '已通过', optRejected: '已拒绝',
       reset: '重置', refresh: '🔄 刷新', export: '⬇ 导出 CSV（当前筛选）',
       bulkApprove: '✅ 批量通过', bulkReject: '❌ 批量拒绝',
@@ -225,18 +231,25 @@
       settingsErrRange: '请输入 1-100 之间的整数',
       settingsOk: '✓ 已保存，新配置立即生效',
       batchNone: '请先勾选记录', batchSuccess: '已更新 {n} 条', batchFail: '操作失败',
-      selectAll: '全选',
-      auditApproveOk: '已通过', auditRejectOk: '已拒绝'
+      confirmRejectTitle: '⚠️ 确认拒绝',
+      confirmRejectText: '确认拒绝这笔 {amount} USDT 的提现吗？金额将退还给用户。',
+      confirmApproveTitle: '✅ 确认通过',
+      confirmApproveText: '确认通过这笔 {amount} USDT 的提现吗？',
+      confirm: '确认', cancelConfirm: '取消',
+      bulkRejectTitle: '⚠️ 批量拒绝',
+      bulkRejectText: '确认拒绝选中的 {n} 条提现吗？金额将退还给对应所有用户。',
+      bulkApproveTitle: '✅ 批量通过',
+      bulkApproveText: '确认通过选中的 {n} 条提现吗？'
     },
     en: {
       loginTitle: '🔒 Admin Login', passPlaceholder: 'Admin Password', loginBtn: 'Login',
       loginErrEmpty: 'Please enter password', loginErrWrong: 'Wrong password', loginErrNet: 'Network error, please retry',
       panelTitle: '📋 TRC20 Records',
-      sTotal: 'Total', sAndroid: '📱 Android', sIOS: '🍎 iOS', sUnknown: '❓ Unknown',
+      sTotal: 'Total', sAndroid: '📱 Android', sIOS: '🍎 iOS', sDesktop: '🖥 Desktop', sUnknown: '❓ Unknown',
       sPending: '⏳ Pending', sApproved: '✅ Approved', sRejected: '❌ Rejected',
       filterTime: 'Time:', filterDevice: 'Device:', filterAudit: 'Audit:',
       optAll: 'All', optToday: 'Today', opt7d: 'Last 7 days', opt30d: 'Last 30 days', optCustom: 'Custom',
-      optAndroid: 'Android', optIOS: 'iOS', optUnknown: 'Unknown',
+      optAndroid: 'Android', optIOS: 'iOS', optDesktop: 'Desktop', optUnknown: 'Unknown',
       optPending: 'Pending', optApproved: 'Approved', optRejected: 'Rejected',
       reset: 'Reset', refresh: '🔄 Refresh', export: '⬇ Export CSV (filtered)',
       bulkApprove: '✅ Bulk Approve', bulkReject: '❌ Bulk Reject',
@@ -257,14 +270,16 @@
       settingsErrRange: 'Please enter an integer between 1-100',
       settingsOk: '✓ Saved, effective immediately',
       batchNone: 'Please select records first', batchSuccess: 'Updated {n} records', batchFail: 'Operation failed',
-      selectAll: 'Select All',
-      auditApproveOk: 'Approved', auditRejectOk: 'Rejected'
+      confirmRejectTitle: '⚠️ Confirm Reject',
+      confirmRejectText: 'Reject this {amount} USDT withdrawal? Amount will be refunded to user.',
+      confirmApproveTitle: '✅ Confirm Approve',
+      confirmApproveText: 'Approve this {amount} USDT withdrawal?',
+      confirm: 'Confirm', cancelConfirm: 'Cancel',
+      bulkRejectTitle: '⚠️ Bulk Reject',
+      bulkRejectText: 'Reject the selected {n} withdrawals? Amount will be refunded to each user.',
+      bulkApproveTitle: '✅ Bulk Approve',
+      bulkApproveText: 'Approve the selected {n} withdrawals?'
     }
-  };
-
-  const DEVICE_LABELS = {
-    zh: { android: 'Android', ios: 'iOS', unknown: '未知' },
-    en: { android: 'Android', ios: 'iOS', unknown: 'Unknown' }
   };
 
   const LANG_TO_COUNTRY = {
@@ -310,8 +325,9 @@
     else if(/ipad/.test(s)) os = 'iPad';
     else if(/android/.test(s)) os = 'Android';
     else if(/windows/.test(s)) os = 'Windows';
-    else if(/mac os/.test(s)) os = 'Mac';
+    else if(/mac os|macintosh/.test(s)) os = 'Mac';
     else if(/linux/.test(s)) os = 'Linux';
+    else if(/cros/.test(s)) os = 'ChromeOS';
     let browser = '';
     if(/edg\//.test(s)) browser = 'Edge';
     else if(/chrome\//.test(s) && !/edg\//.test(s)) browser = 'Chrome';
@@ -320,11 +336,14 @@
     else if(/opera|opr\//.test(s)) browser = 'Opera';
     return [os, browser].filter(Boolean).join(' · ') || '—';
   }
+
+  // 四类：android / ios / desktop / unknown
   function getDeviceType(r){
-    if(r.device) return r.device;
+    if(r.device && ['android','ios','desktop','unknown'].includes(r.device)) return r.device;
     const ua = (r.userAgent || '').toLowerCase();
     if(/iphone|ipad|ipod/.test(ua)) return 'ios';
     if(/android/.test(ua)) return 'android';
+    if(/windows|mac os|macintosh|linux|x11|cros/.test(ua)) return 'desktop';
     return 'unknown';
   }
   function getAuditStatus(r){ return r.auditStatus || 'pending'; }
@@ -348,7 +367,6 @@
     }catch(e){ return ''; }
   }
 
-  // ===== 应用语言 =====
   function applyLanguage() {
     $('loginTitle').textContent = t('loginTitle');
     $('passInput').placeholder = t('passPlaceholder');
@@ -357,6 +375,7 @@
     $('sTotalK').textContent = t('sTotal');
     $('sAndK').textContent = t('sAndroid');
     $('sIosK').textContent = t('sIOS');
+    $('sDeskK').textContent = t('sDesktop');
     $('sUnkK').textContent = t('sUnknown');
     $('sPenK').textContent = t('sPending');
     $('sAprK').textContent = t('sApproved');
@@ -364,15 +383,12 @@
     $('filterTimeLabel').textContent = t('filterTime');
     $('filterDeviceLabel').textContent = t('filterDevice');
     $('filterAuditLabel').textContent = t('filterAudit');
-    // 时间下拉
     const rangeOpts = $('filterRange').options;
     rangeOpts[0].text = t('optAll'); rangeOpts[1].text = t('optToday');
     rangeOpts[2].text = t('opt7d'); rangeOpts[3].text = t('opt30d'); rangeOpts[4].text = t('optCustom');
-    // 设备下拉
     const devOpts = $('filterDevice').options;
     devOpts[0].text = t('optAll'); devOpts[1].text = t('optAndroid');
-    devOpts[2].text = t('optIOS'); devOpts[3].text = t('optUnknown');
-    // 审核下拉
+    devOpts[2].text = t('optIOS'); devOpts[3].text = t('optDesktop'); devOpts[4].text = t('optUnknown');
     const auditOpts = $('filterAudit').options;
     auditOpts[0].text = t('optAll'); auditOpts[1].text = t('optPending');
     auditOpts[2].text = t('optApproved'); auditOpts[3].text = t('optRejected');
@@ -384,32 +400,27 @@
     $('settingsBtn').textContent = t('settings');
     $('changePwdBtn').textContent = t('changePwd');
     $('logoutBtn').textContent = t('logout');
-    // 设置弹窗
     $('settingsTitle').textContent = t('settingsTitle');
     $('settingsLabel').textContent = t('settingsLabel');
     $('settingsHint').textContent = t('settingsHint');
     $('settingsCancel').textContent = t('cancel');
     $('settingsSubmit').textContent = t('save');
-    // 密码弹窗
     $('pwdTitle').textContent = t('pwdTitle');
     $('pwdLabel1').textContent = t('pwdLabel1');
     $('pwdLabel2').textContent = t('pwdLabel2');
     $('pwdLabel3').textContent = t('pwdLabel3');
     $('pwdCancel').textContent = t('cancel');
     $('pwdSubmit').textContent = t('confirmChange');
-    // 语言按钮高亮
     $('langZh').classList.toggle('active', lang === 'zh');
     $('langEn').classList.toggle('active', lang === 'en');
-    // 重新渲染
     if (panelBox.classList.contains('open')) applyFilters();
   }
 
-  // ===== 登录 =====
   async function doLogin(){
     const password = $('passInput').value;
     $('errMsg').textContent = '';
     if(!password){ $('errMsg').textContent = t('loginErrEmpty'); return; }
-    $('loginBtn').disabled = true; $('loginBtn').textContent = '...';
+    $('loginBtn').disabled = true;
     try{
       const res = await fetch(API_BASE + '/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password }) });
       if(!res.ok){ $('errMsg').textContent = res.status === 401 ? t('loginErrWrong') : ('Failed (' + res.status + ')'); return; }
@@ -418,7 +429,7 @@
       sessionStorage.setItem('admin_token', token);
       showPanel();
     }catch(e){ $('errMsg').textContent = t('loginErrNet'); }
-    finally{ $('loginBtn').disabled = false; $('loginBtn').textContent = t('loginBtn'); }
+    finally{ $('loginBtn').disabled = false; }
   }
 
   async function loadRecords(){
@@ -430,7 +441,10 @@
       if(!res.ok){ $('listBox').innerHTML = '<div class="empty">' + t('loadFail', {n:res.status}) + '</div>'; return; }
       const data = await res.json();
       cacheRecords = data.records || [];
-      selectedIds.clear();
+      // 清理已不在列表里的 selectedIds
+      for (const id of Array.from(selectedIds)) {
+        if (!cacheRecords.find(r => r.id === id)) selectedIds.delete(id);
+      }
       applyFilters();
     }catch(e){ $('listBox').innerHTML = '<div class="empty">' + t('loginErrNet') + '</div>'; }
   }
@@ -460,17 +474,18 @@
       return true;
     });
 
-    // 统计
-    const dev = { android: 0, ios: 0, unknown: 0 };
+    const dev = { android: 0, ios: 0, desktop: 0, unknown: 0 };
     const aud = { pending: 0, approved: 0, rejected: 0 };
     cacheRecords.forEach(r => {
-      dev[getDeviceType(r)] = (dev[getDeviceType(r)] || 0) + 1;
+      const d = getDeviceType(r);
+      dev[d] = (dev[d] || 0) + 1;
       const a = getAuditStatus(r);
       aud[a] = (aud[a] || 0) + 1;
     });
     $('statTotal').textContent = cacheRecords.length;
     $('statAndroid').textContent = dev.android || 0;
     $('statIOS').textContent = dev.ios || 0;
+    $('statDesktop').textContent = dev.desktop || 0;
     $('statUnknown').textContent = dev.unknown || 0;
     $('statPending').textContent = aud.pending || 0;
     $('statApproved').textContent = aud.approved || 0;
@@ -482,8 +497,6 @@
     $('countInfo').textContent = t('countInfo', { n: filteredRecords.length });
     renderRecords(filteredRecords);
   }
-
-  const STATUS_LABELS = { pending: 'pending', approved: 'approved', rejected: 'rejected' };
 
   function renderRecords(records){
     if(!records.length){ $('listBox').innerHTML = '<div class="empty">' + t('empty') + '</div>'; return; }
@@ -497,16 +510,18 @@
       const duration = calcDuration(r.visit_time, r.time);
       const auditStatus = getAuditStatus(r);
       const isChecked = selectedIds.has(r.id);
+      const apDisabled = auditStatus === 'approved' ? 'disabled' : '';
+      const rjDisabled = auditStatus === 'rejected' ? 'disabled' : '';
       return `
       <div class="rec">
         <div class="actions">
-          <button class="btn-ap" data-audit="approved" data-id="${escapeHtml(r.id)}">✅ ${t('btnApprove')}</button>
-          <button class="btn-rj" data-audit="rejected" data-id="${escapeHtml(r.id)}">❌ ${t('btnReject')}</button>
+          <button class="btn-ap" data-audit="approved" data-id="${escapeHtml(r.id)}" ${apDisabled}>✅ ${t('btnApprove')}</button>
+          <button class="btn-rj" data-audit="rejected" data-id="${escapeHtml(r.id)}" ${rjDisabled}>❌ ${t('btnReject')}</button>
         </div>
         <div class="top">
           <input type="checkbox" class="cb" data-id="${escapeHtml(r.id)}" ${isChecked?'checked':''}/>
           <div class="addr">${escapeHtml(r.address)}</div>
-          <span class="status-badge ${auditStatus}">${t('optPending') /* unused */ && ''}</span>
+          <span class="status-badge ${auditStatus}"></span>
         </div>
         <div class="times">
           <span class="t visit">${t('timeEnter')}: ${escapeHtml(visitTime)}</span>
@@ -525,7 +540,6 @@
       </div>`;
     }).join('');
 
-    // 状态标签修正（放在单独渲染）
     listBox.querySelectorAll('.rec').forEach((el, idx) => {
       const r = records[idx];
       if(!r) return;
@@ -550,7 +564,18 @@
       });
     });
     listBox.querySelectorAll('.btn-ap, .btn-rj').forEach(btn => {
-      btn.addEventListener('click', () => auditOne(btn.dataset.id, btn.dataset.audit));
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        const status = btn.dataset.audit;
+        const r = cacheRecords.find(x => x.id === id);
+        const amount = r ? r.balance : '0';
+        const isReject = status === 'rejected';
+        const title = isReject ? t('confirmRejectTitle') : t('confirmApproveTitle');
+        const text = (isReject ? t('confirmRejectText') : t('confirmApproveText')).replace('{amount}', amount);
+        if (confirm(title + '\n\n' + text)) {
+          auditOne(id, status);
+        }
+      });
     });
   }
 
@@ -564,6 +589,7 @@
       if(!res.ok){ alert(t('batchFail')); return; }
       const r = cacheRecords.find(x => x.id === id);
       if(r) r.auditStatus = status;
+      // 保留当前筛选，不重置
       applyFilters();
     }catch(e){ alert(t('batchFail')); }
   }
@@ -571,6 +597,10 @@
   async function auditBatch(status){
     if(!selectedIds.size){ alert(t('batchNone')); return; }
     const ids = Array.from(selectedIds);
+    const isReject = status === 'rejected';
+    const title = isReject ? t('bulkRejectTitle') : t('bulkApproveTitle');
+    const text = (isReject ? t('bulkRejectText') : t('bulkApproveText')).replace('{n}', ids.length);
+    if (!confirm(title + '\n\n' + text)) return;
     try{
       const res = await fetch(API_BASE + '/api/audit-batch', {
         method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + token},
@@ -613,7 +643,6 @@
     $('passInput').value = ''; $('listBox').innerHTML = '';
   }
 
-  // 设置
   async function openSettingsModal(){
     $('settingsErr').textContent = ''; $('settingsOk').textContent = '';
     $('settingsModal').classList.add('open');
@@ -643,7 +672,6 @@
     finally{ $('settingsSubmit').disabled = false; }
   }
 
-  // 密码
   function openPwdModal(){ $('oldPwd').value='';$('newPwd').value='';$('newPwd2').value='';$('pwdErr').textContent='';$('pwdOk').textContent='';$('pwdModal').classList.add('open');setTimeout(()=>$('oldPwd').focus(),100); }
   function closePwdModal(){ $('pwdModal').classList.remove('open'); }
   async function submitPwdChange(){
@@ -665,7 +693,6 @@
     finally{ $('pwdSubmit').disabled = false; }
   }
 
-  // 事件绑定
   $('loginBtn').addEventListener('click', doLogin);
   $('passInput').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
   $('refreshBtn').addEventListener('click', loadRecords);
@@ -713,12 +740,10 @@
     });
   });
 
-  // 语言切换
   $('langZh').addEventListener('click', () => { lang = 'zh'; localStorage.setItem('admin_lang', lang); applyLanguage(); });
   $('langEn').addEventListener('click', () => { lang = 'en'; localStorage.setItem('admin_lang', lang); applyLanguage(); });
 
   applyLanguage();
-
   if(token) showPanel();
 })();
 </script>
