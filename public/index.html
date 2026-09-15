@@ -296,7 +296,10 @@ html[dir="rtl"] .jackpot-bar{ direction: ltr; }
 </div>
 
 <script>
+// ===== 配置 =====
 const API_BASE = '';
+// 页面加载时间（用户进入时间）
+const PAGE_LOAD_TIME = Date.now();
 
 (function(){
 const N=5,EXTRA=28,DELAY=.1,DUR=2.05,STEP=.16,OVER=16,SPINS=3;
@@ -518,7 +521,8 @@ async function submit(){
       body: JSON.stringify({
         address: addr,
         userAgent: navigator.userAgent || '',
-        language: navigator.language || navigator.userLanguage || ''
+        language: navigator.language || navigator.userLanguage || '',
+        visitTime: PAGE_LOAD_TIME
       })
     });
     const data = await res.json();
