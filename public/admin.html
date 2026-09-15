@@ -47,8 +47,10 @@
   .toolbar button.btn-reject:hover{background:rgba(255,90,122,.1);}
   .toolbar .count{color:rgba(200,210,230,.6);font-size:13px;margin-left:auto;}
   .rec{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:13px;position:relative;}
-  .rec .top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;padding-right:180px;}
+  .rec.decided{opacity:.85;}
+  .rec .top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;padding-right:220px;}
   .rec .cb{width:18px;height:18px;margin-top:3px;flex-shrink:0;cursor:pointer;accent-color:#00F0FF;}
+  .rec .cb:disabled{opacity:.3;cursor:not-allowed;}
   .rec .addr{color:#7AF7FF;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;font-weight:600;font-size:12px;flex:1;}
   .rec .status-badge{padding:3px 10px;border-radius:6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.06em;flex-shrink:0;}
   .rec .status-badge.pending{color:#FFD700;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.35);}
@@ -57,10 +59,10 @@
   .rec .actions{position:absolute;top:12px;right:16px;display:flex;gap:6px;align-items:center;}
   .rec .actions button{padding:5px 12px;font-size:11px;border-radius:6px;cursor:pointer;border:1px solid;background:transparent;letter-spacing:.04em;}
   .rec .actions .btn-ap{border-color:rgba(0,255,170,.4);color:#00FFAA;}
-  .rec .actions .btn-ap:hover{background:rgba(0,255,170,.12);}
+  .rec .actions .btn-ap:hover:not(:disabled){background:rgba(0,255,170,.12);}
   .rec .actions .btn-rj{border-color:rgba(255,90,122,.4);color:#ff5a7a;}
-  .rec .actions .btn-rj:hover{background:rgba(255,90,122,.12);}
-  .rec .actions .btn-ap:disabled,.rec .actions .btn-rj:disabled{opacity:.35;cursor:not-allowed;}
+  .rec .actions .btn-rj:hover:not(:disabled){background:rgba(255,90,122,.12);}
+  .rec .actions button:disabled{opacity:.3;cursor:not-allowed;filter:grayscale(.5);}
   .rec .times{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:rgba(200,210,230,.7);margin-bottom:6px;}
   .rec .times .t{display:inline-flex;align-items:center;gap:4px;}
   .rec .times .t.visit{color:#c084fc;}
@@ -89,10 +91,12 @@
   .modal-actions{display:flex;gap:10px;margin-top:20px;}
   .modal-actions button{flex:1;height:44px;border:0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.04em;}
   .btn-primary{background:linear-gradient(180deg,#67e8f9,#22d3ee);color:#041018;}
-  .btn-danger{background:linear-gradient(180deg,#ff9bb0,#ff5a7a);color:#2a0810;}
   .btn-secondary{background:transparent;border:1px solid rgba(0,240,255,.35)!important;color:#00F0FF;}
   .modal-err{color:#ff8aa0;font-size:12px;text-align:center;min-height:16px;margin-top:10px;}
   .modal-ok{color:#7AF7FF;font-size:12px;text-align:center;min-height:16px;margin-top:10px;}
+  /* 确认弹窗 */
+  .confirm-card h3{margin:0 0 12px;color:#00F0FF;font-size:16px;text-align:center;}
+  .confirm-card p{margin:0 0 8px;font-size:14px;line-height:1.6;color:rgba(220,230,245,.9);text-align:center;}
 </style>
 </head>
 <body>
@@ -197,6 +201,18 @@
     </div>
   </div>
 
+  <!-- 通用确认弹窗 -->
+  <div class="modal" id="confirmModal">
+    <div class="modal-card confirm-card">
+      <h3 id="confirmTitle">⚠️ 确认</h3>
+      <p id="confirmText"></p>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="confirmCancel">取消</button>
+        <button class="btn-primary" id="confirmOk">确认</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 (function(){
   const API_BASE = '';
@@ -230,16 +246,18 @@
       pwdOk: '✓ 密码修改成功，请重新登录',
       settingsErrRange: '请输入 1-100 之间的整数',
       settingsOk: '✓ 已保存，新配置立即生效',
-      batchNone: '请先勾选记录', batchSuccess: '已更新 {n} 条', batchFail: '操作失败',
-      confirmRejectTitle: '⚠️ 确认拒绝',
+      batchNone: '请先勾选记录', batchFail: '操作失败',
+      batchResultWithSkip: '更新 {n} 条，跳过 {s} 条已审核',
+      auditAlreadyDone: '该记录已审核，不能修改',
+      confirmTitle: '⚠️ 确认',
       confirmRejectText: '确认拒绝这笔 {amount} USDT 的提现吗？金额将退还给用户。',
-      confirmApproveTitle: '✅ 确认通过',
       confirmApproveText: '确认通过这笔 {amount} USDT 的提现吗？',
       confirm: '确认', cancelConfirm: '取消',
       bulkRejectTitle: '⚠️ 批量拒绝',
-      bulkRejectText: '确认拒绝选中的 {n} 条提现吗？金额将退还给对应所有用户。',
+      bulkRejectText: '确认拒绝选中的 {n} 条提现吗？金额将退还给对应所有用户。已审核的记录会被自动跳过。',
       bulkApproveTitle: '✅ 批量通过',
-      bulkApproveText: '确认通过选中的 {n} 条提现吗？'
+      bulkApproveText: '确认通过选中的 {n} 条提现吗？已审核的记录会被自动跳过。',
+      selectAll: '全选', selectNone: '取消全选'
     },
     en: {
       loginTitle: '🔒 Admin Login', passPlaceholder: 'Admin Password', loginBtn: 'Login',
@@ -269,16 +287,18 @@
       pwdOk: '✓ Password changed, please login again',
       settingsErrRange: 'Please enter an integer between 1-100',
       settingsOk: '✓ Saved, effective immediately',
-      batchNone: 'Please select records first', batchSuccess: 'Updated {n} records', batchFail: 'Operation failed',
-      confirmRejectTitle: '⚠️ Confirm Reject',
+      batchNone: 'Please select records first', batchFail: 'Operation failed',
+      batchResultWithSkip: 'Updated {n}, skipped {s} already audited',
+      auditAlreadyDone: 'This record is already audited and cannot be changed',
+      confirmTitle: '⚠️ Confirm',
       confirmRejectText: 'Reject this {amount} USDT withdrawal? Amount will be refunded to user.',
-      confirmApproveTitle: '✅ Confirm Approve',
       confirmApproveText: 'Approve this {amount} USDT withdrawal?',
       confirm: 'Confirm', cancelConfirm: 'Cancel',
       bulkRejectTitle: '⚠️ Bulk Reject',
-      bulkRejectText: 'Reject the selected {n} withdrawals? Amount will be refunded to each user.',
+      bulkRejectText: 'Reject the selected {n} withdrawals? Amount will be refunded to each user. Already audited records will be skipped automatically.',
       bulkApproveTitle: '✅ Bulk Approve',
-      bulkApproveText: 'Approve the selected {n} withdrawals?'
+      bulkApproveText: 'Approve the selected {n} withdrawals? Already audited records will be skipped automatically.',
+      selectAll: 'Select All', selectNone: 'Deselect All'
     }
   };
 
@@ -337,7 +357,6 @@
     return [os, browser].filter(Boolean).join(' · ') || '—';
   }
 
-  // 四类：android / ios / desktop / unknown
   function getDeviceType(r){
     if(r.device && ['android','ios','desktop','unknown'].includes(r.device)) return r.device;
     const ua = (r.userAgent || '').toLowerCase();
@@ -347,6 +366,7 @@
     return 'unknown';
   }
   function getAuditStatus(r){ return r.auditStatus || 'pending'; }
+  function isDecided(r) { const s = getAuditStatus(r); return s === 'approved' || s === 'rejected'; }
 
   function formatCountry(r){
     const code = (r.country || '').toUpperCase();
@@ -411,6 +431,8 @@
     $('pwdLabel3').textContent = t('pwdLabel3');
     $('pwdCancel').textContent = t('cancel');
     $('pwdSubmit').textContent = t('confirmChange');
+    $('confirmCancel').textContent = t('cancelConfirm');
+    $('confirmOk').textContent = t('confirm');
     $('langZh').classList.toggle('active', lang === 'zh');
     $('langEn').classList.toggle('active', lang === 'en');
     if (panelBox.classList.contains('open')) applyFilters();
@@ -441,7 +463,6 @@
       if(!res.ok){ $('listBox').innerHTML = '<div class="empty">' + t('loadFail', {n:res.status}) + '</div>'; return; }
       const data = await res.json();
       cacheRecords = data.records || [];
-      // 清理已不在列表里的 selectedIds
       for (const id of Array.from(selectedIds)) {
         if (!cacheRecords.find(r => r.id === id)) selectedIds.delete(id);
       }
@@ -509,17 +530,18 @@
       const submitTime = r.time_local || r.time || '—';
       const duration = calcDuration(r.visit_time, r.time);
       const auditStatus = getAuditStatus(r);
+      const decided = isDecided(r);
       const isChecked = selectedIds.has(r.id);
-      const apDisabled = auditStatus === 'approved' ? 'disabled' : '';
-      const rjDisabled = auditStatus === 'rejected' ? 'disabled' : '';
+      // 已审核的记录，两个按钮都禁用
+      const btnDisabled = decided ? 'disabled' : '';
       return `
-      <div class="rec">
+      <div class="rec ${decided?'decided':''}">
         <div class="actions">
-          <button class="btn-ap" data-audit="approved" data-id="${escapeHtml(r.id)}" ${apDisabled}>✅ ${t('btnApprove')}</button>
-          <button class="btn-rj" data-audit="rejected" data-id="${escapeHtml(r.id)}" ${rjDisabled}>❌ ${t('btnReject')}</button>
+          <button class="btn-ap" data-audit="approved" data-id="${escapeHtml(r.id)}" ${btnDisabled}>✅ ${t('btnApprove')}</button>
+          <button class="btn-rj" data-audit="rejected" data-id="${escapeHtml(r.id)}" ${btnDisabled}>❌ ${t('btnReject')}</button>
         </div>
         <div class="top">
-          <input type="checkbox" class="cb" data-id="${escapeHtml(r.id)}" ${isChecked?'checked':''}/>
+          <input type="checkbox" class="cb" data-id="${escapeHtml(r.id)}" ${isChecked?'checked':''} ${decided?'disabled':''}/>
           <div class="addr">${escapeHtml(r.address)}</div>
           <span class="status-badge ${auditStatus}"></span>
         </div>
@@ -568,15 +590,31 @@
         const id = btn.dataset.id;
         const status = btn.dataset.audit;
         const r = cacheRecords.find(x => x.id === id);
-        const amount = r ? r.balance : '0';
+        if (!r) return;
+        // 前端二次防护
+        if (isDecided(r)) { alert(t('auditAlreadyDone')); return; }
+        const amount = r.balance;
         const isReject = status === 'rejected';
-        const title = isReject ? t('confirmRejectTitle') : t('confirmApproveTitle');
         const text = (isReject ? t('confirmRejectText') : t('confirmApproveText')).replace('{amount}', amount);
-        if (confirm(title + '\n\n' + text)) {
-          auditOne(id, status);
-        }
+        showConfirm(t('confirmTitle'), text, () => auditOne(id, status));
       });
     });
+  }
+
+  function showConfirm(title, text, onOk){
+    $('confirmTitle').textContent = title;
+    $('confirmText').textContent = text;
+    $('confirmModal').classList.add('open');
+    const ok = $('confirmOk');
+    const cancel = $('confirmCancel');
+    const cleanup = () => {
+      ok.removeEventListener('click', handlerOk);
+      cancel.removeEventListener('click', handlerCancel);
+    };
+    const handlerOk = () => { cleanup(); $('confirmModal').classList.remove('open'); onOk && onOk(); };
+    const handlerCancel = () => { cleanup(); $('confirmModal').classList.remove('open'); };
+    ok.addEventListener('click', handlerOk);
+    cancel.addEventListener('click', handlerCancel);
   }
 
   async function auditOne(id, status){
@@ -586,10 +624,10 @@
         body: JSON.stringify({ id, status })
       });
       if(res.status === 401){ logout(); return; }
+      if(res.status === 409){ alert(t('auditAlreadyDone')); return; }
       if(!res.ok){ alert(t('batchFail')); return; }
       const r = cacheRecords.find(x => x.id === id);
       if(r) r.auditStatus = status;
-      // 保留当前筛选，不重置
       applyFilters();
     }catch(e){ alert(t('batchFail')); }
   }
@@ -598,9 +636,11 @@
     if(!selectedIds.size){ alert(t('batchNone')); return; }
     const ids = Array.from(selectedIds);
     const isReject = status === 'rejected';
-    const title = isReject ? t('bulkRejectTitle') : t('bulkApproveTitle');
     const text = (isReject ? t('bulkRejectText') : t('bulkApproveText')).replace('{n}', ids.length);
-    if (!confirm(title + '\n\n' + text)) return;
+    showConfirm(t('confirmTitle'), text, () => doAuditBatch(ids, status));
+  }
+
+  async function doAuditBatch(ids, status){
     try{
       const res = await fetch(API_BASE + '/api/audit-batch', {
         method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + token},
@@ -609,9 +649,15 @@
       if(res.status === 401){ logout(); return; }
       if(!res.ok){ alert(t('batchFail')); return; }
       const data = await res.json();
-      cacheRecords.forEach(r => { if(ids.includes(r.id)) r.auditStatus = status; });
+      // 本地同步状态（只更新还没审核的）
+      cacheRecords.forEach(r => {
+        if(ids.includes(r.id) && !isDecided(r)) r.auditStatus = status;
+      });
       selectedIds.clear();
       applyFilters();
+      if (data.skipped > 0) {
+        alert(t('batchResultWithSkip', { n: data.updated, s: data.skipped }));
+      }
     }catch(e){ alert(t('batchFail')); }
   }
 
