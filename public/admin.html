@@ -7,6 +7,9 @@
 <style>
   *{box-sizing:border-box;}
   body{margin:0;background:#0B0C10;color:#e8eefc;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;padding:24px;}
+  .lang-switch{position:fixed;top:14px;right:18px;z-index:100;display:flex;gap:6px;}
+  .lang-switch button{padding:6px 12px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:rgba(19,21,31,.85);color:#00F0FF;cursor:pointer;font-size:12px;letter-spacing:.06em;}
+  .lang-switch button.active{background:rgba(0,240,255,.15);border-color:rgba(0,240,255,.7);}
   .login{max-width:380px;margin:80px auto;background:linear-gradient(180deg,#1a1d2c,#10121a);padding:32px;border-radius:16px;box-shadow:0 0 0 1px rgba(0,240,255,.3),0 24px 48px rgba(0,0,0,.5);}
   .login h2{margin:0 0 20px;color:#00F0FF;font-size:18px;text-align:center;letter-spacing:.08em;}
   .login input{width:100%;height:46px;padding:0 14px;border-radius:10px;border:1px solid rgba(0,240,255,.35);background:#0a0c14;color:#fff;font-size:15px;outline:none;}
@@ -14,30 +17,48 @@
   .login button{width:100%;height:46px;margin-top:14px;border:0;border-radius:10px;background:linear-gradient(180deg,#67e8f9,#22d3ee);color:#041018;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.06em;}
   .login button:active{transform:translateY(2px);}
   .login .err{color:#ff8aa0;font-size:13px;text-align:center;min-height:18px;margin-top:12px;}
-  .panel{display:none;max-width:1100px;margin:0 auto;}
+  .panel{display:none;max-width:1200px;margin:0 auto;}
   .panel.open{display:block;}
   .panel h1{color:#00F0FF;font-size:20px;margin:0 0 16px;letter-spacing:.06em;}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
   .stat{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;cursor:pointer;transition:all .18s;}
   .stat:hover{border-color:rgba(0,240,255,.4);transform:translateY(-1px);}
   .stat.active{border-color:rgba(0,240,255,.7);background:rgba(0,240,255,.06);}
   .stat .k{font-size:11px;color:rgba(200,210,230,.6);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
   .stat .v{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:22px;color:#7AF7FF;}
-  .stat.android .v{color:#7AF7FF;}
   .stat.ios .v{color:#c084fc;}
   .stat.unknown .v{color:#FFD700;}
+  .stat.pending .v{color:#FFD700;}
+  .stat.approved .v{color:#00FFAA;}
+  .stat.rejected .v{color:#ff5a7a;}
   .filters{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;}
   .filters label{font-size:12px;color:rgba(200,210,230,.7);margin-right:4px;}
   .filters select,.filters input{height:34px;padding:0 10px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:#0a0c14;color:#e8eefc;font-size:13px;outline:none;}
-  .filters select:focus,.filters input:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,240,255,.2);}
-  .filters button{padding:8px 16px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;font-size:13px;transition:background .2s;}
+  .filters select:focus,.filters input:focus{border-color:#00F0FF;box-shadow:0 0 10px rgba(0,240,255,.2);}
+  .filters button{padding:8px 16px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;font-size:13px;}
   .filters button:hover{background:rgba(0,240,255,.1);}
   .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
   .toolbar button{padding:8px 16px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;font-size:13px;transition:background .2s;}
   .toolbar button:hover{background:rgba(0,240,255,.1);}
+  .toolbar button.btn-approve{border-color:rgba(0,255,170,.4);color:#00FFAA;}
+  .toolbar button.btn-approve:hover{background:rgba(0,255,170,.1);}
+  .toolbar button.btn-reject{border-color:rgba(255,90,122,.4);color:#ff5a7a;}
+  .toolbar button.btn-reject:hover{background:rgba(255,90,122,.1);}
   .toolbar .count{color:rgba(200,210,230,.6);font-size:13px;margin-left:auto;}
-  .rec{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:13px;}
-  .rec .addr{color:#7AF7FF;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;font-weight:600;margin-bottom:6px;font-size:12px;}
+  .rec{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:13px;position:relative;}
+  .rec .top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+  .rec .cb{width:18px;height:18px;margin-top:3px;flex-shrink:0;cursor:pointer;accent-color:#00F0FF;}
+  .rec .addr{color:#7AF7FF;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;font-weight:600;font-size:12px;flex:1;}
+  .rec .status-badge{padding:3px 10px;border-radius:6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.06em;flex-shrink:0;}
+  .rec .status-badge.pending{color:#FFD700;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.35);}
+  .rec .status-badge.approved{color:#00FFAA;background:rgba(0,255,170,.1);border:1px solid rgba(0,255,170,.35);}
+  .rec .status-badge.rejected{color:#ff5a7a;background:rgba(255,90,122,.1);border:1px solid rgba(255,90,122,.35);}
+  .rec .actions{position:absolute;top:12px;right:16px;display:flex;gap:6px;align-items:center;}
+  .rec .actions button{padding:5px 12px;font-size:11px;border-radius:6px;cursor:pointer;border:1px solid;background:transparent;letter-spacing:.04em;}
+  .rec .actions .btn-ap{border-color:rgba(0,255,170,.4);color:#00FFAA;}
+  .rec .actions .btn-ap:hover{background:rgba(0,255,170,.12);}
+  .rec .actions .btn-rj{border-color:rgba(255,90,122,.4);color:#ff5a7a;}
+  .rec .actions .btn-rj:hover{background:rgba(255,90,122,.12);}
   .rec .times{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:rgba(200,210,230,.7);margin-bottom:6px;}
   .rec .times .t{display:inline-flex;align-items:center;gap:4px;}
   .rec .times .t.visit{color:#c084fc;}
@@ -46,14 +67,13 @@
   .rec .meta{color:rgba(200,210,230,.6);font-size:11px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
   .rec .meta span{display:inline-flex;align-items:center;gap:4px;}
   .rec .meta .badge{padding:2px 8px;border-radius:6px;background:rgba(0,240,255,.08);border:1px solid rgba(0,240,255,.2);color:#7AF7FF;}
-  .rec .meta .badge-device{background:rgba(176,38,255,.1);border-color:rgba(176,38,255,.3);color:#c084fc;}
-  .rec .meta .badge-lang{background:rgba(255,209,102,.08);border-color:rgba(255,209,102,.3);color:#FFD700;}
-  .rec .meta .badge-country{background:rgba(0,255,170,.1);border-color:rgba(0,255,170,.3);color:#00FFAA;}
   .rec .meta .badge-device.android{background:rgba(0,240,255,.12);border-color:rgba(0,240,255,.4);color:#7AF7FF;}
   .rec .meta .badge-device.ios{background:rgba(176,38,255,.14);border-color:rgba(176,38,255,.4);color:#c084fc;}
   .rec .meta .badge-device.unknown{background:rgba(255,209,102,.1);border-color:rgba(255,209,102,.3);color:#FFD700;}
+  .rec .meta .badge-lang{background:rgba(255,209,102,.08);border-color:rgba(255,209,102,.3);color:#FFD700;}
+  .rec .meta .badge-country{background:rgba(0,255,170,.1);border-color:rgba(0,255,170,.3);color:#00FFAA;}
   .empty{color:rgba(200,210,230,.5);text-align:center;padding:60px 0;font-size:14px;}
-  .copy-btn{margin-left:auto;padding:2px 8px;font-size:10px;border-radius:6px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;}
+  .copy-btn{padding:2px 8px;font-size:10px;border-radius:6px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;margin-left:auto;}
   .copy-btn:hover{background:rgba(0,240,255,.1);}
   .modal{position:fixed;inset:0;background:rgba(4,6,12,.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .modal.open{display:flex;}
@@ -72,25 +92,33 @@
 </style>
 </head>
 <body>
+  <div class="lang-switch">
+    <button id="langZh" class="active">中文</button>
+    <button id="langEn">English</button>
+  </div>
+
   <div class="login" id="loginBox">
-    <h2>🔒 Admin Login</h2>
+    <h2 id="loginTitle">🔒 Admin Login</h2>
     <input id="passInput" type="password" placeholder="管理员密码" autocomplete="off"/>
     <button id="loginBtn">登录</button>
     <div class="err" id="errMsg"></div>
   </div>
 
   <div class="panel" id="panelBox">
-    <h1>📋 TRC20 地址记录</h1>
+    <h1 id="panelTitle">📋 TRC20 地址记录</h1>
 
     <div class="stats" id="statsBox">
-      <div class="stat" data-device="all"><div class="k">总记录</div><div class="v" id="statTotal">0</div></div>
-      <div class="stat android" data-device="android"><div class="k">📱 安卓</div><div class="v" id="statAndroid">0</div></div>
-      <div class="stat ios" data-device="ios"><div class="k">🍎 苹果</div><div class="v" id="statIOS">0</div></div>
-      <div class="stat unknown" data-device="unknown"><div class="k">❓ 未知设备</div><div class="v" id="statUnknown">0</div></div>
+      <div class="stat" data-device="all"><div class="k" id="sTotalK">总记录</div><div class="v" id="statTotal">0</div></div>
+      <div class="stat" data-device="android"><div class="k" id="sAndK">📱 安卓</div><div class="v" id="statAndroid">0</div></div>
+      <div class="stat ios" data-device="ios"><div class="k" id="sIosK">🍎 苹果</div><div class="v" id="statIOS">0</div></div>
+      <div class="stat unknown" data-device="unknown"><div class="k" id="sUnkK">❓ 未知设备</div><div class="v" id="statUnknown">0</div></div>
+      <div class="stat pending" data-audit="pending"><div class="k" id="sPenK">⏳ 等待审核</div><div class="v" id="statPending">0</div></div>
+      <div class="stat approved" data-audit="approved"><div class="k" id="sAprK">✅ 已通过</div><div class="v" id="statApproved">0</div></div>
+      <div class="stat rejected" data-audit="rejected"><div class="k" id="sRejK">❌ 已拒绝</div><div class="v" id="statRejected">0</div></div>
     </div>
 
     <div class="filters">
-      <label>时间：</label>
+      <label id="filterTimeLabel">时间：</label>
       <select id="filterRange">
         <option value="all">全部</option>
         <option value="today">今天</option>
@@ -100,12 +128,19 @@
       </select>
       <input type="date" id="filterFrom" style="display:none"/>
       <input type="date" id="filterTo" style="display:none"/>
-      <label>设备：</label>
+      <label id="filterDeviceLabel">设备：</label>
       <select id="filterDevice">
         <option value="all">全部</option>
         <option value="android">安卓</option>
         <option value="ios">苹果</option>
         <option value="unknown">未知</option>
+      </select>
+      <label id="filterAuditLabel">审核状态：</label>
+      <select id="filterAudit">
+        <option value="all">全部</option>
+        <option value="pending">等待审核</option>
+        <option value="approved">已通过</option>
+        <option value="rejected">已拒绝</option>
       </select>
       <button id="resetFilters">重置</button>
     </div>
@@ -113,6 +148,8 @@
     <div class="toolbar">
       <button id="refreshBtn">🔄 刷新</button>
       <button id="exportBtn">⬇ 导出 CSV（当前筛选）</button>
+      <button id="bulkApproveBtn" class="btn-approve">✅ 批量通过</button>
+      <button id="bulkRejectBtn" class="btn-reject">❌ 批量拒绝</button>
       <button id="settingsBtn">⚙️ 设置</button>
       <button id="changePwdBtn">🔑 修改密码</button>
       <button id="logoutBtn">🚪 退出</button>
@@ -123,10 +160,10 @@
 
   <div class="modal" id="settingsModal">
     <div class="modal-card">
-      <h3>⚙️ 每日提现次数设置</h3>
-      <label>每个 IP 每天可完整提现的次数</label>
+      <h3 id="settingsTitle">⚙️ 每日提现次数设置</h3>
+      <label id="settingsLabel">每个 IP 每天可完整提现的次数</label>
       <input id="dailyLimitInput" type="number" min="1" max="100" value="1"/>
-      <div class="hint">例如设为 2，则每个 IP 每天可完整玩 2 轮。北京时间 0 点重置。</div>
+      <div class="hint" id="settingsHint">例如设为 2，则每个 IP 每天可完整玩 2 轮。北京时间 0 点重置。</div>
       <div class="modal-err" id="settingsErr"></div>
       <div class="modal-ok" id="settingsOk"></div>
       <div class="modal-actions">
@@ -138,12 +175,12 @@
 
   <div class="modal" id="pwdModal">
     <div class="modal-card">
-      <h3>🔑 修改管理员密码</h3>
-      <label>当前密码</label>
+      <h3 id="pwdTitle">🔑 修改管理员密码</h3>
+      <label id="pwdLabel1">当前密码</label>
       <input id="oldPwd" type="password" autocomplete="off"/>
-      <label>新密码（至少 6 位）</label>
+      <label id="pwdLabel2">新密码（至少 6 位）</label>
       <input id="newPwd" type="password" autocomplete="off"/>
-      <label>确认新密码</label>
+      <label id="pwdLabel3">确认新密码</label>
       <input id="newPwd2" type="password" autocomplete="off"/>
       <div class="modal-err" id="pwdErr"></div>
       <div class="modal-ok" id="pwdOk"></div>
@@ -158,26 +195,110 @@
 (function(){
   const API_BASE = '';
 
-  const $ = id => document.getElementById(id);
-  const loginBox = $('loginBox'), panelBox = $('panelBox');
-  const passInput = $('passInput'), loginBtn = $('loginBtn'), errMsg = $('errMsg');
-  const listBox = $('listBox'), countInfo = $('countInfo');
-  const refreshBtn = $('refreshBtn'), exportBtn = $('exportBtn'), logoutBtn = $('logoutBtn');
-  const changePwdBtn = $('changePwdBtn'), settingsBtn = $('settingsBtn');
-  const pwdModal = $('pwdModal'), settingsModal = $('settingsModal');
-  const oldPwd = $('oldPwd'), newPwd = $('newPwd'), newPwd2 = $('newPwd2');
-  const pwdErr = $('pwdErr'), pwdOk = $('pwdOk');
-  const pwdCancel = $('pwdCancel'), pwdSubmit = $('pwdSubmit');
-  const dailyLimitInput = $('dailyLimitInput'), settingsErr = $('settingsErr'), settingsOk = $('settingsOk');
-  const settingsCancel = $('settingsCancel'), settingsSubmit = $('settingsSubmit');
-  const filterRange = $('filterRange'), filterFrom = $('filterFrom'), filterTo = $('filterTo');
-  const filterDevice = $('filterDevice'), resetFilters = $('resetFilters');
-  const statTotal = $('statTotal'), statAndroid = $('statAndroid'), statIOS = $('statIOS'), statUnknown = $('statUnknown');
+  const I18N = {
+    zh: {
+      loginTitle: '🔒 管理员登录', passPlaceholder: '管理员密码', loginBtn: '登录',
+      loginErrEmpty: '请输入密码', loginErrWrong: '密码错误', loginErrNet: '网络错误，请重试',
+      panelTitle: '📋 TRC20 地址记录',
+      sTotal: '总记录', sAndroid: '📱 安卓', sIOS: '🍎 苹果', sUnknown: '❓ 未知设备',
+      sPending: '⏳ 等待审核', sApproved: '✅ 已通过', sRejected: '❌ 已拒绝',
+      filterTime: '时间：', filterDevice: '设备：', filterAudit: '审核状态：',
+      optAll: '全部', optToday: '今天', opt7d: '近 7 天', opt30d: '近 30 天', optCustom: '自定义',
+      optAndroid: '安卓', optIOS: '苹果', optUnknown: '未知',
+      optPending: '等待审核', optApproved: '已通过', optRejected: '已拒绝',
+      reset: '重置', refresh: '🔄 刷新', export: '⬇ 导出 CSV（当前筛选）',
+      bulkApprove: '✅ 批量通过', bulkReject: '❌ 批量拒绝',
+      settings: '⚙️ 设置', changePwd: '🔑 修改密码', logout: '🚪 退出',
+      countInfo: '共 {n} 条（已筛选）',
+      btnApprove: '通过', btnReject: '拒绝', btnCopy: '复制', btnCopied: '已复制', btnCopyFail: '失败',
+      empty: '暂无记录', loading: '加载中...', loadFail: '加载失败 ({n})',
+      timeEnter: '🟣 进入', timeSubmit: '🔵 提交', timeDuration: '⏱ 耗时',
+      settingsTitle: '⚙️ 每日提现次数设置',
+      settingsLabel: '每个 IP 每天可完整提现的次数',
+      settingsHint: '例如设为 2，则每个 IP 每天可完整玩 2 轮。北京时间 0 点重置。',
+      pwdTitle: '🔑 修改管理员密码',
+      pwdLabel1: '当前密码', pwdLabel2: '新密码（至少 6 位）', pwdLabel3: '确认新密码',
+      cancel: '取消', save: '保存', confirmChange: '确认修改',
+      pwdErrOld: '当前密码错误', pwdErrShort: '新密码至少 6 位', pwdErrMatch: '两次输入的新密码不一致',
+      pwdErrEmpty: '请输入当前密码', pwdErrNet: '网络错误，请重试',
+      pwdOk: '✓ 密码修改成功，请重新登录',
+      settingsErrRange: '请输入 1-100 之间的整数',
+      settingsOk: '✓ 已保存，新配置立即生效',
+      batchNone: '请先勾选记录', batchSuccess: '已更新 {n} 条', batchFail: '操作失败',
+      selectAll: '全选',
+      auditApproveOk: '已通过', auditRejectOk: '已拒绝'
+    },
+    en: {
+      loginTitle: '🔒 Admin Login', passPlaceholder: 'Admin Password', loginBtn: 'Login',
+      loginErrEmpty: 'Please enter password', loginErrWrong: 'Wrong password', loginErrNet: 'Network error, please retry',
+      panelTitle: '📋 TRC20 Records',
+      sTotal: 'Total', sAndroid: '📱 Android', sIOS: '🍎 iOS', sUnknown: '❓ Unknown',
+      sPending: '⏳ Pending', sApproved: '✅ Approved', sRejected: '❌ Rejected',
+      filterTime: 'Time:', filterDevice: 'Device:', filterAudit: 'Audit:',
+      optAll: 'All', optToday: 'Today', opt7d: 'Last 7 days', opt30d: 'Last 30 days', optCustom: 'Custom',
+      optAndroid: 'Android', optIOS: 'iOS', optUnknown: 'Unknown',
+      optPending: 'Pending', optApproved: 'Approved', optRejected: 'Rejected',
+      reset: 'Reset', refresh: '🔄 Refresh', export: '⬇ Export CSV (filtered)',
+      bulkApprove: '✅ Bulk Approve', bulkReject: '❌ Bulk Reject',
+      settings: '⚙️ Settings', changePwd: '🔑 Change Password', logout: '🚪 Logout',
+      countInfo: '{n} records (filtered)',
+      btnApprove: 'Approve', btnReject: 'Reject', btnCopy: 'Copy', btnCopied: 'Copied', btnCopyFail: 'Failed',
+      empty: 'No records', loading: 'Loading...', loadFail: 'Load failed ({n})',
+      timeEnter: '🟣 Enter', timeSubmit: '🔵 Submit', timeDuration: '⏱ Duration',
+      settingsTitle: '⚙️ Daily Withdrawal Limit',
+      settingsLabel: 'Max withdrawals per IP per day',
+      settingsHint: 'E.g., set to 2 means each IP can complete 2 rounds per day. Resets at 00:00 Beijing time.',
+      pwdTitle: '🔑 Change Admin Password',
+      pwdLabel1: 'Current Password', pwdLabel2: 'New Password (min 6 chars)', pwdLabel3: 'Confirm New Password',
+      cancel: 'Cancel', save: 'Save', confirmChange: 'Confirm',
+      pwdErrOld: 'Wrong current password', pwdErrShort: 'New password at least 6 chars', pwdErrMatch: 'Passwords do not match',
+      pwdErrEmpty: 'Please enter current password', pwdErrNet: 'Network error, please retry',
+      pwdOk: '✓ Password changed, please login again',
+      settingsErrRange: 'Please enter an integer between 1-100',
+      settingsOk: '✓ Saved, effective immediately',
+      batchNone: 'Please select records first', batchSuccess: 'Updated {n} records', batchFail: 'Operation failed',
+      selectAll: 'Select All',
+      auditApproveOk: 'Approved', auditRejectOk: 'Rejected'
+    }
+  };
 
+  const DEVICE_LABELS = {
+    zh: { android: 'Android', ios: 'iOS', unknown: '未知' },
+    en: { android: 'Android', ios: 'iOS', unknown: 'Unknown' }
+  };
+
+  const LANG_TO_COUNTRY = {
+    zh:'🇨🇳 中国', en:'🇺🇸 美国', es:'🇪🇸 西班牙', hi:'🇮🇳 印度', ar:'🇸🇦 沙特',
+    pt:'🇧🇷 巴西', ru:'🇷🇺 俄罗斯', ja:'🇯🇵 日本', de:'🇩🇪 德国', fr:'🇫🇷 法国',
+    ko:'🇰🇷 韩国', it:'🇮🇹 意大利', tr:'🇹🇷 土耳其', vi:'🇻🇳 越南', th:'🇹🇭 泰国',
+    id:'🇮🇩 印尼', ms:'🇲🇾 马来', nl:'🇳🇱 荷兰', pl:'🇵🇱 波兰'
+  };
+  const CODE_TO_COUNTRY = {
+    CN:'🇨🇳 中国', US:'🇺🇸 美国', GB:'🇬🇧 英国', AU:'🇦🇺 澳大利亚', CA:'🇨🇦 加拿大',
+    ES:'🇪🇸 西班牙', MX:'🇲🇽 墨西哥', AR:'🇦🇷 阿根廷', CO:'🇨🇴 哥伦比亚', CL:'🇨🇱 智利',
+    IN:'🇮🇳 印度', SA:'🇸🇦 沙特', AE:'🇦🇪 阿联酋', EG:'🇪🇬 埃及',
+    BR:'🇧🇷 巴西', PT:'🇵🇹 葡萄牙', RU:'🇷🇺 俄罗斯', UA:'🇺🇦 乌克兰',
+    JP:'🇯🇵 日本', DE:'🇩🇪 德国', FR:'🇫🇷 法国', KR:'🇰🇷 韩国',
+    IT:'🇮🇹 意大利', TR:'🇹🇷 土耳其', VN:'🇻🇳 越南', TH:'🇹🇭 泰国',
+    ID:'🇮🇩 印尼', MY:'🇲🇾 马来', NL:'🇳🇱 荷兰', PL:'🇵🇱 波兰',
+    HK:'🇭🇰 香港', TW:'🇨🇳 台湾', MO:'🇨🇳 澳门'
+  };
+
+  let lang = localStorage.getItem('admin_lang') || 'zh';
   let token = sessionStorage.getItem('admin_token') || '';
-  let cacheRecords = [];     // 全部
-  let filteredRecords = [];  // 当前筛选后
-  let deviceFilter = 'all';  // 由 stats 卡片点击时也设置
+  let cacheRecords = [];
+  let filteredRecords = [];
+  let deviceFilter = 'all';
+  let auditFilter = 'all';
+  const selectedIds = new Set();
+
+  const $ = id => document.getElementById(id);
+
+  function t(key, params) {
+    let s = (I18N[lang] && I18N[lang][key]) || I18N.zh[key] || key;
+    if (params) Object.keys(params).forEach(k => { s = s.replace('{' + k + '}', params[k]); });
+    return s;
+  }
 
   function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
@@ -199,7 +320,6 @@
     else if(/opera|opr\//.test(s)) browser = 'Opera';
     return [os, browser].filter(Boolean).join(' · ') || '—';
   }
-
   function getDeviceType(r){
     if(r.device) return r.device;
     const ua = (r.userAgent || '').toLowerCase();
@@ -207,33 +327,13 @@
     if(/android/.test(ua)) return 'android';
     return 'unknown';
   }
-
-  const LANG_TO_COUNTRY = {
-    zh:'🇨🇳 中国', en:'🇺🇸 美国', es:'🇪🇸 西班牙', hi:'🇮🇳 印度', ar:'🇸🇦 沙特',
-    pt:'🇧🇷 巴西', ru:'🇷🇺 俄罗斯', ja:'🇯🇵 日本', de:'🇩🇪 德国', fr:'🇫🇷 法国',
-    ko:'🇰🇷 韩国', it:'🇮🇹 意大利', tr:'🇹🇷 土耳其', vi:'🇻🇳 越南', th:'🇹🇭 泰国',
-    id:'🇮🇩 印尼', ms:'🇲🇾 马来', nl:'🇳🇱 荷兰', pl:'🇵🇱 波兰'
-  };
-
-  // 优先国家代码（IP 判断得到）→ 显示实际国家；否则回退到语言→国家
-  const CODE_TO_COUNTRY = {
-    CN:'🇨🇳 中国', US:'🇺🇸 美国', GB:'🇬🇧 英国', AU:'🇦🇺 澳大利亚', CA:'🇨🇦 加拿大',
-    ES:'🇪🇸 西班牙', MX:'🇲🇽 墨西哥', AR:'🇦🇷 阿根廷', CO:'🇨🇴 哥伦比亚', CL:'🇨🇱 智利',
-    IN:'🇮🇳 印度', SA:'🇸🇦 沙特', AE:'🇦🇪 阿联酋', EG:'🇪🇬 埃及',
-    BR:'🇧🇷 巴西', PT:'🇵🇹 葡萄牙',
-    RU:'🇷🇺 俄罗斯', UA:'🇺🇦 乌克兰',
-    JP:'🇯🇵 日本', DE:'🇩🇪 德国', FR:'🇫🇷 法国', KR:'🇰🇷 韩国',
-    IT:'🇮🇹 意大利', TR:'🇹🇷 土耳其', VN:'🇻🇳 越南', TH:'🇹🇭 泰国',
-    ID:'🇮🇩 印尼', MY:'🇲🇾 马来', NL:'🇳🇱 荷兰', PL:'🇵🇱 波兰',
-    HK:'🇭🇰 香港', TW:'🇨🇳 台湾', MO:'🇨🇳 澳门'
-  };
+  function getAuditStatus(r){ return r.auditStatus || 'pending'; }
 
   function formatCountry(r){
     const code = (r.country || '').toUpperCase();
     if (code && CODE_TO_COUNTRY[code]) return CODE_TO_COUNTRY[code];
-    // 没有国家代码，回退到语言
-    const lang = (r.language || '').toLowerCase().split('-')[0];
-    if (lang && LANG_TO_COUNTRY[lang]) return LANG_TO_COUNTRY[lang];
+    const l = (r.language || '').toLowerCase().split('-')[0];
+    if (l && LANG_TO_COUNTRY[l]) return LANG_TO_COUNTRY[l];
     return '❓ 未知';
   }
 
@@ -243,102 +343,175 @@
       const t1 = new Date(v).getTime(), t2 = new Date(s).getTime();
       if(isNaN(t1) || isNaN(t2) || t2 < t1) return '';
       const sec = Math.round((t2 - t1)/1000);
-      if(sec < 60) return sec + ' 秒';
-      return Math.floor(sec/60) + ' 分 ' + (sec%60) + ' 秒';
+      if(sec < 60) return sec + 's';
+      return Math.floor(sec/60) + 'm ' + (sec%60) + 's';
     }catch(e){ return ''; }
   }
 
+  // ===== 应用语言 =====
+  function applyLanguage() {
+    $('loginTitle').textContent = t('loginTitle');
+    $('passInput').placeholder = t('passPlaceholder');
+    $('loginBtn').textContent = t('loginBtn');
+    $('panelTitle').textContent = t('panelTitle');
+    $('sTotalK').textContent = t('sTotal');
+    $('sAndK').textContent = t('sAndroid');
+    $('sIosK').textContent = t('sIOS');
+    $('sUnkK').textContent = t('sUnknown');
+    $('sPenK').textContent = t('sPending');
+    $('sAprK').textContent = t('sApproved');
+    $('sRejK').textContent = t('sRejected');
+    $('filterTimeLabel').textContent = t('filterTime');
+    $('filterDeviceLabel').textContent = t('filterDevice');
+    $('filterAuditLabel').textContent = t('filterAudit');
+    // 时间下拉
+    const rangeOpts = $('filterRange').options;
+    rangeOpts[0].text = t('optAll'); rangeOpts[1].text = t('optToday');
+    rangeOpts[2].text = t('opt7d'); rangeOpts[3].text = t('opt30d'); rangeOpts[4].text = t('optCustom');
+    // 设备下拉
+    const devOpts = $('filterDevice').options;
+    devOpts[0].text = t('optAll'); devOpts[1].text = t('optAndroid');
+    devOpts[2].text = t('optIOS'); devOpts[3].text = t('optUnknown');
+    // 审核下拉
+    const auditOpts = $('filterAudit').options;
+    auditOpts[0].text = t('optAll'); auditOpts[1].text = t('optPending');
+    auditOpts[2].text = t('optApproved'); auditOpts[3].text = t('optRejected');
+    $('resetFilters').textContent = t('reset');
+    $('refreshBtn').textContent = t('refresh');
+    $('exportBtn').textContent = t('export');
+    $('bulkApproveBtn').textContent = t('bulkApprove');
+    $('bulkRejectBtn').textContent = t('bulkReject');
+    $('settingsBtn').textContent = t('settings');
+    $('changePwdBtn').textContent = t('changePwd');
+    $('logoutBtn').textContent = t('logout');
+    // 设置弹窗
+    $('settingsTitle').textContent = t('settingsTitle');
+    $('settingsLabel').textContent = t('settingsLabel');
+    $('settingsHint').textContent = t('settingsHint');
+    $('settingsCancel').textContent = t('cancel');
+    $('settingsSubmit').textContent = t('save');
+    // 密码弹窗
+    $('pwdTitle').textContent = t('pwdTitle');
+    $('pwdLabel1').textContent = t('pwdLabel1');
+    $('pwdLabel2').textContent = t('pwdLabel2');
+    $('pwdLabel3').textContent = t('pwdLabel3');
+    $('pwdCancel').textContent = t('cancel');
+    $('pwdSubmit').textContent = t('confirmChange');
+    // 语言按钮高亮
+    $('langZh').classList.toggle('active', lang === 'zh');
+    $('langEn').classList.toggle('active', lang === 'en');
+    // 重新渲染
+    if (panelBox.classList.contains('open')) applyFilters();
+  }
+
+  // ===== 登录 =====
   async function doLogin(){
-    const password = passInput.value;
-    errMsg.textContent = '';
-    if(!password){ errMsg.textContent = '请输入密码'; return; }
-    loginBtn.disabled = true; loginBtn.textContent = '登录中...';
+    const password = $('passInput').value;
+    $('errMsg').textContent = '';
+    if(!password){ $('errMsg').textContent = t('loginErrEmpty'); return; }
+    $('loginBtn').disabled = true; $('loginBtn').textContent = '...';
     try{
       const res = await fetch(API_BASE + '/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password }) });
-      if(!res.ok){ errMsg.textContent = res.status === 401 ? '密码错误' : ('登录失败 (' + res.status + ')'); return; }
+      if(!res.ok){ $('errMsg').textContent = res.status === 401 ? t('loginErrWrong') : ('Failed (' + res.status + ')'); return; }
       const data = await res.json();
       token = data.token;
       sessionStorage.setItem('admin_token', token);
       showPanel();
-    }catch(e){ errMsg.textContent = '网络错误，请重试'; }
-    finally{ loginBtn.disabled = false; loginBtn.textContent = '登录'; }
+    }catch(e){ $('errMsg').textContent = t('loginErrNet'); }
+    finally{ $('loginBtn').disabled = false; $('loginBtn').textContent = t('loginBtn'); }
   }
 
   async function loadRecords(){
     if(!token) return;
-    listBox.innerHTML = '<div class="empty">加载中...</div>';
+    $('listBox').innerHTML = '<div class="empty">' + t('loading') + '</div>';
     try{
       const res = await fetch(API_BASE + '/api/records', { headers: { 'Authorization': 'Bearer ' + token } });
       if(res.status === 401){ logout(); return; }
-      if(!res.ok){ listBox.innerHTML = '<div class="empty">加载失败 (' + res.status + ')</div>'; return; }
+      if(!res.ok){ $('listBox').innerHTML = '<div class="empty">' + t('loadFail', {n:res.status}) + '</div>'; return; }
       const data = await res.json();
       cacheRecords = data.records || [];
+      selectedIds.clear();
       applyFilters();
-    }catch(e){ listBox.innerHTML = '<div class="empty">网络错误，请重试</div>'; }
+    }catch(e){ $('listBox').innerHTML = '<div class="empty">' + t('loginErrNet') + '</div>'; }
   }
 
   function inRange(r){
-    const range = filterRange.value;
+    const range = $('filterRange').value;
     if(range === 'all') return true;
-    const t = r.time ? new Date(r.time).getTime() : 0;
-    if(!t) return false;
+    const tt = r.time ? new Date(r.time).getTime() : 0;
+    if(!tt) return false;
     const now = Date.now();
-    if(range === 'today'){
-      const d = new Date();
-      const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-      return t >= start;
-    }
-    if(range === '7d') return t >= now - 7*24*60*60*1000;
-    if(range === '30d') return t >= now - 30*24*60*60*1000;
+    if(range === 'today'){ const d = new Date(); const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); return tt >= start; }
+    if(range === '7d') return tt >= now - 7*24*60*60*1000;
+    if(range === '30d') return tt >= now - 30*24*60*60*1000;
     if(range === 'custom'){
-      const from = filterFrom.value ? new Date(filterFrom.value).getTime() : 0;
-      const to = filterTo.value ? new Date(filterTo.value).getTime() + 24*60*60*1000 - 1 : Infinity;
-      return t >= from && t <= to;
+      const from = $('filterFrom').value ? new Date($('filterFrom').value).getTime() : 0;
+      const to = $('filterTo').value ? new Date($('filterTo').value).getTime() + 86400000 - 1 : Infinity;
+      return tt >= from && tt <= to;
     }
     return true;
   }
 
   function applyFilters(){
-    const dev = deviceFilter;
     filteredRecords = cacheRecords.filter(r => {
       if(!inRange(r)) return false;
-      if(dev === 'all') return true;
-      return getDeviceType(r) === dev;
+      if(deviceFilter !== 'all' && getDeviceType(r) !== deviceFilter) return false;
+      if(auditFilter !== 'all' && getAuditStatus(r) !== auditFilter) return false;
+      return true;
     });
+
     // 统计
-    const counts = { android: 0, ios: 0, unknown: 0 };
-    cacheRecords.forEach(r => { counts[getDeviceType(r)] = (counts[getDeviceType(r)] || 0) + 1; });
-    statTotal.textContent = cacheRecords.length;
-    statAndroid.textContent = counts.android || 0;
-    statIOS.textContent = counts.ios || 0;
-    statUnknown.textContent = counts.unknown || 0;
-    // 高亮
-    document.querySelectorAll('.stat').forEach(el => el.classList.toggle('active', el.dataset.device === dev));
-    // 显示
-    countInfo.textContent = '共 ' + filteredRecords.length + ' 条（已筛选）';
+    const dev = { android: 0, ios: 0, unknown: 0 };
+    const aud = { pending: 0, approved: 0, rejected: 0 };
+    cacheRecords.forEach(r => {
+      dev[getDeviceType(r)] = (dev[getDeviceType(r)] || 0) + 1;
+      const a = getAuditStatus(r);
+      aud[a] = (aud[a] || 0) + 1;
+    });
+    $('statTotal').textContent = cacheRecords.length;
+    $('statAndroid').textContent = dev.android || 0;
+    $('statIOS').textContent = dev.ios || 0;
+    $('statUnknown').textContent = dev.unknown || 0;
+    $('statPending').textContent = aud.pending || 0;
+    $('statApproved').textContent = aud.approved || 0;
+    $('statRejected').textContent = aud.rejected || 0;
+
+    document.querySelectorAll('.stat[data-device]').forEach(el => el.classList.toggle('active', deviceFilter !== 'all' && el.dataset.device === deviceFilter));
+    document.querySelectorAll('.stat[data-audit]').forEach(el => el.classList.toggle('active', auditFilter !== 'all' && el.dataset.audit === auditFilter));
+
+    $('countInfo').textContent = t('countInfo', { n: filteredRecords.length });
     renderRecords(filteredRecords);
   }
 
+  const STATUS_LABELS = { pending: 'pending', approved: 'approved', rejected: 'rejected' };
+
   function renderRecords(records){
-    if(!records.length){ listBox.innerHTML = '<div class="empty">暂无记录</div>'; return; }
+    if(!records.length){ $('listBox').innerHTML = '<div class="empty">' + t('empty') + '</div>'; return; }
     listBox.innerHTML = records.map((r, i) => {
       const deviceName = parseDevice(r.userAgent);
       const deviceType = getDeviceType(r);
-      const lang = r.language || '—';
+      const l = r.language || '—';
       const country = formatCountry(r);
       const visitTime = r.visit_time_local || '—';
       const submitTime = r.time_local || r.time || '—';
       const duration = calcDuration(r.visit_time, r.time);
+      const auditStatus = getAuditStatus(r);
+      const isChecked = selectedIds.has(r.id);
       return `
       <div class="rec">
-        <div class="addr" style="display:flex;align-items:center;gap:8px;">
-          <span>${escapeHtml(r.address)}</span>
-          <button class="copy-btn" data-addr="${escapeHtml(r.address)}">复制</button>
+        <div class="actions">
+          <button class="btn-ap" data-audit="approved" data-id="${escapeHtml(r.id)}">✅ ${t('btnApprove')}</button>
+          <button class="btn-rj" data-audit="rejected" data-id="${escapeHtml(r.id)}">❌ ${t('btnReject')}</button>
+        </div>
+        <div class="top">
+          <input type="checkbox" class="cb" data-id="${escapeHtml(r.id)}" ${isChecked?'checked':''}/>
+          <div class="addr">${escapeHtml(r.address)}</div>
+          <span class="status-badge ${auditStatus}">${t('optPending') /* unused */ && ''}</span>
         </div>
         <div class="times">
-          <span class="t visit">🟣 进入: ${escapeHtml(visitTime)}</span>
-          <span class="t submit">🔵 提交: ${escapeHtml(submitTime)}</span>
-          ${duration ? `<span class="t duration">⏱ 耗时: ${escapeHtml(duration)}</span>` : ''}
+          <span class="t visit">${t('timeEnter')}: ${escapeHtml(visitTime)}</span>
+          <span class="t submit">${t('timeSubmit')}: ${escapeHtml(submitTime)}</span>
+          ${duration ? `<span class="t duration">${t('timeDuration')}: ${escapeHtml(duration)}</span>` : ''}
         </div>
         <div class="meta">
           <span>#${i+1}</span>
@@ -346,34 +519,82 @@
           <span class="badge badge-country">🌍 ${escapeHtml(country)}</span>
           ${r.ip ? `<span class="badge">🌐 ${escapeHtml(r.ip)}</span>` : ''}
           <span class="badge badge-device ${deviceType}">📱 ${escapeHtml(deviceName)}</span>
-          <span class="badge badge-lang">🗣 ${escapeHtml(lang)}</span>
+          <span class="badge badge-lang">🗣 ${escapeHtml(l)}</span>
+          <button class="copy-btn" data-addr="${escapeHtml(r.address)}">${t('btnCopy')}</button>
         </div>
       </div>`;
     }).join('');
 
+    // 状态标签修正（放在单独渲染）
+    listBox.querySelectorAll('.rec').forEach((el, idx) => {
+      const r = records[idx];
+      if(!r) return;
+      const badge = el.querySelector('.status-badge');
+      const st = getAuditStatus(r);
+      badge.classList.remove('pending','approved','rejected');
+      badge.classList.add(st);
+      badge.textContent = st === 'approved' ? t('optApproved') : st === 'rejected' ? t('optRejected') : t('optPending');
+    });
+
     listBox.querySelectorAll('.copy-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         navigator.clipboard.writeText(btn.dataset.addr).then(() => {
-          const o = btn.textContent; btn.textContent = '已复制'; setTimeout(()=>btn.textContent=o, 1200);
-        }).catch(() => { btn.textContent = '失败'; setTimeout(()=>btn.textContent='复制', 1200); });
+          const o = btn.textContent; btn.textContent = t('btnCopied'); setTimeout(()=>btn.textContent=o, 1000);
+        }).catch(() => { btn.textContent = t('btnCopyFail'); setTimeout(()=>btn.textContent=t('btnCopy'), 1000); });
       });
+    });
+    listBox.querySelectorAll('.cb').forEach(cb => {
+      cb.addEventListener('change', () => {
+        if(cb.checked) selectedIds.add(cb.dataset.id);
+        else selectedIds.delete(cb.dataset.id);
+      });
+    });
+    listBox.querySelectorAll('.btn-ap, .btn-rj').forEach(btn => {
+      btn.addEventListener('click', () => auditOne(btn.dataset.id, btn.dataset.audit));
     });
   }
 
+  async function auditOne(id, status){
+    try{
+      const res = await fetch(API_BASE + '/api/audit', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + token},
+        body: JSON.stringify({ id, status })
+      });
+      if(res.status === 401){ logout(); return; }
+      if(!res.ok){ alert(t('batchFail')); return; }
+      const r = cacheRecords.find(x => x.id === id);
+      if(r) r.auditStatus = status;
+      applyFilters();
+    }catch(e){ alert(t('batchFail')); }
+  }
+
+  async function auditBatch(status){
+    if(!selectedIds.size){ alert(t('batchNone')); return; }
+    const ids = Array.from(selectedIds);
+    try{
+      const res = await fetch(API_BASE + '/api/audit-batch', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + token},
+        body: JSON.stringify({ ids, status })
+      });
+      if(res.status === 401){ logout(); return; }
+      if(!res.ok){ alert(t('batchFail')); return; }
+      const data = await res.json();
+      cacheRecords.forEach(r => { if(ids.includes(r.id)) r.auditStatus = status; });
+      selectedIds.clear();
+      applyFilters();
+    }catch(e){ alert(t('batchFail')); }
+  }
+
   function exportCSV(){
-    if(!filteredRecords.length){ alert('当前筛选下暂无数据'); return; }
-    const header = ['地址','余额','国家/地区','进入时间','提交时间','耗时','IP','设备类型','设备','设备语言'];
+    if(!filteredRecords.length){ alert(t('empty')); return; }
+    const header = lang === 'en'
+      ? ['Address','Balance','Country','Enter','Submit','Duration','IP','Device Type','Device','Language','Audit Status']
+      : ['地址','余额','国家/地区','进入时间','提交时间','耗时','IP','设备类型','设备','设备语言','审核状态'];
     const rows = filteredRecords.map(r => [
-      r.address,
-      r.balance || '0.00',
-      formatCountry(r),
-      r.visit_time_local || '',
-      r.time_local || r.time || '',
-      calcDuration(r.visit_time, r.time),
-      r.ip || '',
-      getDeviceType(r),
-      parseDevice(r.userAgent),
-      r.language || ''
+      r.address, r.balance || '0.00', formatCountry(r),
+      r.visit_time_local || '', r.time_local || r.time || '', calcDuration(r.visit_time, r.time),
+      r.ip || '', getDeviceType(r), parseDevice(r.userAgent), r.language || '',
+      getAuditStatus(r)
     ]);
     const csv = [header, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
@@ -384,103 +605,119 @@
     a.click(); URL.revokeObjectURL(url);
   }
 
-  function showPanel(){ loginBox.style.display = 'none'; panelBox.classList.add('open'); loadRecords(); }
+  function showPanel(){ $('loginBox').style.display = 'none'; $('panelBox').classList.add('open'); loadRecords(); }
   function logout(){
     token = ''; sessionStorage.removeItem('admin_token');
-    cacheRecords = []; filteredRecords = [];
-    panelBox.classList.remove('open'); loginBox.style.display = 'block';
-    passInput.value = ''; listBox.innerHTML = '';
+    cacheRecords = []; filteredRecords = []; selectedIds.clear();
+    $('panelBox').classList.remove('open'); $('loginBox').style.display = 'block';
+    $('passInput').value = ''; $('listBox').innerHTML = '';
   }
 
-  // 设置弹窗
+  // 设置
   async function openSettingsModal(){
-    settingsErr.textContent = ''; settingsOk.textContent = '';
-    settingsModal.classList.add('open');
+    $('settingsErr').textContent = ''; $('settingsOk').textContent = '';
+    $('settingsModal').classList.add('open');
     try{
       const res = await fetch(API_BASE + '/api/config', { headers: { 'Authorization': 'Bearer ' + token } });
       if(res.status === 401){ logout(); return; }
-      if(res.ok){ const data = await res.json(); dailyLimitInput.value = data.dailyLimit || 1; }
+      if(res.ok){ const data = await res.json(); $('dailyLimitInput').value = data.dailyLimit || 1; }
     }catch(e){}
-    setTimeout(() => dailyLimitInput.focus(), 100);
+    setTimeout(() => $('dailyLimitInput').focus(), 100);
   }
-  function closeSettingsModal(){ settingsModal.classList.remove('open'); }
+  function closeSettingsModal(){ $('settingsModal').classList.remove('open'); }
   async function submitSettings(){
-    settingsErr.textContent = ''; settingsOk.textContent = '';
-    const v = parseInt(dailyLimitInput.value, 10);
-    if(isNaN(v) || v < 1 || v > 100){ settingsErr.textContent = '请输入 1-100 之间的整数'; return; }
-    settingsSubmit.disabled = true; settingsSubmit.textContent = '保存中...';
+    $('settingsErr').textContent = ''; $('settingsOk').textContent = '';
+    const v = parseInt($('dailyLimitInput').value, 10);
+    if(isNaN(v) || v < 1 || v > 100){ $('settingsErr').textContent = t('settingsErrRange'); return; }
+    $('settingsSubmit').disabled = true;
     try{
       const res = await fetch(API_BASE + '/api/config', {
         method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + token},
         body: JSON.stringify({ dailyLimit: v })
       });
       if(res.status === 401){ logout(); return; }
-      if(!res.ok){ const d = await res.json().catch(()=>({})); settingsErr.textContent = d.error || ('保存失败 (' + res.status + ')'); return; }
-      settingsOk.textContent = '✓ 已保存，新配置立即生效';
+      if(!res.ok){ $('settingsErr').textContent = t('settingsErrRange'); return; }
+      $('settingsOk').textContent = t('settingsOk');
       setTimeout(() => closeSettingsModal(), 1200);
-    }catch(e){ settingsErr.textContent = '网络错误，请重试'; }
-    finally{ settingsSubmit.disabled = false; settingsSubmit.textContent = '保存'; }
+    }catch(e){ $('settingsErr').textContent = t('loginErrNet'); }
+    finally{ $('settingsSubmit').disabled = false; }
   }
 
-  // 修改密码
-  function openPwdModal(){ oldPwd.value='';newPwd.value='';newPwd2.value='';pwdErr.textContent='';pwdOk.textContent='';pwdModal.classList.add('open');setTimeout(()=>oldPwd.focus(),100); }
-  function closePwdModal(){ pwdModal.classList.remove('open'); }
+  // 密码
+  function openPwdModal(){ $('oldPwd').value='';$('newPwd').value='';$('newPwd2').value='';$('pwdErr').textContent='';$('pwdOk').textContent='';$('pwdModal').classList.add('open');setTimeout(()=>$('oldPwd').focus(),100); }
+  function closePwdModal(){ $('pwdModal').classList.remove('open'); }
   async function submitPwdChange(){
-    pwdErr.textContent = ''; pwdOk.textContent = '';
-    if(!oldPwd.value){ pwdErr.textContent = '请输入当前密码'; return; }
-    if(!newPwd.value || newPwd.value.length < 6){ pwdErr.textContent = '新密码至少 6 位'; return; }
-    if(newPwd.value !== newPwd2.value){ pwdErr.textContent = '两次输入的新密码不一致'; return; }
-    pwdSubmit.disabled = true; pwdSubmit.textContent = '提交中...';
+    $('pwdErr').textContent='';$('pwdOk').textContent='';
+    if(!$('oldPwd').value){ $('pwdErr').textContent = t('pwdErrEmpty'); return; }
+    if(!$('newPwd').value || $('newPwd').value.length < 6){ $('pwdErr').textContent = t('pwdErrShort'); return; }
+    if($('newPwd').value !== $('newPwd2').value){ $('pwdErr').textContent = t('pwdErrMatch'); return; }
+    $('pwdSubmit').disabled = true;
     try{
       const res = await fetch(API_BASE + '/api/change-password', {
         method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + token},
-        body: JSON.stringify({ oldPassword: oldPwd.value, newPassword: newPwd.value })
+        body: JSON.stringify({ oldPassword: $('oldPwd').value, newPassword: $('newPwd').value })
       });
-      if(res.status === 401){ pwdErr.textContent = '当前密码错误'; return; }
-      if(!res.ok){ pwdErr.textContent = '修改失败 (' + res.status + ')'; return; }
-      pwdOk.textContent = '✓ 密码修改成功，请重新登录';
+      if(res.status === 401){ $('pwdErr').textContent = t('pwdErrOld'); return; }
+      if(!res.ok){ $('pwdErr').textContent = t('loginErrNet'); return; }
+      $('pwdOk').textContent = t('pwdOk');
       setTimeout(() => { closePwdModal(); logout(); }, 1500);
-    }catch(e){ pwdErr.textContent = '网络错误，请重试'; }
-    finally{ pwdSubmit.disabled = false; pwdSubmit.textContent = '确认修改'; }
+    }catch(e){ $('pwdErr').textContent = t('loginErrNet'); }
+    finally{ $('pwdSubmit').disabled = false; }
   }
 
-  // 事件
-  loginBtn.addEventListener('click', doLogin);
-  passInput.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
-  refreshBtn.addEventListener('click', loadRecords);
-  exportBtn.addEventListener('click', exportCSV);
-  logoutBtn.addEventListener('click', logout);
-  changePwdBtn.addEventListener('click', openPwdModal);
-  pwdCancel.addEventListener('click', closePwdModal);
-  pwdSubmit.addEventListener('click', submitPwdChange);
-  settingsBtn.addEventListener('click', openSettingsModal);
-  settingsCancel.addEventListener('click', closeSettingsModal);
-  settingsSubmit.addEventListener('click', submitSettings);
+  // 事件绑定
+  $('loginBtn').addEventListener('click', doLogin);
+  $('passInput').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+  $('refreshBtn').addEventListener('click', loadRecords);
+  $('exportBtn').addEventListener('click', exportCSV);
+  $('logoutBtn').addEventListener('click', logout);
+  $('changePwdBtn').addEventListener('click', openPwdModal);
+  $('pwdCancel').addEventListener('click', closePwdModal);
+  $('pwdSubmit').addEventListener('click', submitPwdChange);
+  $('settingsBtn').addEventListener('click', openSettingsModal);
+  $('settingsCancel').addEventListener('click', closeSettingsModal);
+  $('settingsSubmit').addEventListener('click', submitSettings);
+  $('bulkApproveBtn').addEventListener('click', () => auditBatch('approved'));
+  $('bulkRejectBtn').addEventListener('click', () => auditBatch('rejected'));
 
-  filterRange.addEventListener('change', () => {
-    const isCustom = filterRange.value === 'custom';
-    filterFrom.style.display = isCustom ? 'inline-block' : 'none';
-    filterTo.style.display = isCustom ? 'inline-block' : 'none';
+  $('filterRange').addEventListener('change', () => {
+    const isCustom = $('filterRange').value === 'custom';
+    $('filterFrom').style.display = isCustom ? 'inline-block' : 'none';
+    $('filterTo').style.display = isCustom ? 'inline-block' : 'none';
     applyFilters();
   });
-  filterFrom.addEventListener('change', applyFilters);
-  filterTo.addEventListener('change', applyFilters);
-  filterDevice.addEventListener('change', () => { deviceFilter = filterDevice.value; applyFilters(); });
-  resetFilters.addEventListener('click', () => {
-    filterRange.value = 'all'; filterFrom.value = ''; filterTo.value = '';
-    filterFrom.style.display = 'none'; filterTo.style.display = 'none';
-    deviceFilter = 'all'; filterDevice.value = 'all';
+  $('filterFrom').addEventListener('change', applyFilters);
+  $('filterTo').addEventListener('change', applyFilters);
+  $('filterDevice').addEventListener('change', () => { deviceFilter = $('filterDevice').value; applyFilters(); });
+  $('filterAudit').addEventListener('change', () => { auditFilter = $('filterAudit').value; applyFilters(); });
+  $('resetFilters').addEventListener('click', () => {
+    $('filterRange').value = 'all'; $('filterFrom').value = ''; $('filterTo').value = '';
+    $('filterFrom').style.display = 'none'; $('filterTo').style.display = 'none';
+    deviceFilter = 'all'; $('filterDevice').value = 'all';
+    auditFilter = 'all'; $('filterAudit').value = 'all';
     applyFilters();
   });
 
-  // 点击统计卡片筛选
-  document.querySelectorAll('.stat').forEach(el => {
+  document.querySelectorAll('.stat[data-device]').forEach(el => {
     el.addEventListener('click', () => {
       deviceFilter = el.dataset.device;
-      filterDevice.value = deviceFilter;
+      $('filterDevice').value = deviceFilter;
       applyFilters();
     });
   });
+  document.querySelectorAll('.stat[data-audit]').forEach(el => {
+    el.addEventListener('click', () => {
+      auditFilter = el.dataset.audit;
+      $('filterAudit').value = auditFilter;
+      applyFilters();
+    });
+  });
+
+  // 语言切换
+  $('langZh').addEventListener('click', () => { lang = 'zh'; localStorage.setItem('admin_lang', lang); applyLanguage(); });
+  $('langEn').addEventListener('click', () => { lang = 'en'; localStorage.setItem('admin_lang', lang); applyLanguage(); });
+
+  applyLanguage();
 
   if(token) showPanel();
 })();
