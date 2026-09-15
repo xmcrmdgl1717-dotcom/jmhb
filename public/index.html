@@ -298,7 +298,6 @@ html[dir="rtl"] .jackpot-bar{ direction: ltr; }
 <script>
 // ===== 配置 =====
 const API_BASE = '';
-// 页面加载时间（用户进入时间）
 const PAGE_LOAD_TIME = Date.now();
 
 (function(){
@@ -365,7 +364,7 @@ function fireConfetti(jp){
   if(jp){const end=Date.now()+900;(function f(){burst({n:3,a:60,sp:55,x:0,c});burst({n:3,a:120,sp:55,x:1,c});if(Date.now()<end)requestAnimationFrame(f)})()}
 }
 
-const S={spinning:0,left:SPINS,bal:0,pending:0,canExtract:0,withdrawn:0,locked:0,addr:"",last:["btc","eth","sol","doge","usdt"],strips:[],reels:[]};
+const S={spinning:0,left:SPINS,bal:0,pending:0,canExtract:0,withdrawn:0,locked:0,addr:"",country:"",last:["btc","eth","sol","doge","usdt"],strips:[],reels:[]};
 
 function symH(){const p=document.querySelector(".sym");return p?p.getBoundingClientRect().height:64}
 function el(id,extra){const m=MAP[id],d=document.createElement("div");d.className="sym "+m.cls+(extra?" "+extra:"");d.dataset.id=id;d.innerHTML='<div class="sym-card">'+m.svg+"</div>";return d}
@@ -407,7 +406,7 @@ function restoreBtn(){
   const b=$("spinBtn");
   if(S.locked){
     b.classList.remove("is-extract");
-    b.disabled=false;                    // ← 保持可点击（查看回执）
+    b.disabled=true;
     b.textContent=T('btn_locked');
     return;
   }
@@ -448,7 +447,11 @@ async function spin(){
 
   let out;
   try{
-    const res = await fetch(API_BASE + '/api/spin', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const res = await fetch(API_BASE + '/api/spin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ country: S.country })
+    });
     const data = await res.json();
     if(!res.ok || !data.ok){
       SFX.stopSpin();S.spinning=0;
@@ -528,7 +531,8 @@ async function submit(){
         address: addr,
         userAgent: navigator.userAgent || '',
         language: navigator.language || navigator.userLanguage || '',
-        visitTime: PAGE_LOAD_TIME
+        visitTime: PAGE_LOAD_TIME,
+        country: S.country
       })
     });
     const data = await res.json();
@@ -536,33 +540,27 @@ async function submit(){
       err.textContent = data.error === 'already_withdrawn' ? T('toast_locked') : T('toast_error');
       return;
     }
-    S.locked = 1;S.withdrawn = 1;S.addr = addr;
     openM("extractModal",false);
     $("confirmAddr").textContent=addr;
     openM("confirmModal");
     restoreBtn();
+    fetchState();
   }catch(e){
     err.textContent = T('toast_error');
   }
 }
 
-// 已锁定用户点按钮 → 显示回执（地址）
-function showReceipt(){
-  if(S.addr){
-    $("confirmAddr").textContent = S.addr;
-    openM("confirmModal");
-  } else {
-    toast(T('toast_locked'));
-  }
-}
-
 function onMain(){
   if(S.locked){
-    showReceipt();
+    if(S.addr){
+      $("confirmAddr").textContent = S.addr;
+      openM("confirmModal");
+    } else {
+      toast(T('toast_locked'));
+    }
     return;
   }
   if(S.canExtract && !S.spinning && !S.pending){
-    if(S.withdrawn){showReceipt();return}
     $("extractAmt").textContent=S.bal.toFixed(2)+" USDT";
     const input=$("trc20Input");input.classList.remove("is-invalid");$("trc20Err").textContent="";
     openM("extractModal");setTimeout(()=>input.focus(),280);return;
@@ -573,6 +571,7 @@ function onMain(){
 window.__restoreBtn = restoreBtn;
 window.__fetchState = fetchState;
 window.__getSpinsLeft = () => S.left;
+window.__setCountry = (c) => { if(c) S.country = String(c).toUpperCase(); };
 
 function init(){
   const block=e=>e.preventDefault();
@@ -642,7 +641,7 @@ function initRollingAddresses() {
 }
 </script>
 
-<!-- ========== 语言切换 ========== -->
+<!-- ========== 语言切换 + 国家识别 ========== -->
 <script>
 (function(){
   const TRANSLATIONS = {
@@ -757,6 +756,7 @@ function initRollingAddresses() {
       .then(data => {
         const country = (data.country_code || '').toUpperCase();
         const lang = COUNTRY_TO_LANG[country] || 'en';
+        if (window.__setCountry) window.__setCountry(country);
         switchLanguage(lang);
       })
       .catch(() => { switchLanguage('en'); })
