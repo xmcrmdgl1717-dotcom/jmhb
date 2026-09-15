@@ -58,7 +58,6 @@ function getServerDate() {
   const bj = new Date(now.getTime() + 8 * 60 * 60 * 1000);
   return bj.toISOString().slice(0, 10);
 }
-// 设备类型：android / ios / desktop / unknown
 function detectDevice(ua) {
   if (!ua) return 'unknown';
   const s = ua.toLowerCase();
@@ -153,7 +152,7 @@ app.get('/api/player-state', (req, res) => {
   });
 });
 
-// ===== 我的提现记录（含被拒绝的，按 IP 从 records.json 查）=====
+// ===== 我的提现记录（含被拒绝的）=====
 app.get('/api/my-withdrawals', (req, res) => {
   const ip = getClientIP(req);
   const records = normalizeRecords(readRecords());
@@ -309,14 +308,12 @@ app.post('/api/config', (req, res) => {
   res.json({ ok: true, dailyLimit: n });
 });
 
-// ===== 退款：拒绝时把提现金额加回用户余额 =====
+// ===== 退款 =====
 function refundToPlayerByRecord(record) {
   if (!record || !record.ip) return false;
   const amount = Number(record.balance) || 0;
   if (amount <= 0) return false;
-
   const players = readPlayers();
-  // 找到该 IP 对应的最新一条 player（按 createdAt 倒序）
   const keys = Object.keys(players).filter(k => players[k] && players[k].ip === record.ip);
   if (!keys.length) return false;
   keys.sort((a, b) => (players[b].createdAt || '').localeCompare(players[a].createdAt || ''));
@@ -328,7 +325,7 @@ function refundToPlayerByRecord(record) {
   return true;
 }
 
-// ===== 单条审核 =====
+// ===== 单条审核（已审核的记录拒绝再次审核）=====
 app.post('/api/audit', (req, res) => {
   if (!verifyToken(getTokenFromReq(req))) return res.status(401).json({ ok: false, error: 'unauthorized' });
   const { id, status } = req.body || {};
@@ -339,8 +336,12 @@ app.post('/api/audit', (req, res) => {
   if (!r) return res.status(404).json({ ok: false, error: 'record not found' });
 
   const oldStatus = r.auditStatus || 'pending';
-  // 从非 rejected 变成 rejected 时退款（只退一次）
-  if (oldStatus !== 'rejected' && status === 'rejected') {
+  // 已审核的记录不允许再次修改
+  if (oldStatus === 'approved' || oldStatus === 'rejected') {
+    return res.status(409).json({ ok: false, error: 'already_audited', current: oldStatus });
+  }
+  // 从 pending → rejected 时退款
+  if (status === 'rejected') {
     refundToPlayerByRecord(r);
   }
   r.auditStatus = status;
@@ -350,7 +351,7 @@ app.post('/api/audit', (req, res) => {
   res.json({ ok: true });
 });
 
-// ===== 批量审核 =====
+// ===== 批量审核（跳过已审核的）=====
 app.post('/api/audit-batch', (req, res) => {
   if (!verifyToken(getTokenFromReq(req))) return res.status(401).json({ ok: false, error: 'unauthorized' });
   const { ids, status } = req.body || {};
@@ -358,21 +359,21 @@ app.post('/api/audit-batch', (req, res) => {
   if (!['pending', 'approved', 'rejected'].includes(status)) return res.status(400).json({ ok: false, error: 'invalid status' });
   const records = normalizeRecords(readRecords());
   const now = new Date().toISOString();
-  let n = 0;
+  let updated = 0, skipped = 0;
   records.forEach(r => {
     if (ids.includes(r.id)) {
       const oldStatus = r.auditStatus || 'pending';
-      if (oldStatus !== 'rejected' && status === 'rejected') {
-        refundToPlayerByRecord(r);
-      }
+      // 已审核的跳过
+      if (oldStatus === 'approved' || oldStatus === 'rejected') { skipped++; return; }
+      if (status === 'rejected') refundToPlayerByRecord(r);
       r.auditStatus = status;
       r.auditAt = now;
-      n++;
+      updated++;
       syncPlayerWithdrawal(r.id, status);
     }
   });
   writeRecords(records);
-  res.json({ ok: true, updated: n });
+  res.json({ ok: true, updated, skipped });
 });
 
 function syncPlayerWithdrawal(recordId, status) {
