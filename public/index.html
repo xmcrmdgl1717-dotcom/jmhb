@@ -405,7 +405,12 @@ function T(key){
 }
 function restoreBtn(){
   const b=$("spinBtn");
-  if(S.locked){b.classList.remove("is-extract");b.disabled=true;b.textContent=T('btn_locked');return}
+  if(S.locked){
+    b.classList.remove("is-extract");
+    b.disabled=false;                    // ← 保持可点击（查看回执）
+    b.textContent=T('btn_locked');
+    return;
+  }
   if(S.canExtract){b.classList.add("is-extract");b.disabled=false;b.textContent=T('extract_btn');return}
   b.classList.remove("is-extract");
   b.disabled=S.pending>0||S.spinning||S.left<=0;
@@ -423,7 +428,7 @@ async function fetchState(){
     S.canExtract = data.canExtract ? 1 : 0;
     S.withdrawn = data.withdrawn ? 1 : 0;
     S.locked = data.locked ? 1 : 0;
-    S.addr = data.address || '';   // ← 保存已提交的地址
+    S.addr = data.address || '';
     setBal(S.bal);
     setLeft(S.left);
     restoreBtn();
@@ -547,7 +552,6 @@ function showReceipt(){
     $("confirmAddr").textContent = S.addr;
     openM("confirmModal");
   } else {
-    // 老记录没有地址，回退到 Toast
     toast(T('toast_locked'));
   }
 }
