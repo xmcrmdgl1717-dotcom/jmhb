@@ -34,6 +34,7 @@
   .rec .meta .badge{padding:2px 8px;border-radius:6px;background:rgba(0,240,255,.08);border:1px solid rgba(0,240,255,.2);color:#7AF7FF;}
   .rec .meta .badge-device{background:rgba(176,38,255,.1);border-color:rgba(176,38,255,.3);color:#c084fc;}
   .rec .meta .badge-lang{background:rgba(255,209,102,.08);border-color:rgba(255,209,102,.3);color:#FFD700;}
+  .rec .meta .badge-country{background:rgba(0,255,170,.1);border-color:rgba(0,255,170,.3);color:#00FFAA;}
   .empty{color:rgba(200,210,230,.5);text-align:center;padding:60px 0;font-size:14px;}
   .copy-btn{margin-left:auto;padding:2px 8px;font-size:10px;border-radius:6px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;}
   .copy-btn:hover{background:rgba(0,240,255,.1);}
@@ -44,6 +45,7 @@
   .modal-card label{display:block;font-size:12px;color:rgba(200,210,230,.75);margin-bottom:6px;margin-top:12px;}
   .modal-card input{width:100%;height:44px;padding:0 14px;border-radius:10px;border:1px solid rgba(0,240,255,.35);background:#0a0c14;color:#fff;font-size:14px;outline:none;}
   .modal-card input:focus{border-color:#00F0FF;box-shadow:0 0 14px rgba(0,240,255,.25);}
+  .modal-card .hint{font-size:11px;color:rgba(200,210,230,.5);margin-top:6px;}
   .modal-actions{display:flex;gap:10px;margin-top:20px;}
   .modal-actions button{flex:1;height:44px;border:0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.04em;}
   .btn-primary{background:linear-gradient(180deg,#67e8f9,#22d3ee);color:#041018;}
@@ -65,11 +67,28 @@
     <div class="toolbar">
       <button id="refreshBtn">🔄 刷新</button>
       <button id="exportBtn">⬇ 导出 CSV</button>
+      <button id="settingsBtn">⚙️ 设置</button>
       <button id="changePwdBtn">🔑 修改密码</button>
       <button id="logoutBtn">🚪 退出</button>
       <span class="count" id="countInfo"></span>
     </div>
     <div id="listBox"></div>
+  </div>
+
+  <!-- 设置弹窗 -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-card">
+      <h3>⚙️ 每日提现次数设置</h3>
+      <label>每个 IP 每天可完整提现的次数</label>
+      <input id="dailyLimitInput" type="number" min="1" max="100" value="1"/>
+      <div class="hint">例如设为 2，则每个 IP 每天可完整玩 2 轮（每轮 3 次旋转 + 1 次提现）。北京时间 0 点重置。</div>
+      <div class="modal-err" id="settingsErr"></div>
+      <div class="modal-ok" id="settingsOk"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="settingsCancel">取消</button>
+        <button class="btn-primary" id="settingsSubmit">保存</button>
+      </div>
+    </div>
   </div>
 
   <div class="modal" id="pwdModal">
@@ -105,7 +124,9 @@
   const exportBtn = document.getElementById('exportBtn');
   const logoutBtn = document.getElementById('logoutBtn');
   const changePwdBtn = document.getElementById('changePwdBtn');
+  const settingsBtn = document.getElementById('settingsBtn');
   const pwdModal = document.getElementById('pwdModal');
+  const settingsModal = document.getElementById('settingsModal');
   const oldPwd = document.getElementById('oldPwd');
   const newPwd = document.getElementById('newPwd');
   const newPwd2 = document.getElementById('newPwd2');
@@ -113,6 +134,11 @@
   const pwdOk = document.getElementById('pwdOk');
   const pwdCancel = document.getElementById('pwdCancel');
   const pwdSubmit = document.getElementById('pwdSubmit');
+  const dailyLimitInput = document.getElementById('dailyLimitInput');
+  const settingsErr = document.getElementById('settingsErr');
+  const settingsOk = document.getElementById('settingsOk');
+  const settingsCancel = document.getElementById('settingsCancel');
+  const settingsSubmit = document.getElementById('settingsSubmit');
 
   let token = sessionStorage.getItem('admin_token') || '';
   let cacheRecords = [];
@@ -141,7 +167,35 @@
     return [os, browser].filter(Boolean).join(' · ') || '—';
   }
 
-  // 用 ISO 时间计算耗时（visit_time 和 time 都是 ISO 格式）
+  // 语言代码 → 国家显示（国旗 + 名称）
+  const LANG_TO_COUNTRY = {
+    zh: '🇨🇳 中国',
+    en: '🇺🇸 美国',
+    es: '🇪🇸 西班牙',
+    hi: '🇮🇳 印度',
+    ar: '🇸🇦 沙特',
+    pt: '🇧🇷 巴西',
+    ru: '🇷🇺 俄罗斯',
+    ja: '🇯🇵 日本',
+    de: '🇩🇪 德国',
+    fr: '🇫🇷 法国',
+    ko: '🇰🇷 韩国',
+    it: '🇮🇹 意大利',
+    tr: '🇹🇷 土耳其',
+    vi: '🇻🇳 越南',
+    th: '🇹🇭 泰国',
+    id: '🇮🇩 印尼',
+    ms: '🇲🇾 马来',
+    nl: '🇳🇱 荷兰',
+    pl: '🇵🇱 波兰'
+  };
+
+  function formatCountry(code){
+    if(!code) return '❓ 未知';
+    const key = String(code).toLowerCase();
+    return LANG_TO_COUNTRY[key] || '❓ 未知';
+  }
+
   function calcDuration(visitIso, submitIso){
     if(!visitIso || !submitIso) return '';
     try{
@@ -213,6 +267,7 @@
     listBox.innerHTML = records.map((r, i) => {
       const device = parseDevice(r.userAgent);
       const lang = r.language || '—';
+      const country = formatCountry(r.country);
       const visitTime = r.visit_time_local || '—';
       const submitTime = r.time_local || r.time || '—';
       const duration = calcDuration(r.visit_time, r.time);
@@ -230,6 +285,7 @@
         <div class="meta">
           <span>#${i+1}</span>
           <span>💰 ${escapeHtml(String(r.balance || '0.00'))} USDT</span>
+          <span class="badge badge-country">🌍 ${escapeHtml(country)}</span>
           ${r.ip ? `<span class="badge">🌐 ${escapeHtml(r.ip)}</span>` : ''}
           <span class="badge badge-device">📱 ${escapeHtml(device)}</span>
           <span class="badge badge-lang">🗣 ${escapeHtml(lang)}</span>
@@ -254,10 +310,11 @@
 
   function exportCSV(){
     if(!cacheRecords.length){ alert('暂无数据可导出'); return; }
-    const header = ['地址', '余额', '进入时间', '提交时间', '耗时', 'IP', '设备', '设备语言'];
+    const header = ['地址', '余额', '地区', '进入时间', '提交时间', '耗时', 'IP', '设备', '设备语言'];
     const rows = cacheRecords.map(r => [
       r.address,
       r.balance || '0.00',
+      formatCountry(r.country),
       r.visit_time_local || '',
       r.time_local || r.time || '',
       calcDuration(r.visit_time, r.time),
@@ -293,6 +350,7 @@
     listBox.innerHTML = '';
   }
 
+  // ===== 修改密码 =====
   function openPwdModal(){
     oldPwd.value = '';
     newPwd.value = '';
@@ -343,6 +401,58 @@
     }
   }
 
+  // ===== 设置弹窗 =====
+  async function openSettingsModal(){
+    settingsErr.textContent = '';
+    settingsOk.textContent = '';
+    settingsModal.classList.add('open');
+    try{
+      const res = await fetch(API_BASE + '/api/config', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if(res.status === 401){ logout(); return; }
+      if(res.ok){
+        const data = await res.json();
+        dailyLimitInput.value = data.dailyLimit || 1;
+      }
+    }catch(e){}
+    setTimeout(() => dailyLimitInput.focus(), 100);
+  }
+  function closeSettingsModal(){
+    settingsModal.classList.remove('open');
+  }
+  async function submitSettings(){
+    settingsErr.textContent = '';
+    settingsOk.textContent = '';
+    const v = parseInt(dailyLimitInput.value, 10);
+    if(isNaN(v) || v < 1 || v > 100){ settingsErr.textContent = '请输入 1-100 之间的整数'; return; }
+    settingsSubmit.disabled = true;
+    settingsSubmit.textContent = '保存中...';
+    try{
+      const res = await fetch(API_BASE + '/api/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ dailyLimit: v })
+      });
+      if(res.status === 401){ logout(); return; }
+      if(!res.ok){
+        const d = await res.json().catch(() => ({}));
+        settingsErr.textContent = d.error || ('保存失败 (' + res.status + ')');
+        return;
+      }
+      settingsOk.textContent = '✓ 已保存，新配置立即生效';
+      setTimeout(() => closeSettingsModal(), 1200);
+    }catch(e){
+      settingsErr.textContent = '网络错误，请重试';
+    }finally{
+      settingsSubmit.disabled = false;
+      settingsSubmit.textContent = '保存';
+    }
+  }
+
   loginBtn.addEventListener('click', doLogin);
   passInput.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
   refreshBtn.addEventListener('click', loadRecords);
@@ -351,6 +461,9 @@
   changePwdBtn.addEventListener('click', openPwdModal);
   pwdCancel.addEventListener('click', closePwdModal);
   pwdSubmit.addEventListener('click', submitPwdChange);
+  settingsBtn.addEventListener('click', openSettingsModal);
+  settingsCancel.addEventListener('click', closeSettingsModal);
+  settingsSubmit.addEventListener('click', submitSettings);
 
   if(token) showPanel();
 })();
