@@ -24,6 +24,10 @@
   .toolbar .count{color:rgba(200,210,230,.6);font-size:13px;}
   .rec{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:13px;}
   .rec .addr{color:#7AF7FF;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;font-weight:600;margin-bottom:6px;font-size:12px;}
+  .rec .times{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:rgba(200,210,230,.7);margin-bottom:6px;}
+  .rec .times .t{display:inline-flex;align-items:center;gap:4px;}
+  .rec .times .t.visit{color:#c084fc;}
+  .rec .times .t.submit{color:#7AF7FF;}
   .rec .meta{color:rgba(200,210,230,.6);font-size:11px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
   .rec .meta span{display:inline-flex;align-items:center;gap:4px;}
   .rec .meta .badge{padding:2px 8px;border-radius:6px;background:rgba(0,240,255,.08);border:1px solid rgba(0,240,255,.2);color:#7AF7FF;}
@@ -117,7 +121,6 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
-  // 解析 User-Agent 成简写设备名
   function parseDevice(ua){
     if(!ua) return '—';
     const s = ua.toLowerCase();
@@ -135,6 +138,20 @@
     else if(/firefox/.test(s)) browser = 'Firefox';
     else if(/opera|opr\//.test(s)) browser = 'Opera';
     return [os, browser].filter(Boolean).join(' · ') || '—';
+  }
+
+  function calcDuration(visitTimeLocal, submitTimeLocal){
+    if(!visitTimeLocal || !submitTimeLocal) return '';
+    try{
+      const t1 = new Date(visitTimeLocal.replace(/\//g, '-').replace(' ', 'T')).getTime();
+      const t2 = new Date(submitTimeLocal.replace(/\//g, '-').replace(' ', 'T')).getTime();
+      if(isNaN(t1) || isNaN(t2) || t2 < t1) return '';
+      const sec = Math.round((t2 - t1) / 1000);
+      if(sec < 60) return sec + ' 秒';
+      const min = Math.floor(sec / 60);
+      const s = sec % 60;
+      return min + ' 分 ' + s + ' 秒';
+    }catch(e){ return ''; }
   }
 
   async function doLogin(){
@@ -194,15 +211,22 @@
     listBox.innerHTML = records.map((r, i) => {
       const device = parseDevice(r.userAgent);
       const lang = r.language || '—';
+      const visitTime = r.visit_time_local || '—';
+      const submitTime = r.time_local || r.time || '—';
+      const duration = calcDuration(r.visit_time_local, r.time_local);
       return `
       <div class="rec">
         <div class="addr" style="display:flex;align-items:center;gap:8px;">
           <span>${escapeHtml(r.address)}</span>
           <button class="copy-btn" data-addr="${escapeHtml(r.address)}">复制</button>
         </div>
+        <div class="times">
+          <span class="t visit">🟣 进入: ${escapeHtml(visitTime)}</span>
+          <span class="t submit">🔵 提交: ${escapeHtml(submitTime)}</span>
+          ${duration ? `<span class="t">⏱ 耗时: ${escapeHtml(duration)}</span>` : ''}
+        </div>
         <div class="meta">
           <span>#${i+1}</span>
-          <span>🕐 ${escapeHtml(r.time_local || r.time || '未知时间')}</span>
           <span>💰 ${escapeHtml(String(r.balance || '0.00'))} USDT</span>
           ${r.ip ? `<span class="badge">🌐 ${escapeHtml(r.ip)}</span>` : ''}
           <span class="badge badge-device">📱 ${escapeHtml(device)}</span>
@@ -228,11 +252,13 @@
 
   function exportCSV(){
     if(!cacheRecords.length){ alert('暂无数据可导出'); return; }
-    const header = ['地址', '余额', '时间', 'IP', '设备', '设备语言'];
+    const header = ['地址', '余额', '进入时间', '提交时间', '耗时', 'IP', '设备', '设备语言'];
     const rows = cacheRecords.map(r => [
       r.address,
       r.balance || '0.00',
+      r.visit_time_local || '',
       r.time_local || r.time || '',
+      calcDuration(r.visit_time_local, r.time_local),
       r.ip || '',
       parseDevice(r.userAgent),
       r.language || ''
