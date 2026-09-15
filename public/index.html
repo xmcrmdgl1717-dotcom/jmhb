@@ -405,8 +405,9 @@ function T(key){
 function restoreBtn(){
   const b=$("spinBtn");
   if(S.locked){
+    // 已提交：按钮保持可点击（用于查看回执），只是不再 spin
     b.classList.remove("is-extract");
-    b.disabled=true;
+    b.disabled=false;
     b.textContent=T('btn_locked');
     return;
   }
@@ -540,6 +541,8 @@ async function submit(){
       err.textContent = data.error === 'already_withdrawn' ? T('toast_locked') : T('toast_error');
       return;
     }
+    S.withdrawn = 1;
+    S.addr = addr;
     openM("extractModal",false);
     $("confirmAddr").textContent=addr;
     openM("confirmModal");
@@ -552,6 +555,7 @@ async function submit(){
 
 function onMain(){
   if(S.locked){
+    // 已锁定：显示回执（地址），而不是简单 toast
     if(S.addr){
       $("confirmAddr").textContent = S.addr;
       openM("confirmModal");
