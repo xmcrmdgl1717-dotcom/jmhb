@@ -28,6 +28,8 @@
   .stat.ios .v{color:#c084fc;}
   .stat.desktop .v{color:#7af7ff;}
   .stat.unknown .v{color:#FFD700;}
+  .stat.visiting .v{color:#00FFAA;}
+  .stat.left .v{color:#94a3b8;}
   .stat.pending .v{color:#FFD700;}
   .stat.approved .v{color:#00FFAA;}
   .stat.rejected .v{color:#ff5a7a;}
@@ -55,14 +57,19 @@
   .toolbar .count{color:rgba(200,210,230,.6);font-size:13px;margin-left:auto;}
   .rec{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:13px;position:relative;}
   .rec.decided{opacity:.85;}
+  .rec.visiting{border-color:rgba(0,255,170,.35);box-shadow:0 0 0 1px rgba(0,255,170,.15);}
   .rec .top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;padding-right:220px;}
   .rec .cb{width:18px;height:18px;margin-top:3px;flex-shrink:0;cursor:pointer;accent-color:#00F0FF;}
   .rec .cb:disabled{opacity:.3;cursor:not-allowed;}
   .rec .addr{color:#7AF7FF;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;font-weight:600;font-size:12px;flex:1;}
+  .rec .addr.empty{color:rgba(200,210,230,.35);font-style:italic;font-weight:400;}
   .rec .status-badge{padding:3px 10px;border-radius:6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.06em;flex-shrink:0;}
+  .rec .status-badge.visiting{color:#00FFAA;background:rgba(0,255,170,.1);border:1px solid rgba(0,255,170,.4);animation:pulseDot 1.6s ease-in-out infinite;}
+  .rec .status-badge.left{color:#94a3b8;background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.3);}
   .rec .status-badge.pending{color:#FFD700;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.35);}
   .rec .status-badge.approved{color:#00FFAA;background:rgba(0,255,170,.1);border:1px solid rgba(0,255,170,.35);}
   .rec .status-badge.rejected{color:#ff5a7a;background:rgba(255,90,122,.1);border:1px solid rgba(255,90,122,.35);}
+  @keyframes pulseDot{50%{opacity:.5;}}
   .rec .actions{position:absolute;top:12px;right:16px;display:flex;gap:6px;align-items:center;}
   .rec .actions button{padding:5px 12px;font-size:11px;border-radius:6px;cursor:pointer;border:1px solid;background:transparent;letter-spacing:.04em;}
   .rec .actions .btn-ap{border-color:rgba(0,255,170,.4);color:#00FFAA;}
@@ -74,6 +81,7 @@
   .rec .times .t{display:inline-flex;align-items:center;gap:4px;}
   .rec .times .t.visit{color:#c084fc;}
   .rec .times .t.submit{color:#7AF7FF;}
+  .rec .times .t.leave{color:#94a3b8;}
   .rec .times .t.duration{color:#FFD700;}
   .rec .meta{color:rgba(200,210,230,.6);font-size:11px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
   .rec .meta span{display:inline-flex;align-items:center;gap:4px;}
@@ -86,6 +94,7 @@
   .rec .meta .badge-country{background:rgba(0,255,170,.1);border-color:rgba(0,255,170,.3);color:#00FFAA;}
   .rec .meta .badge-os{background:rgba(0,240,255,.08);border-color:rgba(0,240,255,.3);color:#7AF7FF;}
   .rec .meta .badge-browser{background:rgba(192,132,252,.1);border-color:rgba(192,132,252,.32);color:#c084fc;}
+  .rec .meta .badge-amt{background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.35);color:#FFD700;font-weight:700;}
   .empty{color:rgba(200,210,230,.5);text-align:center;padding:60px 0;font-size:14px;}
   .copy-btn{padding:2px 8px;font-size:10px;border-radius:6px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;margin-left:auto;}
   .copy-btn:hover{background:rgba(0,240,255,.1);}
@@ -125,20 +134,20 @@
   </div>
 
   <div class="panel" id="panelBox">
-    <h1 id="panelTitle">📋 TRC20 地址记录</h1>
+    <h1 id="panelTitle">📋 TRC20 访问记录</h1>
 
     <div class="stats" id="statsBox">
       <div class="stat" data-device="all"><div class="k" id="sTotalK">总记录</div><div class="v" id="statTotal">0</div></div>
+      <div class="stat visiting" data-status="visiting"><div class="k" id="sVisitK">🟢 访问中</div><div class="v" id="statVisiting">0</div></div>
+      <div class="stat left" data-status="left"><div class="k" id="sLeftK">⚪ 未提交</div><div class="v" id="statLeft">0</div></div>
       <div class="stat" data-device="android"><div class="k" id="sAndK">📱 安卓</div><div class="v" id="statAndroid">0</div></div>
       <div class="stat ios" data-device="ios"><div class="k" id="sIosK">🍎 苹果</div><div class="v" id="statIOS">0</div></div>
       <div class="stat desktop" data-device="desktop"><div class="k" id="sDeskK">🖥 桌面</div><div class="v" id="statDesktop">0</div></div>
-      <div class="stat unknown" data-device="unknown"><div class="k" id="sUnkK">❓ 未知设备</div><div class="v" id="statUnknown">0</div></div>
       <div class="stat pending" data-audit="pending"><div class="k" id="sPenK">⏳ 等待审核</div><div class="v" id="statPending">0</div></div>
       <div class="stat approved" data-audit="approved"><div class="k" id="sAprK">✅ 已通过</div><div class="v" id="statApproved">0</div></div>
       <div class="stat rejected" data-audit="rejected"><div class="k" id="sRejK">❌ 已拒绝</div><div class="v" id="statRejected">0</div></div>
     </div>
 
-    <!-- ★ 新的快捷筛选栏（去掉"关卡"，新增"系统""浏览器""搜索框"） -->
     <div class="filters">
       <div class="filter-group">
         <label id="fLblTime">时间</label>
@@ -158,6 +167,17 @@
         </div>
       </div>
       <div class="filter-group">
+        <label id="fLblStatus">状态</label>
+        <select id="filterStatus">
+          <option value="all">全部</option>
+          <option value="visiting">访问中</option>
+          <option value="left">未提交</option>
+          <option value="pending">等待审核</option>
+          <option value="approved">已通过</option>
+          <option value="rejected">已拒绝</option>
+        </select>
+      </div>
+      <div class="filter-group">
         <label id="fLblDevice">设备</label>
         <select id="filterDevice">
           <option value="all">全部</option>
@@ -169,32 +189,24 @@
       </div>
       <div class="filter-group">
         <label id="fLblCountry">国家</label>
-        <select id="filterCountry">
-          <option value="all">全部</option>
-        </select>
+        <select id="filterCountry"><option value="all">全部</option></select>
       </div>
       <div class="filter-group">
         <label id="fLblOs">系统</label>
-        <select id="filterOs">
-          <option value="all">全部</option>
-        </select>
+        <select id="filterOs"><option value="all">全部</option></select>
       </div>
       <div class="filter-group">
         <label id="fLblBrowser">浏览器</label>
-        <select id="filterBrowser">
-          <option value="all">全部</option>
-        </select>
+        <select id="filterBrowser"><option value="all">全部</option></select>
       </div>
       <div class="filter-group">
         <label id="fLblLang">语言</label>
-        <select id="filterLang">
-          <option value="all">全部</option>
-        </select>
+        <select id="filterLang"><option value="all">全部</option></select>
       </div>
       <div class="filter-group search">
         <label id="fLblSearch">搜索</label>
         <div class="search-input-wrap">
-          <input type="text" id="filterSearch" placeholder="IP / 指纹 / 国家 / 系统 / 浏览器 / 语言"/>
+          <input type="text" id="filterSearch" placeholder="IP / 地址 / 国家 / 系统 / 浏览器 / 语言"/>
         </div>
       </div>
       <div class="filter-actions">
@@ -236,6 +248,13 @@
       <label id="settingsLabel">每个 IP 每天可完整提现的次数</label>
       <input id="dailyLimitInput" type="number" min="1" max="100" value="1"/>
       <div class="hint" id="settingsHint">例如设为 2，每个 IP 每天可提现 2 次。北京时间 0 点重置。</div>
+
+      <div class="settings-divider"></div>
+
+      <label id="heartbeatLabel">心跳间隔（秒）</label>
+      <input id="heartbeatInput" type="number" min="5" max="300" value="30"/>
+      <div class="hint" id="heartbeatHint">前端每隔 N 秒上报一次心跳，用于判断用户是否还在线。推荐 30 秒。范围 5-300。</div>
+
       <div class="modal-err" id="settingsErr"></div>
       <div class="modal-ok" id="settingsOk"></div>
       <div class="modal-actions">
@@ -282,14 +301,17 @@
     zh: {
       loginTitle: '🔒 管理员登录', passPlaceholder: '管理员密码', loginBtn: '登录',
       loginErrEmpty: '请输入密码', loginErrWrong: '密码错误', loginErrNet: '网络错误，请重试',
-      panelTitle: '📋 TRC20 地址记录',
-      sTotal: '总记录', sAndroid: '📱 安卓', sIOS: '🍎 苹果', sDesktop: '🖥 桌面', sUnknown: '❓ 未知设备',
+      panelTitle: '📋 TRC20 访问记录',
+      sTotal: '总记录', sVisiting: '🟢 访问中', sLeft: '⚪ 未提交',
+      sAndroid: '📱 安卓', sIOS: '🍎 苹果', sDesktop: '🖥 桌面',
       sPending: '⏳ 等待审核', sApproved: '✅ 已通过', sRejected: '❌ 已拒绝',
-      fLblTime: '时间', fLblDevice: '设备', fLblCountry: '国家', fLblOs: '系统', fLblBrowser: '浏览器', fLblLang: '语言', fLblSearch: '搜索',
-      searchPlaceholder: 'IP / 指纹 / 国家 / 系统 / 浏览器 / 语言',
+      fLblTime: '时间', fLblStatus: '状态', fLblDevice: '设备', fLblCountry: '国家',
+      fLblOs: '系统', fLblBrowser: '浏览器', fLblLang: '语言', fLblSearch: '搜索',
+      searchPlaceholder: 'IP / 地址 / 国家 / 系统 / 浏览器 / 语言',
       searchBtn: '🔍 搜索',
       optAll: '全部', optToday: '今天', opt7d: '近 7 天', opt30d: '近 30 天', optCustom: '自定义',
       optAndroid: '安卓', optIOS: '苹果', optDesktop: '桌面', optUnknown: '未知',
+      optVisiting: '访问中', optLeft: '未提交',
       optPending: '等待审核', optApproved: '已通过', optRejected: '已拒绝',
       reset: '重置', refresh: '🔄 刷新', export: '⬇ 导出 CSV（当前筛选）',
       bulkApprove: '✅ 批量通过', bulkReject: '❌ 批量拒绝',
@@ -297,15 +319,18 @@
       countInfo: '共 {n} 条（已筛选）',
       btnApprove: '通过', btnReject: '拒绝', btnCopy: '复制', btnCopied: '已复制', btnCopyFail: '失败',
       empty: '暂无记录', loading: '加载中...', loadFail: '加载失败 ({n})',
-      timeEnter: '🟣 进入', timeSubmit: '🔵 提交', timeDuration: '⏱ 耗时',
+      timeEnter: '🟣 进入', timeSubmit: '🔵 提交', timeLeave: '🟠 离开', timeDuration: '⏱ 停留',
+      statusVisiting: '访问中', statusLeft: '未提交', statusPending: '等待审核', statusApproved: '已通过', statusRejected: '已拒绝',
       settingsTitle: '⚙️ 系统设置',
       settingsTgLabel: '✈️ 飞机客服链接 (Telegram)',
       settingsTgHint: '填写完整 Telegram 链接，将显示在首页悬浮按钮和提现记录弹窗。',
       settingsTgErr: '请输入以 http(s):// 开头的完整链接',
-      settingsTgOk: '✓ 飞机号已保存，前端将立即生效',
+      settingsTgOk: '✓ 飞机号已保存',
       settingsTgBtn: '保存飞机号',
       settingsLabel: '每个 IP 每天可完整提现的次数',
       settingsHint: '例如设为 2，每个 IP 每天可提现 2 次。北京时间 0 点重置。',
+      heartbeatLabel: '心跳间隔（秒）',
+      heartbeatHint: '前端每隔 N 秒上报一次心跳，用于判断用户是否还在线。推荐 30 秒。范围 5-300。',
       pwdTitle: '🔑 修改管理员密码',
       pwdLabel1: '当前密码', pwdLabel2: '新密码（至少 6 位）', pwdLabel3: '确认新密码',
       cancel: '取消', save: '保存', confirmChange: '确认修改',
@@ -313,9 +338,10 @@
       pwdErrEmpty: '请输入当前密码', pwdErrNet: '网络错误，请重试',
       pwdOk: '✓ 密码修改成功，请重新登录',
       settingsErrRange: '请输入 1-100 之间的整数',
+      heartbeatErrRange: '心跳间隔必须在 5-300 秒之间',
       settingsOk: '✓ 已保存，新配置立即生效',
       batchNone: '请先勾选记录', batchFail: '操作失败',
-      batchResultWithSkip: '更新 {n} 条，跳过 {s} 条已审核',
+      batchResultWithSkip: '更新 {n} 条，跳过 {s} 条',
       auditAlreadyDone: '该记录已审核，不能修改',
       confirmTitle: '⚠️ 确认',
       confirmRejectText: '确认拒绝这笔 {amount} USDT 的提现吗？金额将退还给用户。',
@@ -325,14 +351,17 @@
     en: {
       loginTitle: '🔒 Admin Login', passPlaceholder: 'Admin Password', loginBtn: 'Login',
       loginErrEmpty: 'Please enter password', loginErrWrong: 'Wrong password', loginErrNet: 'Network error, please retry',
-      panelTitle: '📋 TRC20 Records',
-      sTotal: 'Total', sAndroid: '📱 Android', sIOS: '🍎 iOS', sDesktop: '🖥 Desktop', sUnknown: '❓ Unknown',
+      panelTitle: '📋 TRC20 Visit Records',
+      sTotal: 'Total', sVisiting: '🟢 Visiting', sLeft: '⚪ Not submitted',
+      sAndroid: '📱 Android', sIOS: '🍎 iOS', sDesktop: '🖥 Desktop',
       sPending: '⏳ Pending', sApproved: '✅ Approved', sRejected: '❌ Rejected',
-      fLblTime: 'Time', fLblDevice: 'Device', fLblCountry: 'Country', fLblOs: 'OS', fLblBrowser: 'Browser', fLblLang: 'Language', fLblSearch: 'Search',
+      fLblTime: 'Time', fLblStatus: 'Status', fLblDevice: 'Device', fLblCountry: 'Country',
+      fLblOs: 'OS', fLblBrowser: 'Browser', fLblLang: 'Language', fLblSearch: 'Search',
       searchPlaceholder: 'IP / Address / Country / OS / Browser / Language',
       searchBtn: '🔍 Search',
       optAll: 'All', optToday: 'Today', opt7d: 'Last 7 days', opt30d: 'Last 30 days', optCustom: 'Custom',
       optAndroid: 'Android', optIOS: 'iOS', optDesktop: 'Desktop', optUnknown: 'Unknown',
+      optVisiting: 'Visiting', optLeft: 'Not submitted',
       optPending: 'Pending', optApproved: 'Approved', optRejected: 'Rejected',
       reset: 'Reset', refresh: '🔄 Refresh', export: '⬇ Export CSV (filtered)',
       bulkApprove: '✅ Bulk Approve', bulkReject: '❌ Bulk Reject',
@@ -340,7 +369,8 @@
       countInfo: '{n} records (filtered)',
       btnApprove: 'Approve', btnReject: 'Reject', btnCopy: 'Copy', btnCopied: 'Copied', btnCopyFail: 'Failed',
       empty: 'No records', loading: 'Loading...', loadFail: 'Load failed ({n})',
-      timeEnter: '🟣 Enter', timeSubmit: '🔵 Submit', timeDuration: '⏱ Duration',
+      timeEnter: '🟣 Enter', timeSubmit: '🔵 Submit', timeLeave: '🟠 Leave', timeDuration: '⏱ Stay',
+      statusVisiting: 'Visiting', statusLeft: 'Not submitted', statusPending: 'Pending', statusApproved: 'Approved', statusRejected: 'Rejected',
       settingsTitle: '⚙️ System Settings',
       settingsTgLabel: '✈️ Telegram Support Link',
       settingsTgHint: 'Enter full Telegram link. Shown on homepage float button and withdrawal modal.',
@@ -349,6 +379,8 @@
       settingsTgBtn: 'Save Telegram Link',
       settingsLabel: 'Max withdrawals per IP per day',
       settingsHint: 'E.g., 2 means each IP can withdraw 2 times per day. Resets at 00:00 Beijing time.',
+      heartbeatLabel: 'Heartbeat interval (seconds)',
+      heartbeatHint: 'Frontend reports heartbeat every N seconds to detect if user is still online. Recommended 30s. Range 5-300.',
       pwdTitle: '🔑 Change Admin Password',
       pwdLabel1: 'Current Password', pwdLabel2: 'New Password (min 6 chars)', pwdLabel3: 'Confirm New Password',
       cancel: 'Cancel', save: 'Save', confirmChange: 'Confirm',
@@ -356,9 +388,10 @@
       pwdErrEmpty: 'Please enter current password', pwdErrNet: 'Network error, please retry',
       pwdOk: '✓ Password changed, please login again',
       settingsErrRange: 'Please enter an integer between 1-100',
+      heartbeatErrRange: 'Heartbeat interval must be 5-300 seconds',
       settingsOk: '✓ Saved, effective immediately',
       batchNone: 'Please select records first', batchFail: 'Operation failed',
-      batchResultWithSkip: 'Updated {n}, skipped {s} already audited',
+      batchResultWithSkip: 'Updated {n}, skipped {s}',
       auditAlreadyDone: 'This record is already audited and cannot be changed',
       confirmTitle: '⚠️ Confirm',
       confirmRejectText: 'Reject this {amount} USDT withdrawal? Amount will be refunded to user.',
@@ -388,6 +421,7 @@
   let token = sessionStorage.getItem('admin_token') || '';
   let cacheRecords = [];
   let filteredRecords = [];
+  let statusFilter = 'all';
   let deviceFilter = 'all';
   let auditFilter = 'all';
   let countryFilter = 'all';
@@ -396,7 +430,8 @@
   let langFilter = 'all';
   let searchQuery = '';
   const selectedIds = new Set();
-  let currentConfig = { dailyLimit: 1, telegramLink: '' };
+  let currentConfig = { dailyLimit: 1, telegramLink: '', heartbeatInterval: 30 };
+  let autoRefreshTimer = null;
 
   const $ = id => document.getElementById(id);
 
@@ -436,8 +471,18 @@
     if(/windows|mac os|macintosh|linux|x11|cros/.test(ua)) return 'desktop';
     return 'unknown';
   }
-  function getAuditStatus(r){ return r.auditStatus || r.status || 'pending'; }
-  function isDecided(r) { const s = getAuditStatus(r); return s === 'approved' || s === 'rejected'; }
+
+  // 记录的状态：visiting / left / pending / approved / rejected
+  function getStatus(r){
+    if (r.auditStatus === 'approved') return 'approved';
+    if (r.auditStatus === 'rejected') return 'rejected';
+    if (r.auditStatus === 'pending') return 'pending';
+    if (r.submit_time) return 'pending';
+    if (r.leave_time) return 'left';
+    return 'visiting';
+  }
+  function isDecided(r) { const s = getStatus(r); return s === 'approved' || s === 'rejected'; }
+  function canAudit(r) { return getStatus(r) === 'pending'; }
 
   function formatCountry(r){
     const code = (r.country || '').toUpperCase();
@@ -447,15 +492,27 @@
     return '❓ 未知';
   }
 
-  function calcDuration(v, s){
-    if(!v || !s) return '';
-    try{
-      const t1 = new Date(v).getTime(), t2 = new Date(s).getTime();
-      if(isNaN(t1) || isNaN(t2) || t2 < t1) return '';
-      const sec = Math.round((t2 - t1)/1000);
-      if(sec < 60) return sec + 's';
-      return Math.floor(sec/60) + 'm ' + (sec%60) + 's';
-    }catch(e){ return ''; }
+  // 停留时长：已离开用 duration，访问中则实时计算
+  function getStayDuration(r){
+    const visitMs = r.visit_time ? new Date(r.visit_time).getTime() : 0;
+    if (!visitMs) return 0;
+    const st = getStatus(r);
+    let endMs;
+    if (st === 'visiting') {
+      endMs = r.last_heartbeat ? new Date(r.last_heartbeat).getTime() : Date.now();
+    } else {
+      endMs = r.leave_time ? new Date(r.leave_time).getTime() : (r.submit_time ? new Date(r.submit_time).getTime() : Date.now());
+    }
+    if (isNaN(endMs) || endMs < visitMs) return 0;
+    return Math.round((endMs - visitMs) / 1000);
+  }
+
+  function formatDuration(sec){
+    if (!sec || sec < 1) return '0s';
+    if (sec < 60) return sec + 's';
+    const m = Math.floor(sec/60);
+    const s = sec % 60;
+    return m + 'm ' + s + 's';
   }
 
   function applyLanguage() {
@@ -464,15 +521,17 @@
     $('loginBtn').textContent = t('loginBtn');
     $('panelTitle').textContent = t('panelTitle');
     $('sTotalK').textContent = t('sTotal');
+    $('sVisitK').textContent = t('sVisiting');
+    $('sLeftK').textContent = t('sLeft');
     $('sAndK').textContent = t('sAndroid');
     $('sIosK').textContent = t('sIOS');
     $('sDeskK').textContent = t('sDesktop');
-    $('sUnkK').textContent = t('sUnknown');
     $('sPenK').textContent = t('sPending');
     $('sAprK').textContent = t('sApproved');
     $('sRejK').textContent = t('sRejected');
 
     $('fLblTime').textContent = t('fLblTime');
+    $('fLblStatus').textContent = t('fLblStatus');
     $('fLblDevice').textContent = t('fLblDevice');
     $('fLblCountry').textContent = t('fLblCountry');
     $('fLblOs').textContent = t('fLblOs');
@@ -485,6 +544,11 @@
     const rangeOpts = $('filterRange').options;
     rangeOpts[0].text = t('optAll'); rangeOpts[1].text = t('optToday');
     rangeOpts[2].text = t('opt7d'); rangeOpts[3].text = t('opt30d'); rangeOpts[4].text = t('optCustom');
+
+    const statusOpts = $('filterStatus').options;
+    statusOpts[0].text = t('optAll'); statusOpts[1].text = t('optVisiting');
+    statusOpts[2].text = t('optLeft'); statusOpts[3].text = t('optPending');
+    statusOpts[4].text = t('optApproved'); statusOpts[5].text = t('optRejected');
 
     const devOpts = $('filterDevice').options;
     devOpts[0].text = t('optAll'); devOpts[1].text = t('optAndroid');
@@ -505,6 +569,8 @@
     $('saveTgBtn').textContent = t('settingsTgBtn');
     $('settingsLabel').textContent = t('settingsLabel');
     $('settingsHint').textContent = t('settingsHint');
+    $('heartbeatLabel').textContent = t('heartbeatLabel');
+    $('heartbeatHint').textContent = t('heartbeatHint');
     $('settingsCancel').textContent = t('cancel');
     $('settingsSubmit').textContent = t('save');
 
@@ -537,13 +603,13 @@
     finally{ $('loginBtn').disabled = false; }
   }
 
-  async function loadRecords(){
+  async function loadRecords(silent){
     if(!token) return;
-    $('listBox').innerHTML = '<div class="empty">' + t('loading') + '</div>';
+    if(!silent) $('listBox').innerHTML = '<div class="empty">' + t('loading') + '</div>';
     try{
       const res = await fetch(API_BASE + '/api/records', { headers: { 'Authorization': 'Bearer ' + token } });
       if(res.status === 401){ logout(); return; }
-      if(!res.ok){ $('listBox').innerHTML = '<div class="empty">' + t('loadFail', {n:res.status}) + '</div>'; return; }
+      if(!res.ok){ if(!silent) $('listBox').innerHTML = '<div class="empty">' + t('loadFail', {n:res.status}) + '</div>'; return; }
       const data = await res.json();
       cacheRecords = Array.isArray(data) ? data : (data.records || []);
       for (const id of Array.from(selectedIds)) {
@@ -551,10 +617,9 @@
       }
       buildFilterOptions();
       applyFilters();
-    }catch(e){ $('listBox').innerHTML = '<div class="empty">' + t('loginErrNet') + '</div>'; }
+    }catch(e){ if(!silent) $('listBox').innerHTML = '<div class="empty">' + t('loginErrNet') + '</div>'; }
   }
 
-  // 根据现有数据构建"国家/系统/浏览器/语言"下拉选项
   function buildFilterOptions(){
     const countries = new Set();
     const oses = new Set();
@@ -566,7 +631,6 @@
       if (r.browser) browsers.add(r.browser);
       if (r.language) langs.add(r.language);
     });
-
     function fillOptions(sel, values, formatter){
       const cur = sel.value;
       sel.innerHTML = '<option value="all">' + t('optAll') + '</option>';
@@ -587,7 +651,7 @@
   function inRange(r){
     const range = $('filterRange').value;
     if(range === 'all') return true;
-    const tt = (r.time || r.createdAt) ? new Date(r.time || r.createdAt).getTime() : 0;
+    const tt = r.visit_time ? new Date(r.visit_time).getTime() : 0;
     if(!tt) return false;
     const now = Date.now();
     if(range === 'today'){ const d = new Date(); const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); return tt >= start; }
@@ -601,12 +665,11 @@
     return true;
   }
 
-  // 搜索：模糊匹配 IP / 地址 / 国家 / 系统 / 浏览器 / 语言 / UA
   function matchesSearch(r, q){
     if (!q) return true;
     const lower = q.toLowerCase();
     const haystack = [
-      r.ip, r.address, r.country, r.os, r.browser, r.language, r.userAgent, r.device
+      r.ip, r.address, r.country, r.os, r.browser, r.language, r.userAgent, r.device, r.status
     ].filter(Boolean).join(' ').toLowerCase();
     return haystack.includes(lower);
   }
@@ -614,8 +677,11 @@
   function applyFilters(){
     filteredRecords = cacheRecords.filter(r => {
       if(!inRange(r)) return false;
+      const st = getStatus(r);
+      if(statusFilter !== 'all' && st !== statusFilter) return false;
       if(deviceFilter !== 'all' && getDeviceType(r) !== deviceFilter) return false;
-      if(auditFilter !== 'all' && getAuditStatus(r) !== auditFilter) return false;
+      // 兼容旧的 audit 点击（将 auditFilter 合并到 statusFilter）
+      if(auditFilter !== 'all' && st !== auditFilter) return false;
       if(countryFilter !== 'all' && (r.country || '').toUpperCase() !== countryFilter) return false;
       if(osFilter !== 'all' && r.os !== osFilter) return false;
       if(browserFilter !== 'all' && r.browser !== browserFilter) return false;
@@ -626,23 +692,29 @@
 
     const dev = { android: 0, ios: 0, desktop: 0, unknown: 0 };
     const aud = { pending: 0, approved: 0, rejected: 0 };
+    let visitingCount = 0;
+    let leftCount = 0;
     cacheRecords.forEach(r => {
       const d = getDeviceType(r);
       dev[d] = (dev[d] || 0) + 1;
-      const a = getAuditStatus(r);
-      aud[a] = (aud[a] || 0) + 1;
+      const st = getStatus(r);
+      if (st === 'visiting') visitingCount++;
+      else if (st === 'left') leftCount++;
+      else aud[st] = (aud[st] || 0) + 1;
     });
     $('statTotal').textContent = cacheRecords.length;
+    $('statVisiting').textContent = visitingCount;
+    $('statLeft').textContent = leftCount;
     $('statAndroid').textContent = dev.android || 0;
     $('statIOS').textContent = dev.ios || 0;
     $('statDesktop').textContent = dev.desktop || 0;
-    $('statUnknown').textContent = dev.unknown || 0;
     $('statPending').textContent = aud.pending || 0;
     $('statApproved').textContent = aud.approved || 0;
     $('statRejected').textContent = aud.rejected || 0;
 
     document.querySelectorAll('.stat[data-device]').forEach(el => el.classList.toggle('active', deviceFilter !== 'all' && el.dataset.device === deviceFilter));
-    document.querySelectorAll('.stat[data-audit]').forEach(el => el.classList.toggle('active', auditFilter !== 'all' && el.dataset.audit === auditFilter));
+    document.querySelectorAll('.stat[data-status]').forEach(el => el.classList.toggle('active', statusFilter !== 'all' && el.dataset.status === statusFilter));
+    document.querySelectorAll('.stat[data-audit]').forEach(el => el.classList.toggle('active', statusFilter !== 'all' && el.dataset.audit === statusFilter));
 
     $('countInfo').textContent = t('countInfo', { n: filteredRecords.length });
     renderRecords(filteredRecords);
@@ -650,60 +722,85 @@
 
   function renderRecords(records){
     if(!records.length){ $('listBox').innerHTML = '<div class="empty">' + t('empty') + '</div>'; return; }
+    const now = Date.now();
     listBox.innerHTML = records.map((r, i) => {
       const deviceName = parseDevice(r.userAgent);
       const deviceType = getDeviceType(r);
       const l = r.language || '—';
       const country = formatCountry(r);
-      const visitTime = r.visit_time_local || '—';
-      const submitTime = r.time_local || r.time || r.createdAt || '—';
-      const duration = calcDuration(r.visit_time, r.time || r.createdAt);
-      const auditStatus = getAuditStatus(r);
+      const st = getStatus(r);
+
+      const visitTime = r.visit_time_local || (r.visit_time ? r.visit_time.slice(0,19).replace('T',' ') : '—');
+      const submitTime = r.submit_time_local || (r.submit_time ? r.submit_time.slice(0,19).replace('T',' ') : null);
+      const leaveTime = r.leave_time_local || (r.leave_time ? r.leave_time.slice(0,19).replace('T',' ') : null);
+
+      const staySec = getStayDuration(r);
+      const stayText = formatDuration(staySec);
+
       const decided = isDecided(r);
+      const pending = canAudit(r);
       const isChecked = selectedIds.has(String(r.id));
-      const btnDisabled = decided ? 'disabled' : '';
+      const btnDisabled = (decided || !pending) ? 'disabled' : '';
+
+      const statusMap = {
+        visiting: t('statusVisiting'),
+        left: t('statusLeft'),
+        pending: t('statusPending'),
+        approved: t('statusApproved'),
+        rejected: t('statusRejected')
+      };
+
       const osText = r.os || '未知系统';
       const browserText = r.browser || '未知浏览器';
+      const addrText = r.address || '';
+      const addrDisplay = addrText ? escapeHtml(addrText) : '（未提交地址）';
+      const addrClass = addrText ? 'addr' : 'addr empty';
+      const amtText = (r.balance || r.amount) ? String(r.balance || r.amount) : '';
+      const amtBadge = amtText ? `<span class="badge badge-amt">💰 ${escapeHtml(amtText)} USDT</span>` : '';
+
       return `
-      <div class="rec ${decided?'decided':''}">
+      <div class="rec ${decided?'decided':''} ${st==='visiting'?'visiting':''}" data-id="${escapeHtml(r.id)}">
         <div class="actions">
           <button class="btn-ap" data-audit="approved" data-id="${escapeHtml(r.id)}" ${btnDisabled}>✅ ${t('btnApprove')}</button>
           <button class="btn-rj" data-audit="rejected" data-id="${escapeHtml(r.id)}" ${btnDisabled}>❌ ${t('btnReject')}</button>
         </div>
         <div class="top">
-          <input type="checkbox" class="cb" data-id="${escapeHtml(r.id)}" ${isChecked?'checked':''} ${decided?'disabled':''}/>
-          <div class="addr">${escapeHtml(r.address)}</div>
-          <span class="status-badge ${auditStatus}"></span>
+          <input type="checkbox" class="cb" data-id="${escapeHtml(r.id)}" ${isChecked?'checked':''} ${btnDisabled}/>
+          <div class="${addrClass}">${addrDisplay}</div>
+          <span class="status-badge ${st}"></span>
         </div>
         <div class="times">
           <span class="t visit">${t('timeEnter')}: ${escapeHtml(visitTime)}</span>
-          <span class="t submit">${t('timeSubmit')}: ${escapeHtml(submitTime)}</span>
-          ${duration ? `<span class="t duration">${t('timeDuration')}: ${escapeHtml(duration)}</span>` : ''}
+          ${submitTime ? `<span class="t submit">${t('timeSubmit')}: ${escapeHtml(submitTime)}</span>` : ''}
+          ${leaveTime ? `<span class="t leave">${t('timeLeave')}: ${escapeHtml(leaveTime)}</span>` : ''}
+          <span class="t duration">${t('timeDuration')}: ${escapeHtml(stayText)}</span>
         </div>
         <div class="meta">
           <span>#${i+1}</span>
-          <span>💰 ${escapeHtml(String(r.balance || r.amount || '0.00'))} USDT</span>
+          ${amtBadge}
           <span class="badge badge-country">🌍 ${escapeHtml(country)}</span>
           ${r.ip ? `<span class="badge">🌐 ${escapeHtml(r.ip)}</span>` : ''}
           <span class="badge badge-device ${deviceType}">📱 ${escapeHtml(deviceName)}</span>
           <span class="badge badge-os">🖥 ${escapeHtml(osText)}</span>
           <span class="badge badge-browser">🧭 ${escapeHtml(browserText)}</span>
           <span class="badge badge-lang">🗣 ${escapeHtml(l)}</span>
-          <button class="copy-btn" data-addr="${escapeHtml(r.address)}">${t('btnCopy')}</button>
+          ${addrText ? `<button class="copy-btn" data-addr="${escapeHtml(addrText)}">${t('btnCopy')}</button>` : ''}
         </div>
       </div>`;
     }).join('');
 
+    // 状态徽章文字 & class
     listBox.querySelectorAll('.rec').forEach((el, idx) => {
       const r = records[idx];
       if(!r) return;
       const badge = el.querySelector('.status-badge');
-      const st = getAuditStatus(r);
-      badge.classList.remove('pending','approved','rejected');
+      const st = getStatus(r);
+      badge.classList.remove('visiting','left','pending','approved','rejected');
       badge.classList.add(st);
-      badge.textContent = st === 'approved' ? t('optApproved') : st === 'rejected' ? t('optRejected') : t('optPending');
+      badge.textContent = ({visiting: t('statusVisiting'), left: t('statusLeft'), pending: t('statusPending'), approved: t('statusApproved'), rejected: t('statusRejected')})[st] || st;
     });
 
+    // 复制
     listBox.querySelectorAll('.copy-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         navigator.clipboard.writeText(btn.dataset.addr).then(() => {
@@ -711,19 +808,21 @@
         }).catch(() => { btn.textContent = t('btnCopyFail'); setTimeout(()=>btn.textContent=t('btnCopy'), 1000); });
       });
     });
+    // 勾选
     listBox.querySelectorAll('.cb').forEach(cb => {
       cb.addEventListener('change', () => {
         if(cb.checked) selectedIds.add(String(cb.dataset.id));
         else selectedIds.delete(String(cb.dataset.id));
       });
     });
+    // 单条审核
     listBox.querySelectorAll('.btn-ap, .btn-rj').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.dataset.id;
         const status = btn.dataset.audit;
         const r = cacheRecords.find(x => String(x.id) === String(id));
         if (!r) return;
-        if (isDecided(r)) { alert(t('auditAlreadyDone')); return; }
+        if (!canAudit(r)) { alert(t('auditAlreadyDone')); return; }
         const amount = r.balance || r.amount || '0.00';
         const isReject = status === 'rejected';
         const text = (isReject ? t('confirmRejectText') : t('confirmApproveText')).replace('{amount}', amount);
@@ -781,7 +880,7 @@
       if(!res.ok){ alert(t('batchFail')); return; }
       const data = await res.json();
       cacheRecords.forEach(r => {
-        if(ids.includes(String(r.id)) && !isDecided(r)){ r.auditStatus = status; r.status = status; }
+        if(ids.includes(String(r.id)) && canAudit(r)){ r.auditStatus = status; r.status = status; }
       });
       selectedIds.clear();
       applyFilters();
@@ -792,28 +891,49 @@
   function exportCSV(){
     if(!filteredRecords.length){ alert(t('empty')); return; }
     const header = lang === 'en'
-      ? ['Address','Balance','Country','Enter','Submit','Duration','IP','Device Type','Device','OS','Browser','Language','Audit Status']
-      : ['地址','余额','国家/地区','进入时间','提交时间','耗时','IP','设备类型','设备','系统版本','浏览器','设备语言','审核状态'];
-    const rows = filteredRecords.map(r => [
-      r.address, r.balance || r.amount || '0.00', formatCountry(r),
-      r.visit_time_local || '', r.time_local || r.time || r.createdAt || '', calcDuration(r.visit_time, r.time || r.createdAt),
-      r.ip || '', getDeviceType(r), parseDevice(r.userAgent),
-      r.os || '', r.browser || '', r.language || '',
-      getAuditStatus(r)
-    ]);
+      ? ['Status','Address','Amount','Country','Enter','Submit','Leave','Stay(s)','IP','Device Type','Device','OS','Browser','Language']
+      : ['状态','地址','金额','国家/地区','进入时间','提交时间','离开时间','停留(秒)','IP','设备类型','设备','系统版本','浏览器','设备语言'];
+    const rows = filteredRecords.map(r => {
+      const st = getStatus(r);
+      const stText = ({visiting: t('statusVisiting'), left: t('statusLeft'), pending: t('statusPending'), approved: t('statusApproved'), rejected: t('statusRejected')})[st] || st;
+      return [
+        stText,
+        r.address || '',
+        (r.balance || r.amount || '0.00'),
+        formatCountry(r),
+        r.visit_time_local || '',
+        r.submit_time_local || '',
+        r.leave_time_local || '',
+        getStayDuration(r),
+        r.ip || '',
+        getDeviceType(r),
+        parseDevice(r.userAgent),
+        r.os || '',
+        r.browser || '',
+        r.language || ''
+      ];
+    });
     const csv = [header, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'trc20_records_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.download = 'trc20_visits_' + new Date().toISOString().slice(0,10) + '.csv';
     a.click(); URL.revokeObjectURL(url);
   }
 
-  function showPanel(){ $('loginBox').style.display = 'none'; $('panelBox').classList.add('open'); loadRecords(); }
+  function showPanel(){
+    $('loginBox').style.display = 'none';
+    $('panelBox').classList.add('open');
+    loadRecords();
+    // 自动刷新：每 10 秒（静默）
+    if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+    autoRefreshTimer = setInterval(() => loadRecords(true), 10000);
+  }
   function logout(){
     token = ''; sessionStorage.removeItem('admin_token');
     cacheRecords = []; filteredRecords = []; selectedIds.clear();
+    if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
     $('panelBox').classList.remove('open'); $('loginBox').style.display = 'block';
     $('passInput').value = ''; $('listBox').innerHTML = '';
   }
@@ -830,27 +950,37 @@
         currentConfig = data;
         $('dailyLimitInput').value = data.dailyLimit || 1;
         $('telegramLinkInput').value = data.telegramLink || '';
+        $('heartbeatInput').value = data.heartbeatInterval || 30;
       }
     }catch(e){}
   }
   function closeSettingsModal(){ $('settingsModal').classList.remove('open'); }
+
   async function submitSettings(){
     $('settingsErr').textContent = ''; $('settingsOk').textContent = '';
     const v = parseInt($('dailyLimitInput').value, 10);
     if(isNaN(v) || v < 1 || v > 100){ $('settingsErr').textContent = t('settingsErrRange'); return; }
+    const h = parseInt($('heartbeatInput').value, 10);
+    if(isNaN(h) || h < 5 || h > 300){ $('settingsErr').textContent = t('heartbeatErrRange'); return; }
     $('settingsSubmit').disabled = true;
     try{
       const res = await fetch(API_BASE + '/api/config', {
         method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + token},
-        body: JSON.stringify({ dailyLimit: v })
+        body: JSON.stringify({ dailyLimit: v, heartbeatInterval: h })
       });
       if(res.status === 401){ logout(); return; }
-      if(!res.ok){ $('settingsErr').textContent = t('settingsErrRange'); return; }
+      if(!res.ok){
+        const err = await res.json().catch(() => ({}));
+        $('settingsErr').textContent = err.error || t('settingsErrRange');
+        return;
+      }
       $('settingsOk').textContent = t('settingsOk');
       currentConfig.dailyLimit = v;
+      currentConfig.heartbeatInterval = h;
     }catch(e){ $('settingsErr').textContent = t('loginErrNet'); }
     finally{ $('settingsSubmit').disabled = false; }
   }
+
   async function saveTelegram(){
     $('settingsTgErr').textContent = ''; $('settingsTgOk').textContent = '';
     const link = $('telegramLinkInput').value.trim();
@@ -904,7 +1034,7 @@
   // ===== 事件绑定 =====
   $('loginBtn').addEventListener('click', doLogin);
   $('passInput').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
-  $('refreshBtn').addEventListener('click', loadRecords);
+  $('refreshBtn').addEventListener('click', () => loadRecords());
   $('exportBtn').addEventListener('click', exportCSV);
   $('logoutBtn').addEventListener('click', logout);
   $('changePwdBtn').addEventListener('click', openPwdModal);
@@ -924,13 +1054,13 @@
   });
   $('filterFrom').addEventListener('change', applyFilters);
   $('filterTo').addEventListener('change', applyFilters);
+  $('filterStatus').addEventListener('change', () => { statusFilter = $('filterStatus').value; auditFilter = 'all'; applyFilters(); });
   $('filterDevice').addEventListener('change', () => { deviceFilter = $('filterDevice').value; applyFilters(); });
   $('filterCountry').addEventListener('change', () => { countryFilter = $('filterCountry').value; applyFilters(); });
   $('filterOs').addEventListener('change', () => { osFilter = $('filterOs').value; applyFilters(); });
   $('filterBrowser').addEventListener('change', () => { browserFilter = $('filterBrowser').value; applyFilters(); });
   $('filterLang').addEventListener('change', () => { langFilter = $('filterLang').value; applyFilters(); });
 
-  // 搜索框：输入实时筛选 + 点搜索也筛选
   $('filterSearch').addEventListener('input', () => { searchQuery = $('filterSearch').value.trim(); applyFilters(); });
   $('filterSearch').addEventListener('keydown', e => { if(e.key === 'Enter'){ searchQuery = $('filterSearch').value.trim(); applyFilters(); } });
   $('searchBtn').addEventListener('click', () => { searchQuery = $('filterSearch').value.trim(); applyFilters(); });
@@ -939,8 +1069,8 @@
     $('filterRange').value = 'all';
     $('filterFrom').value = ''; $('filterTo').value = '';
     $('customDateGroup').style.display = 'none';
+    statusFilter = 'all'; auditFilter = 'all'; $('filterStatus').value = 'all';
     deviceFilter = 'all'; $('filterDevice').value = 'all';
-    auditFilter = 'all';
     countryFilter = 'all'; $('filterCountry').value = 'all';
     osFilter = 'all'; $('filterOs').value = 'all';
     browserFilter = 'all'; $('filterBrowser').value = 'all';
@@ -956,9 +1086,19 @@
       applyFilters();
     });
   });
+  document.querySelectorAll('.stat[data-status]').forEach(el => {
+    el.addEventListener('click', () => {
+      statusFilter = el.dataset.status;
+      auditFilter = 'all';
+      $('filterStatus').value = statusFilter;
+      applyFilters();
+    });
+  });
   document.querySelectorAll('.stat[data-audit]').forEach(el => {
     el.addEventListener('click', () => {
-      auditFilter = el.dataset.audit;
+      statusFilter = el.dataset.audit;
+      auditFilter = 'all';
+      $('filterStatus').value = statusFilter;
       applyFilters();
     });
   });
