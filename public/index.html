@@ -154,7 +154,7 @@ body{position:fixed;inset:0}
 @media(max-height:740px){:root{--sym:min(54px,max(40px,calc((100vw - 96px)/5)))}.promo-banner{padding:8px 10px 9px}.banner-kicker,.banner-end{font-size:12px}.banner-amt{font-size:clamp(20px,6.6vw,26px)}.banner-sub{margin-top:5px;font-size:12px}.jackpot-val{font-size:14px}.jackpot-bar{padding:6px 8px;margin-bottom:8px}.spin-btn{height:50px;font-size:14px}.pay-item{padding:6px 8px}.howto-play{padding:10px 12px}.howto-play p{font-size:12px}.rolling-list{height:90px}.lang-select{height:36px;font-size:13px}}
 @media(max-height:680px){:root{--sym:min(48px,max(38px,calc((100vw - 96px)/5)))}.banner-kicker,.banner-end{font-size:11px}.banner-amt{font-size:20px}.banner-sub{font-size:11px}.modal-amt{font-size:28px}}
 
-/* ========== 新增：客服按钮样式 ========== */
+/* ========== 客服按钮样式 ========== */
 .tg-float-btn{position:fixed;bottom:20px;right:20px;z-index:9999;display:none;background:#0088cc;border-radius:50%;width:50px;height:50px;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,0.5);text-decoration:none}
 .tg-float-btn svg{width:28px;height:28px;fill:white}
 .tg-modal-btn{display:none;background:#0088cc;color:white;padding:12px 20px;border-radius:14px;text-decoration:none;font-weight:700;margin:10px auto 0;text-align:center;border:none;cursor:pointer;width:100%;max-width:240px;font-family:var(--d);font-size:12px;letter-spacing:.12em}
@@ -273,7 +273,7 @@ body{position:fixed;inset:0}
 </div>
 </div>
 
-<!-- ========== 提交确认弹窗（无 GOT IT，可直接点遮罩关闭） ========== -->
+<!-- ========== 提交确认弹窗（无 GOT IT） ========== -->
 <div id="confirmModal" class="modal">
 <div class="modal-card">
 <div class="modal-kicker" id="confirmKicker">NOTIFICATION</div>
@@ -316,7 +316,7 @@ body{position:fixed;inset:0}
 // ===== 配置：后端 API 地址 =====
 const API_BASE = '';
 
-// ===== 翻译辅助函数（供主游戏使用） =====
+// ===== 翻译辅助函数 =====
 const T = k => (typeof window.__t === 'function') ? window.__t(k) : k;
 
 (function(){
@@ -429,13 +429,21 @@ function highlight(result,winId,match){
   table.querySelectorAll(".pay-item").forEach(e=>e.classList.toggle("is-hit",match>=2&&+e.dataset.n===match));
 }
 function clearHL(){document.querySelectorAll(".sym.is-win,.pay-item.is-hit").forEach(e=>e.classList.remove("is-win","is-hit"));$("paytable").classList.remove("is-resolved")}
+
+// ========== 修复 1：restoreBtn 支持"我的提现记录"状态 ==========
 function restoreBtn(){
   const b=$("spinBtn");
-  if(S.canExtract){b.classList.add("is-extract");b.disabled=false;b.textContent=T('extract_btn');return}
+  if(S.canExtract){
+    b.classList.add("is-extract");
+    b.disabled=false;
+    b.textContent = S.withdrawn ? T('view_records') : T('extract_btn');
+    return;
+  }
   b.classList.remove("is-extract");
   b.disabled=S.pending>0||S.spinning;
   b.textContent=S.spinning?T('spinning_btn'):T('spin_btn');
 }
+
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove("show"),1600)}
 function openM(id,on){$(id).classList.toggle("open",on!==false)}
 
@@ -475,18 +483,43 @@ function claim(){
   if(S.left<=0)S.canExtract=1;
   openM("winModal",false);restoreBtn();
 }
+
+// ========== 修复 2：submit 提交后立即扣余额 + 按钮变"我的提现记录" ==========
 function submit(){
   const input=$("trc20Input"),err=$("trc20Err"),addr=input.value.trim();
-  if(!/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(addr)){input.classList.add("is-invalid");err.textContent=T('invalid_addr');return}
-  input.classList.remove("is-invalid");err.textContent="";S.withdrawn=1;S.addr=addr;openM("extractModal",false);$("confirmAddr").textContent=addr;openM("confirmModal");
-  submitTrc20Record(addr, S.bal.toFixed(2));
+  if(!/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(addr)){
+    input.classList.add("is-invalid");
+    err.textContent=T('invalid_addr');
+    return;
+  }
+  input.classList.remove("is-invalid");
+  err.textContent="";
+  const withdrawAmount = S.bal;   // 先记下金额
+  S.withdrawn=1;
+  S.addr=addr;
+  openM("extractModal",false);
+  $("confirmAddr").textContent=addr;
+  openM("confirmModal");
+  setBal(0);                       // 右上角余额归 0
+  restoreBtn();                    // 主按钮刷成"我的提现记录"
+  submitTrc20Record(addr, withdrawAmount.toFixed(2));
 }
+
+// ========== 修复 3：onMain 已提交则直接打开记录 ==========
 function onMain(){
   if(S.canExtract && !S.spinning && !S.pending){
-    if(S.withdrawn){openM("confirmModal");return}
+    if(S.withdrawn){
+      // 已经提交过 → 直接打开"我的提现记录"
+      if(typeof window.__openMyRecords === 'function') window.__openMyRecords();
+      return;
+    }
     $("extractAmt").textContent=S.bal.toFixed(2)+" USDT";
-    const input=$("trc20Input");input.classList.remove("is-invalid");$("trc20Err").textContent="";
-    openM("extractModal");setTimeout(()=>input.focus(),280);return;
+    const input=$("trc20Input");
+    input.classList.remove("is-invalid");
+    $("trc20Err").textContent="";
+    openM("extractModal");
+    setTimeout(()=>input.focus(),280);
+    return;
   }
   spin();
 }
@@ -503,14 +536,17 @@ function init(){
   let lastW=innerWidth;
   addEventListener("resize",()=>{if(S.spinning||S.pending||S.canExtract||innerWidth===lastW)return;lastW=innerWidth;mount()});
   initRollingAddresses();
-  // 关闭确认弹窗：点击遮罩
+  // 点击确认弹窗遮罩关闭
   const cm = document.getElementById('confirmModal');
   if (cm) cm.addEventListener('click', e => { if (e.target === cm) cm.classList.remove('open'); });
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+
+// ========== 修复 4：暴露给语言切换脚本调用 ==========
+window.__refreshSpinBtn = restoreBtn;
 })();
 
-// ========== 提交 TRC20 提现记录到后端（原有逻辑：调 /api/records） ==========
+// ========== 提交 TRC20 记录到后端 ==========
 async function submitTrc20Record(address, balance){
   try{
     const lang = (document.getElementById('langSelect') && document.getElementById('langSelect').value) || (navigator.language || 'en');
@@ -536,7 +572,7 @@ async function submitTrc20Record(address, balance){
     console.warn('地址记录提交失败:', err.message);
   }
 }
-</script>  
+</script>
 <script>
 // ========== 滚动地址列表 ==========
 function initRollingAddresses() {
@@ -583,7 +619,7 @@ function initRollingAddresses() {
 }
 </script>
 
-<!-- ========== 语言切换（19 种语言 + 全部新增键） ========== -->
+<!-- ========== 语言切换（19 种语言） ========== -->
 <script>
 (function(){
   const TRANSLATIONS = {
@@ -787,11 +823,17 @@ function initRollingAddresses() {
     const sub = document.getElementById('bannerSub'); if (sub) sub.innerHTML = trans.banner_sub;
     set('rollingTitleText', trans.rolling_title);
 
-    const spinBtn = document.getElementById('spinBtn');
-    if (spinBtn && !spinBtn.classList.contains('is-extract')) {
-      const isBusy = spinBtn.disabled && /\.\.\./.test(spinBtn.textContent);
-      if (!isBusy) spinBtn.textContent = trans.spin_btn;
+    // ★ 修复：无论什么状态都刷新主按钮（交给游戏脚本统一处理）
+    if (typeof window.__refreshSpinBtn === 'function') {
+      window.__refreshSpinBtn();
+    } else {
+      const spinBtn = document.getElementById('spinBtn');
+      if (spinBtn && !spinBtn.classList.contains('is-extract')) {
+        const isBusy = spinBtn.disabled && /\.\.\./.test(spinBtn.textContent);
+        if (!isBusy) spinBtn.textContent = trans.spin_btn;
+      }
     }
+
     const spinsLeftDiv = document.getElementById('spinsLeftDiv');
     if (spinsLeftDiv) {
       const strong = spinsLeftDiv.querySelector('strong');
@@ -801,6 +843,7 @@ function initRollingAddresses() {
 
     updateModalTexts(trans);
 
+    // 记录弹窗如果打开着，重新渲染
     const mrModal = document.getElementById('myRecordsModal');
     if (mrModal && mrModal.classList.contains('open') && window.__reloadMyRecords) {
       window.__reloadMyRecords();
@@ -888,8 +931,8 @@ function initRollingAddresses() {
                 return;
             }
             listBox.innerHTML = data.map((r, i) => {
-                const status = r.status === 'approved' ? T('status_approved') : (r.status === 'rejected' ? T('status_rejected') : T('status_pending'));
-                const statusColor = r.status === 'approved' ? '#00FFAA' : (r.status === 'rejected' ? '#ff5a7a' : '#FFD700');
+                const status = r.auditStatus === 'approved' || r.status === 'approved' ? T('status_approved') : ((r.auditStatus === 'rejected' || r.status === 'rejected') ? T('status_rejected') : T('status_pending'));
+                const statusColor = (r.auditStatus === 'approved' || r.status === 'approved') ? '#00FFAA' : ((r.auditStatus === 'rejected' || r.status === 'rejected') ? '#ff5a7a' : '#FFD700');
                 const time = r.createdAt ? new Date(r.createdAt).toLocaleString(undefined, {hour12:false}) : '—';
                 return `
                   <div style="padding:12px;margin-bottom:10px;border-radius:10px;background:rgba(8,10,16,.7);border:1px solid rgba(0,240,255,.2);">
@@ -900,7 +943,7 @@ function initRollingAddresses() {
                     <div style="font-size:10px;color:rgba(200,210,230,.6);margin-bottom:3px;">${T('label_addr')}</div>
                     <div style="font-family:monospace;font-size:11px;color:#7AF7FF;word-break:break-all;margin-bottom:6px;">${r.address || '—'}</div>
                     <div style="font-size:10px;color:rgba(200,210,230,.6);margin-bottom:3px;">${T('label_amount')}</div>
-                    <div style="font-family:Orbitron,sans-serif;font-size:14px;color:#FFD700;font-weight:700;margin-bottom:6px;">+${r.amount || r.balance || '0.00'} USDT</div>
+                    <div style="font-family:Orbitron,sans-serif;font-size:14px;color:#FFD700;font-weight:700;margin-bottom:6px;">+${r.balance || r.amount || '0.00'} USDT</div>
                     <div style="font-size:10px;color:rgba(200,210,230,.6);margin-bottom:3px;">${T('label_time')}</div>
                     <div style="font-family:monospace;font-size:11px;color:#c084fc;">${time}</div>
                   </div>
@@ -912,6 +955,7 @@ function initRollingAddresses() {
     }
 
     window.__reloadMyRecords = loadMyRecords;
+    window.__openMyRecords = function(){ loadMyRecords(); openMR(); };
 
     if (viewBtn) {
         viewBtn.addEventListener('click', () => { closeConfirm(); loadMyRecords(); openMR(); });
