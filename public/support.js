@@ -1,174 +1,129 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover"/>
-<meta name="theme-color" content="#0B0C10"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="format-detection" content="telephone=no"/>
-<title>NEXUS SLOT · Quantum Reels</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="style.css"/>
-</head>
-<body>
-<div class="bg-stage"></div>
-<div class="bg-grid"></div>
-<div class="orb orb-a"></div>
-<div class="orb orb-b"></div>
-<div class="scanlines"></div>
-<div id="app">
-<div class="shell">
-<header class="header">
-<div class="brand">
-<div class="logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 7v5c0 5.2 3.4 10 8 11 4.6-1 8-5.8 8-11V7l-8-5z" stroke="#00F0FF" stroke-width="1.6" fill="rgba(0,240,255,.12)"/><path d="M12 8v8M8.5 12h7" stroke="#FFD166" stroke-width="1.6" stroke-linecap="round"/></svg></div>
-<div>
-<div class="brand-title">NEXUS</div>
-<div class="brand-sub">Quantum Slot</div>
-</div>
-</div>
-<div class="header-actions">
-<button id="muteBtn" class="icon-btn" type="button" aria-label="Toggle sound">
-<svg id="iconSoundOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5.5,9 9.5,9 14,5.5 14,18.5 9.5,15 5.5,15"/><path d="M16.8 9.5a4.2 4.2 0 0 1 0 5"/><path d="M19.2 7.4a7.2 7.2 0 0 1 0 9.2"/></svg>
-<svg id="iconSoundOff" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5.5,9 9.5,9 14,5.5 14,18.5 9.5,15 5.5,15"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
-</button>
-<div class="wallet">
-<svg width="16" height="16" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#26A17B"/><path fill="#fff" d="M17.7 17.4v2.3c3 .16 5.25.88 5.25 1.74 0 .86-2.25 1.58-5.25 1.74v2.79h-1.9v-2.76c-3.07-.18-5.36-.94-5.36-1.85 0-.9 2.29-1.66 5.36-1.84v-2.36c-2.18.14-3.7.7-3.7 1.38H9.3c0-1.22 2.4-2.14 5.5-2.3V13h1.9v1.12c3.02.16 5.26.9 5.26 1.82 0 .93-2.24 1.66-5.26 1.82zm-1.9-.32v-2.2c-2.05.12-3.38.6-3.38 1.16 0 .56 1.33 1.04 3.38 1.16zm1.9 4.86v-2.28c2.1.13 3.48.64 3.48 1.22s-1.38 1.08-3.48 1.2z"/></svg>
-<span class="wallet-amt" id="balanceText">0.00</span>
-<span class="wallet-unit">USDT</span>
-</div>
-</div>
-</header>
-
-<div class="lang-select-wrap">
-  <select id="langSelect" class="lang-select" aria-label="Select Language">
-    <option value="en">🇺🇸 English</option>
-    <option value="zh">🇨🇳 中文</option>
-    <option value="es">🇪🇸 Español</option>
-    <option value="hi">🇮🇳 हिन्दी</option>
-    <option value="ar">🇸🇦 العربية</option>
-    <option value="pt">🇧🇷 Português</option>
-    <option value="ru">🇷🇺 Русский</option>
-    <option value="ja">🇯🇵 日本語</option>
-    <option value="de">🇩🇪 Deutsch</option>
-    <option value="fr">🇫🇷 Français</option>
-    <option value="ko">🇰🇷 한국어</option>
-    <option value="it">🇮🇹 Italiano</option>
-    <option value="tr">🇹🇷 Türkçe</option>
-    <option value="vi">🇻🇳 Tiếng Việt</option>
-    <option value="th">🇹🇭 ไทย</option>
-    <option value="id">🇮🇩 Bahasa Indonesia</option>
-    <option value="ms">🇲🇾 Bahasa Melayu</option>
-    <option value="nl">🇳🇱 Nederlands</option>
-    <option value="pl">🇵🇱 Polski</option>
-  </select>
-</div>
-
-<section class="howto-play">
-<h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> <span id="howtoTitleText">How to Play · Game Description</span></h3>
-<p id="howtoP1"><span class="highlight-cyan">Spin the 5 reels</span> to match crypto symbols. You get <em>3 free spins</em> to start — no deposit needed!</p>
-<p id="howtoP2">Match <em>2+ identical symbols</em> on the center payline to win. Win up to <em>10,000 USDT</em> for 5-of-a-kind!</p>
-<p id="howtoP3">After your spins, claim winnings to your balance, then <span class="highlight-cyan">extract rewards</span> via USDT TRC20.</p>
-</section>
-
-<section class="promo-banner">
-<h1 class="banner-title"><span class="banner-kicker" id="bannerKicker">WIN UP TO</span><span class="banner-amt" id="bannerAmt">10,000 USDT</span><span class="banner-end" id="bannerEnd">FOR FREE!</span></h1>
-<p class="banner-sub" id="bannerSub">Spin 3 times to unlock your starting balance. <em>No deposit required to play!</em></p>
-</section>
-<section class="machine">
-<span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
-<div class="jackpot-bar"><span class="jackpot-label">JACKPOT</span><span class="jackpot-val">10,000 USDT</span></div>
-<div class="reels-stage" id="reelsStage"><span class="tick l"></span><span class="tick r"></span></div>
-<div class="paytable" id="paytable">
-<div class="pay-item" data-n="2"><span class="pay-k">2× MATCH</span><span class="pay-v">10 USDT</span></div>
-<div class="pay-item" data-n="3"><span class="pay-k">3× MATCH</span><span class="pay-v">30 USDT</span></div>
-<div class="pay-item" data-n="4"><span class="pay-k">4× MATCH</span><span class="pay-v">200 USDT</span></div>
-<div class="pay-item" data-n="5"><span class="pay-k">5× MATCH</span><span class="pay-v">10,000 USDT</span></div>
-</div>
-<div class="spin-wrap">
-<button id="spinBtn" class="spin-btn" type="button">SPIN NOW</button>
-<div class="spins-left" id="spinsLeftDiv">FREE SPINS REMAINING: <strong id="spinsText">3</strong>/3</div>
-<div class="rolling-addresses">
-  <div class="rolling-title"><span id="rollingTitleText">⛓ RECENT TRC20 WITHDRAWALS</span><span>LIVE</span></div>
-  <div class="rolling-list" id="rollingList">
-    <div class="rolling-inner" id="rollingInner"></div>
-  </div>
-</div>
-</div>
-</section>
-</div>
-</div>
-<div id="toast" class="toast"></div>
-
-<!-- ========== 中奖弹窗 ========== -->
-<div id="winModal" class="modal">
-<div class="modal-card">
-<div class="modal-kicker" id="winKicker">NEON PAYOUT</div>
-<h2 class="modal-title" id="winTitle">YOU WIN</h2>
-<div class="modal-amt" id="winAmt">+0 USDT</div>
-<p class="modal-desc" id="winDesc"></p>
-<button id="claimBtn" class="claim-btn" type="button">CLAIM TO BALANCE</button>
-</div>
-</div>
-
-<!-- ========== 提取弹窗 ========== -->
-<div id="extractModal" class="modal">
-<div class="modal-card extract-card">
-<div class="modal-kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="15" r="1.2" fill="currentColor" stroke="none"/></svg> <span id="extractKickerText">TRC20 WITHDRAW</span></div>
-<h2 class="modal-title" id="extractTitle">EXTRACT</h2>
-<div class="extract-amt" id="extractAmt">0.00 USDT</div>
-<label class="field-label" id="extractLabel" for="trc20Input">ENTER YOUR USDT TRC20 ADDRESS:</label>
-<input id="trc20Input" class="field-input" type="text" maxlength="48" placeholder="T................................" autocomplete="off" spellcheck="false"/>
-<p class="field-err" id="trc20Err"></p>
-<button id="submitWithdrawBtn" class="submit-btn" type="button">SUBMIT WITHDRAWAL</button>
-</div>
-</div>
-
-<!-- ========== 提交确认弹窗 ========== -->
-<div id="confirmModal" class="modal">
-<div class="modal-card">
-<div class="modal-kicker" id="confirmKicker">NOTIFICATION</div>
-<h2 class="modal-title" id="confirmTitleText">WITHDRAWAL REQUEST SUBMITTED</h2>
-<p class="confirm-copy" id="confirmP1">Your reward withdrawal request has been submitted successfully!</p>
-<p class="confirm-copy" id="confirmP2">We will transfer this reward to your wallet within <strong>1 business day</strong>. Please stay tuned and check your account.</p>
-<div class="addr-box" id="confirmAddr"></div>
-<button id="viewMyRecordsBtn" class="claim-btn" type="button" style="margin-top:10px;background:linear-gradient(180deg,#7AF7FF,#22d3ee);color:#041018;">📋 My Withdrawals</button>
-<a id="modalContactBtn" href="#" target="_blank" class="tg-modal-btn">Contact Support</a>
-</div>
-</div>
-
-<!-- ========== 我的提现记录弹窗 ========== -->
-<div id="myRecordsModal" class="modal">
-  <div class="modal-card">
-    <div class="modal-kicker" id="myRecordsKicker">Withdrawal Records</div>
-    <h2 class="modal-title" id="myRecordsTitle">My Withdrawal Records</h2>
-    <div id="myRecordsList" style="max-height:340px;overflow-y:auto;margin:14px 0 16px;text-align:left;"></div>
-    <button id="myRecordsCloseBtn" class="claim-btn" type="button">Close</button>
-  </div>
-</div>
-
-<!-- ========== 悬浮客服飞机按钮 ========== -->
-<a id="floatingTgBtn" href="#" target="_blank" class="tg-float-btn">
-    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.11.03-1.89 1.2-5.34 3.52-.5.34-.95.5-1.35.49-.44-.01-1.29-.25-1.92-.46-.78-.25-1.4-.39-1.35-.82.03-.22.29-.45.78-.69 3.05-1.33 5.08-2.21 6.09-2.64 2.9-1.21 3.5-1.42 3.89-1.42.09 0 .28.02.4.12.11.09.14.21.15.3z"/></svg>
-</a>
-
-<!-- 首次访问时间记录 -->
-<script>
+// ===================== NEXUS SLOT · 客服 + Safari 拦截 + 提现记录弹窗 =====================
 (function(){
-  try {
-    var k = '__nexus_first_visit';
-    var v = localStorage.getItem(k);
-    if (!v) { v = new Date().toISOString(); localStorage.setItem(k, v); }
-    window.__firstVisitTime = v;
-  } catch(e){ window.__firstVisitTime = new Date().toISOString(); }
-})();
-</script>
+    const T = k => (typeof window.__t === 'function') ? window.__t(k) : k;
 
-<!-- 脚本加载顺序：i18n → game → support -->
-<script src="i18n.js"></script>
-<script src="game.js"></script>
-<script src="support.js"></script>
-</body>
-</html>
+    // 1. 读取后台配置的飞机链接
+    fetch('/api/public-settings')
+        .then(res => res.json())
+        .then(data => {
+            if (data.telegramLink) {
+                const floatBtn = document.getElementById('floatingTgBtn');
+                if (floatBtn) { floatBtn.href = data.telegramLink; floatBtn.style.display = 'flex'; }
+                const modalBtn = document.getElementById('modalContactBtn');
+                if (modalBtn) { modalBtn.href = data.telegramLink; modalBtn.style.display = 'inline-block'; }
+            }
+        })
+        .catch(err => console.warn('加载客服配置失败', err));
+
+    // 2. 复制链接工具
+    window.forceCopyLink = function(text) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
+        try {
+            const ok = document.execCommand('copy');
+            ok ? alert(T('safari_alert_copied')) : prompt(T('copy_fail_prompt'), text);
+        } catch (err) {
+            prompt(T('copy_fail_prompt'), text);
+        }
+        document.body.removeChild(ta);
+    };
+
+    // 3. Safari 强制拦截（iOS 非 Safari 无法旋转）
+    document.addEventListener('DOMContentLoaded', function() {
+        const spinBtn = document.getElementById('spinBtn');
+        if (!spinBtn) return;
+        spinBtn.addEventListener('click', function(e) {
+            const ua = navigator.userAgent;
+            const isIOS = /iPhone|iPad|iPod/.test(ua);
+            const isNotSafari = /CriOS|FxiOS|EdgiOS|OPiOS/.test(ua) || (isIOS && !/Safari/.test(ua));
+            if (isIOS && isNotSafari) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                const link = window.location.href;
+                if (confirm(T('safari_alert_body'))) {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(link)
+                            .then(() => alert(T('safari_alert_copied')))
+                            .catch(() => window.forceCopyLink(link));
+                    } else {
+                        window.forceCopyLink(link);
+                    }
+                }
+                return false;
+            }
+        }, true);
+    });
+
+    // 4. 我的提现记录弹窗
+    const modal = document.getElementById('myRecordsModal');
+    const listBox = document.getElementById('myRecordsList');
+    const closeBtn = document.getElementById('myRecordsCloseBtn');
+    const viewBtn = document.getElementById('viewMyRecordsBtn');
+
+    if (!modal || !listBox) return;
+
+    function openMR() { modal.classList.add('open'); }
+    function closeMR() { modal.classList.remove('open'); }
+    function closeConfirm() {
+        const c = document.getElementById('confirmModal');
+        if (c) c.classList.remove('open');
+    }
+
+    async function loadMyRecords(){
+        listBox.innerHTML = '<div style="text-align:center;color:rgba(200,210,230,.6);padding:20px 0;font-size:13px;">' + T('loading') + '</div>';
+        try {
+            const res = await fetch('/api/my-withdrawals');
+            const data = await res.json();
+            if (!Array.isArray(data) || !data.length) {
+                listBox.innerHTML = '<div style="text-align:center;color:rgba(200,210,230,.5);padding:20px 0;font-size:13px;">' + T('no_records') + '</div>';
+                return;
+            }
+            listBox.innerHTML = data.map((r, i) => {
+                const st = r.auditStatus || r.status || 'pending';
+                const status = st === 'approved' ? T('status_approved') : (st === 'rejected' ? T('status_rejected') : T('status_pending'));
+                const statusColor = st === 'approved' ? '#00FFAA' : (st === 'rejected' ? '#ff5a7a' : '#FFD700');
+                const time = r.createdAt ? new Date(r.createdAt).toLocaleString(undefined, {hour12:false}) : '—';
+                return `
+                  <div style="padding:12px;margin-bottom:10px;border-radius:10px;background:rgba(8,10,16,.7);border:1px solid rgba(0,240,255,.2);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                      <span style="font-family:Orbitron,sans-serif;font-size:10px;color:#7AF7FF;letter-spacing:.06em;">#${i+1}</span>
+                      <span style="font-family:Orbitron,sans-serif;font-size:10px;color:${statusColor};letter-spacing:.06em;">${status}</span>
+                    </div>
+                    <div style="font-size:10px;color:rgba(200,210,230,.6);margin-bottom:3px;">${T('label_addr')}</div>
+                    <div style="font-family:monospace;font-size:11px;color:#7AF7FF;word-break:break-all;margin-bottom:6px;">${r.address || '—'}</div>
+                    <div style="font-size:10px;color:rgba(200,210,230,.6);margin-bottom:3px;">${T('label_amount')}</div>
+                    <div style="font-family:Orbitron,sans-serif;font-size:14px;color:#FFD700;font-weight:700;margin-bottom:6px;">+${r.balance || r.amount || '0.00'} USDT</div>
+                    <div style="font-size:10px;color:rgba(200,210,230,.6);margin-bottom:3px;">${T('label_time')}</div>
+                    <div style="font-family:monospace;font-size:11px;color:#c084fc;">${time}</div>
+                  </div>
+                `;
+            }).join('');
+        } catch(e) {
+            listBox.innerHTML = '<div style="text-align:center;color:#ff8aa0;padding:20px 0;font-size:13px;">' + T('load_failed') + '</div>';
+        }
+    }
+
+    // 暴露给 game.js 调用
+    window.__reloadMyRecords = loadMyRecords;
+    window.__openMyRecords = function(){ loadMyRecords(); openMR(); };
+
+    if (viewBtn) {
+        viewBtn.addEventListener('click', () => { closeConfirm(); loadMyRecords(); openMR(); });
+    }
+    if (closeBtn) closeBtn.addEventListener('click', closeMR);
+    if (modal) modal.addEventListener('click', e => { if(e.target === modal) closeMR(); });
+
+    // ★ 新增：顶部余额可点击 → 打开提现记录
+    const walletBtn = document.getElementById('walletBtn');
+    if (walletBtn) {
+        walletBtn.style.cursor = 'pointer';
+        walletBtn.addEventListener('click', () => {
+            if (typeof window.__openMyRecords === 'function') window.__openMyRecords();
+        });
+    }
+})();
