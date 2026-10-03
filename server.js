@@ -8,7 +8,6 @@ const geoip = require('geoip-lite');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 信任代理（Render/Cloudflare 后面才能拿到真实 IP）
 app.set('trust proxy', true);
 
 app.use(cors());
@@ -24,7 +23,7 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 const DEFAULT_CONFIG = {
     adminPassword: process.env.ADMIN_PASSWORD || 'admin123456',
     dailyLimit: 1,
-    telegramLink: 'https://t.me/your_default_support' // 改成你的默认飞机链接
+    telegramLink: 'https://t.me/your_default_support'
 };
 
 const readJson = (filePath, defaultVal = {}) => {
@@ -74,7 +73,6 @@ function guessDevice(ua) {
     return 'unknown';
 }
 
-// 语言推断（仅作为 IP 定位失败时的兜底）
 function guessCountryByLang(lang) {
     const map = {
         zh:'CN', en:'US', es:'ES', hi:'IN', ar:'SA', pt:'BR', ru:'RU', ja:'JP',
@@ -85,37 +83,61 @@ function guessCountryByLang(lang) {
     return map[l] || '';
 }
 
-// IP 优先，语言兜底
 function detectCountry(ip, language) {
-    // 1) 先尝试 IP 定位
     if (ip) {
-        let cleanIp = String(ip).split(',')[0].trim();
-        cleanIp = cleanIp.replace(/^::ffff:/, ''); // 去掉 IPv6 映射前缀
+        let cleanIp = String(ip).split(',')[0].trim().replace(/^::ffff:/, '');
         if (cleanIp && cleanIp !== '::1' && !cleanIp.startsWith('127.') && !cleanIp.startsWith('10.') && !cleanIp.startsWith('192.168.')) {
             try {
                 const geo = geoip.lookup(cleanIp);
                 if (geo && geo.country) return geo.country;
-            } catch (e) {
-                console.warn('geoip lookup 失败:', e.message);
-            }
+            } catch (e) { console.warn('geoip lookup 失败:', e.message); }
         }
     }
-    // 2) IP 定位失败（内网、数据库未命中），回退到语言推断
     return guessCountryByLang(language);
+}
+
+// 判断该 IP 当天已经成功提现的次数（拒绝的不算）
+function countTodayByIp(ip) {
+    // 北京时间当天 00:00 对应的 UTC 时间戳
+    const now = Date.now();
+    const bjNow = now + 8 * 3600 * 1000;
+    const bjMidnight = new Date(bjNow);
+    bjMidnight.setUTCHours(0, 0, 0, 0);
+    const utcMidnight = bjMidnight.getTime() - 8 * 3600 * 1000;
+
+    return records.filter(r => {
+        if (r.ip !== ip) return false;
+        const t = new Date(r.createdAt || r.time || 0).getTime();
+        if (isNaN(t) || t < utcMidnight) return false;
+        // 只统计"待审核"和"已通过"的，被拒绝的不占次数
+        const st = r.auditStatus || r.status || 'pending';
+        return st === 'pending' || st === 'approved';
+    }).length;
 }
 
 // ==================== 公共 API ====================
 
-// 前端读取飞机号配置
 app.get('/api/public-settings', (req, res) => {
     res.json({ telegramLink: config.telegramLink || '' });
 });
 
-// 前端提交 TRC20 记录
+// 前端提交 TRC20 记录 —— 带 IP 每日次数限制
 app.post('/api/records', (req, res) => {
     try {
         const ip = req.ip || req.connection.remoteAddress || '';
         const ua = req.headers['user-agent'] || '';
+
+        // ★ IP 每日次数限制校验
+        const used = countTodayByIp(ip);
+        const limit = Number(config.dailyLimit) || 1;
+        if (used >= limit) {
+            return res.status(429).json({
+                error: 'DAILY_LIMIT_REACHED',
+                used: used,
+                limit: limit
+            });
+        }
+
         const parser = new UAParser(ua);
         const browser = parser.getBrowser();
         const os = parser.getOS();
@@ -155,12 +177,10 @@ app.post('/api/records', (req, res) => {
     }
 });
 
-// 后台获取所有记录
 app.get('/api/records', authenticateToken, (req, res) => {
     res.json({ records: records.slice().reverse() });
 });
 
-// 前端查询自己 IP 的提现记录
 app.get('/api/my-withdrawals', (req, res) => {
     const ip = req.ip || req.connection.remoteAddress || '';
     const mine = records.filter(r => r.ip === ip).slice(-10).reverse();
