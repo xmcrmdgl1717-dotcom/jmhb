@@ -11,6 +11,9 @@
                 if (floatBtn) { floatBtn.href = data.telegramLink; floatBtn.style.display = 'flex'; }
                 const modalBtn = document.getElementById('modalContactBtn');
                 if (modalBtn) { modalBtn.href = data.telegramLink; modalBtn.style.display = 'inline-block'; }
+                // ★ 提现记录弹窗里的客服按钮
+                const myRecordsContactBtn = document.getElementById('myRecordsContactBtn');
+                if (myRecordsContactBtn) { myRecordsContactBtn.href = data.telegramLink; myRecordsContactBtn.style.display = 'block'; }
             }
         })
         .catch(err => console.warn('加载客服配置失败', err));
@@ -118,7 +121,7 @@
     if (closeBtn) closeBtn.addEventListener('click', closeMR);
     if (modal) modal.addEventListener('click', e => { if(e.target === modal) closeMR(); });
 
-    // ★ 新增：顶部余额可点击 → 打开提现记录
+    // 顶部余额可点击 → 打开提现记录
     const walletBtn = document.getElementById('walletBtn');
     if (walletBtn) {
         walletBtn.style.cursor = 'pointer';
