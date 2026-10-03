@@ -119,7 +119,7 @@ function calcDuration(visitIso, endIso) {
     return Math.round((t2 - t1) / 1000);
 }
 
-// 当天该 IP 已提交次数（只算 pending/approved，被拒绝的不占次数）
+// 当天该 IP 已提交次数（只算 pending/approved）
 function countTodaySubmitted(ip) {
     const now = Date.now();
     const bjNow = now + 8 * 3600 * 1000;
@@ -136,13 +136,27 @@ function countTodaySubmitted(ip) {
     }).length;
 }
 
-// ==================== 访问会话 API ====================
+// ==================== 公共 API ====================
 
-// 公开设置（前端进入即读，无需鉴权）
 app.get('/api/public-settings', (req, res) => {
     res.json({
         telegramLink: config.telegramLink || '',
         heartbeatInterval: Number(config.heartbeatInterval) || 30
+    });
+});
+
+// ★ 新增：查询该 IP 今日还能不能玩
+app.get('/api/player-status', (req, res) => {
+    const ip = req.ip || req.connection.remoteAddress || '';
+    const used = countTodaySubmitted(ip);
+    const limit = Number(config.dailyLimit) || 1;
+    const canPlay = used < limit;
+    res.json({
+        canPlay: canPlay,
+        used: used,
+        limit: limit,
+        hasSubmitted: used > 0,
+        status: canPlay ? 'can_play' : 'limit_reached'
     });
 });
 
@@ -181,7 +195,7 @@ app.post('/api/visit-start', (req, res) => {
             balance: '0.00',
             amount: '0.00',
 
-            status: 'visiting',       // visiting | left | pending | approved | rejected
+            status: 'visiting',
             auditStatus: null,
 
             createdAt: nowIso
@@ -197,7 +211,6 @@ app.post('/api/visit-start', (req, res) => {
     }
 });
 
-// 心跳：更新 last_heartbeat
 app.post('/api/visit-heartbeat', (req, res) => {
     try {
         const { id } = req.body || {};
@@ -207,7 +220,6 @@ app.post('/api/visit-heartbeat', (req, res) => {
         if (rec.leave_time) return res.json({ success: true, ended: true });
         const nowIso = new Date().toISOString();
         rec.last_heartbeat = nowIso;
-        // 只有未离开的情况下才刷新时长
         rec.duration = calcDuration(rec.visit_time, nowIso);
         writeJson(RECORDS_FILE, records);
         res.json({ success: true });
@@ -216,7 +228,6 @@ app.post('/api/visit-heartbeat', (req, res) => {
     }
 });
 
-// 离开：更新 leave_time 和 duration
 app.post('/api/visit-end', (req, res) => {
     try {
         const { id } = req.body || {};
@@ -236,14 +247,12 @@ app.post('/api/visit-end', (req, res) => {
     }
 });
 
-// 提交提现：更新已有访问记录，补上 address / amount / submit_time
 app.post('/api/records', (req, res) => {
     try {
         const ctx = extractContext(req);
         const body = req.body || {};
         const { id } = body;
 
-        // ★ IP 每日次数限制（先检查）
         const used = countTodaySubmitted(ctx.ip);
         const limit = Number(config.dailyLimit) || 1;
         if (used >= limit) {
@@ -281,12 +290,10 @@ app.post('/api/records', (req, res) => {
     }
 });
 
-// 后台获取所有记录
 app.get('/api/records', authenticateToken, (req, res) => {
     res.json({ records: records.slice().reverse() });
 });
 
-// 前端查询自己 IP 的提现记录（只返回提交过的）
 app.get('/api/my-withdrawals', (req, res) => {
     const ip = req.ip || req.connection.remoteAddress || '';
     const mine = records
@@ -335,7 +342,7 @@ app.post('/api/audit-batch', authenticateToken, (req, res) => {
         const rec = records.find(r => String(r.id) === String(id));
         if (!rec) { skipped++; return; }
         if (rec.auditStatus === 'approved' || rec.auditStatus === 'rejected') { skipped++; return; }
-        if (!rec.submit_time) { skipped++; return; } // 未提交的不能审核
+        if (!rec.submit_time) { skipped++; return; }
         rec.auditStatus = finalStatus;
         rec.status = finalStatus;
         rec.auditedAt = new Date().toISOString();
