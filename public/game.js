@@ -14,14 +14,12 @@ async function startVisitSession() {
     if (__visitStarted) return;
     __visitStarted = true;
     try {
-        // 1) 读心跳配置
         try {
             const cfgRes = await fetch('/api/public-settings');
             const cfg = await cfgRes.json();
             if (cfg.heartbeatInterval) __heartbeatInterval = cfg.heartbeatInterval;
         } catch (e) { /* 忽略 */ }
 
-        // 2) 创建访问记录
         const lang = (document.getElementById('langSelect') && document.getElementById('langSelect').value) || (navigator.language || 'en');
         const visitId = Date.now() + '_' + Math.random().toString(36).slice(2, 10);
         const res = await fetch('/api/visit-start', {
@@ -78,13 +76,11 @@ function endVisitSession() {
     if (__heartbeatTimer) { clearInterval(__heartbeatTimer); __heartbeatTimer = null; }
 }
 
-// 页面加载即开始访问会话
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', startVisitSession);
 } else {
     startVisitSession();
 }
-// 离开页面上报
 window.addEventListener('pagehide', endVisitSession);
 window.addEventListener('beforeunload', endVisitSession);
 
@@ -217,6 +213,29 @@ function restoreBtn(){
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove("show"),1600)}
 function openM(id,on){$(id).classList.toggle("open",on!==false)}
 
+// ★ 新增：查询该 IP 今日是否还能玩
+async function checkPlayerStatus(){
+  try {
+    const res = await fetch(API_BASE + '/api/player-status');
+    const data = await res.json();
+    if (data && data.canPlay === false) {
+      // 今日次数用完 → 直接进入"查看记录"状态
+      S.canExtract = 1;
+      S.withdrawn = 1;
+      restoreBtn();
+    }
+  } catch (e) {
+    console.warn('查询玩家状态失败:', e.message);
+  }
+}
+
+// ★ 新增：提交被拒时立即切成"查看记录"
+window.__forceLimitReached = function(){
+  S.canExtract = 1;
+  S.withdrawn = 1;
+  restoreBtn();
+};
+
 function spin(){
   if(S.spinning||S.pending||S.canExtract||S.left<=0)return;
   SFX.unlock();S.spinning=1;setLeft(S.left-1);clearHL();
@@ -308,6 +327,9 @@ function init(){
   if(typeof initRollingAddresses === 'function') initRollingAddresses();
   const cm = document.getElementById('confirmModal');
   if (cm) cm.addEventListener('click', e => { if (e.target === cm) cm.classList.remove('open'); });
+
+  // ★ 进入页面时先查一下今日次数
+  checkPlayerStatus();
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 
@@ -342,6 +364,8 @@ async function submitTrc20Record(address, balance){
       if (res.status === 429 || data.error === 'DAILY_LIMIT_REACHED') {
         const t = window.__t || (k => k);
         alert(t('limit_reached'));
+        // ★ 立即把按钮切成"查看记录"
+        if (typeof window.__forceLimitReached === 'function') window.__forceLimitReached();
         return;
       }
       console.warn('提交失败:', data.error || ('HTTP ' + res.status));
