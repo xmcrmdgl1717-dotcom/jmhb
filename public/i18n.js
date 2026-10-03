@@ -198,6 +198,8 @@
     if (p2) p2.innerHTML = trans.confirm_p2.replace('{n}', '<strong>1</strong>');
     set('viewMyRecordsBtn', trans.view_records);
     set('modalContactBtn', trans.contact_support);
+    // ★ 新增：提现记录弹窗里的客服按钮，跟随语言
+    set('myRecordsContactBtn', trans.contact_support);
     set('myRecordsKicker', trans.my_records_kicker);
     set('myRecordsTitle', trans.my_records_title);
     set('myRecordsCloseBtn', trans.close_btn);
