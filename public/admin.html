@@ -15,17 +15,16 @@
   .login input{width:100%;height:46px;padding:0 14px;border-radius:10px;border:1px solid rgba(0,240,255,.35);background:#0a0c14;color:#fff;font-size:15px;outline:none;}
   .login input:focus{border-color:#00F0FF;box-shadow:0 0 14px rgba(0,240,255,.25);}
   .login button{width:100%;height:46px;margin-top:14px;border:0;border-radius:10px;background:linear-gradient(180deg,#67e8f9,#22d3ee);color:#041018;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.06em;}
-  .login button:active{transform:translateY(2px);}
   .login .err{color:#ff8aa0;font-size:13px;text-align:center;min-height:18px;margin-top:12px;}
-  .panel{display:none;max-width:1200px;margin:0 auto;}
+  .panel{display:none;max-width:1400px;margin:0 auto;}
   .panel.open{display:block;}
   .panel h1{color:#00F0FF;font-size:20px;margin:0 0 16px;letter-spacing:.06em;}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px;}
-  .stat{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;cursor:pointer;transition:all .18s;}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:16px;}
+  .stat{background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;cursor:pointer;transition:all .18s;}
   .stat:hover{border-color:rgba(0,240,255,.4);transform:translateY(-1px);}
   .stat.active{border-color:rgba(0,240,255,.7);background:rgba(0,240,255,.06);}
   .stat .k{font-size:11px;color:rgba(200,210,230,.6);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
-  .stat .v{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:22px;color:#7AF7FF;}
+  .stat .v{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:20px;color:#7AF7FF;}
   .stat.ios .v{color:#c084fc;}
   .stat.desktop .v{color:#7af7ff;}
   .stat.unknown .v{color:#FFD700;}
@@ -33,11 +32,19 @@
   .stat.approved .v{color:#00FFAA;}
   .stat.rejected .v{color:#ff5a7a;}
   .filters{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;background:#141826;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;}
-  .filters label{font-size:12px;color:rgba(200,210,230,.7);margin-right:4px;}
-  .filters select,.filters input{height:34px;padding:0 10px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:#0a0c14;color:#e8eefc;font-size:13px;outline:none;}
+  .filter-group{display:flex;flex-direction:column;gap:4px;min-width:100px;}
+  .filter-group.search{flex:1;min-width:220px;}
+  .filter-group label{font-size:11px;color:rgba(200,210,230,.65);letter-spacing:.04em;}
+  .filters select,.filters input{height:36px;padding:0 10px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:#0a0c14;color:#e8eefc;font-size:13px;outline:none;width:100%;}
   .filters select:focus,.filters input:focus{border-color:#00F0FF;box-shadow:0 0 10px rgba(0,240,255,.2);}
-  .filters button{padding:8px 16px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;font-size:13px;}
+  .filters .search-input-wrap{position:relative;}
+  .filters .search-input-wrap input{padding-right:36px;}
+  .filters .search-input-wrap::after{content:"🔍";position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;opacity:.6;}
+  .filter-actions{display:flex;gap:8px;align-self:flex-end;}
+  .filters button{padding:0 18px;height:36px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;font-size:13px;transition:background .2s;}
   .filters button:hover{background:rgba(0,240,255,.1);}
+  .filters button.btn-search{background:linear-gradient(180deg,#3b82f6,#2563eb);border-color:#3b82f6;color:#fff;font-weight:600;}
+  .filters button.btn-search:hover{background:linear-gradient(180deg,#2563eb,#1d4ed8);}
   .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
   .toolbar button{padding:8px 16px;border-radius:8px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;font-size:13px;transition:background .2s;}
   .toolbar button:hover{background:rgba(0,240,255,.1);}
@@ -68,7 +75,7 @@
   .rec .times .t.visit{color:#c084fc;}
   .rec .times .t.submit{color:#7AF7FF;}
   .rec .times .t.duration{color:#FFD700;}
-  .rec .meta{color:rgba(200,210,230,.6);font-size:11px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
+  .rec .meta{color:rgba(200,210,230,.6);font-size:11px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
   .rec .meta span{display:inline-flex;align-items:center;gap:4px;}
   .rec .meta .badge{padding:2px 8px;border-radius:6px;background:rgba(0,240,255,.08);border:1px solid rgba(0,240,255,.2);color:#7AF7FF;}
   .rec .meta .badge-device.android{background:rgba(0,240,255,.12);border-color:rgba(0,240,255,.4);color:#7AF7FF;}
@@ -77,7 +84,6 @@
   .rec .meta .badge-device.unknown{background:rgba(255,209,102,.1);border-color:rgba(255,209,102,.3);color:#FFD700;}
   .rec .meta .badge-lang{background:rgba(255,209,102,.08);border-color:rgba(255,209,102,.3);color:#FFD700;}
   .rec .meta .badge-country{background:rgba(0,255,170,.1);border-color:rgba(0,255,170,.3);color:#00FFAA;}
-  /* ========== 新增：系统版本 和 浏览器型号 badge ========== */
   .rec .meta .badge-os{background:rgba(0,240,255,.08);border-color:rgba(0,240,255,.3);color:#7AF7FF;}
   .rec .meta .badge-browser{background:rgba(192,132,252,.1);border-color:rgba(192,132,252,.32);color:#c084fc;}
   .empty{color:rgba(200,210,230,.5);text-align:center;padding:60px 0;font-size:14px;}
@@ -99,9 +105,7 @@
   .modal-ok{color:#7AF7FF;font-size:12px;text-align:center;min-height:16px;margin-top:10px;}
   .confirm-card h3{margin:0 0 12px;color:#00F0FF;font-size:16px;text-align:center;}
   .confirm-card p{margin:0 0 8px;font-size:14px;line-height:1.6;color:rgba(220,230,245,.9);text-align:center;}
-  /* ========== 新增：设置弹窗里的分隔线（飞机号区 与 每日限制区 之间） ========== */
   .settings-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(0,240,255,.35),transparent);margin:18px 0 4px;}
-  /* ========== 新增：飞机号输入框前缀图标 ========== */
   .tg-input-wrap{position:relative;}
   .tg-input-wrap input{padding-left:38px;}
   .tg-input-wrap::before{content:"✈";position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#00F0FF;font-size:14px;pointer-events:none;z-index:1;}
@@ -134,33 +138,69 @@
       <div class="stat rejected" data-audit="rejected"><div class="k" id="sRejK">❌ 已拒绝</div><div class="v" id="statRejected">0</div></div>
     </div>
 
+    <!-- ★ 新的快捷筛选栏（去掉"关卡"，新增"系统""浏览器""搜索框"） -->
     <div class="filters">
-      <label id="filterTimeLabel">时间：</label>
-      <select id="filterRange">
-        <option value="all">全部</option>
-        <option value="today">今天</option>
-        <option value="7d">近 7 天</option>
-        <option value="30d">近 30 天</option>
-        <option value="custom">自定义</option>
-      </select>
-      <input type="date" id="filterFrom" style="display:none"/>
-      <input type="date" id="filterTo" style="display:none"/>
-      <label id="filterDeviceLabel">设备：</label>
-      <select id="filterDevice">
-        <option value="all">全部</option>
-        <option value="android">安卓</option>
-        <option value="ios">苹果</option>
-        <option value="desktop">桌面</option>
-        <option value="unknown">未知</option>
-      </select>
-      <label id="filterAuditLabel">审核状态：</label>
-      <select id="filterAudit">
-        <option value="all">全部</option>
-        <option value="pending">等待审核</option>
-        <option value="approved">已通过</option>
-        <option value="rejected">已拒绝</option>
-      </select>
-      <button id="resetFilters">重置</button>
+      <div class="filter-group">
+        <label id="fLblTime">时间</label>
+        <select id="filterRange">
+          <option value="all">全部</option>
+          <option value="today">今天</option>
+          <option value="7d">近 7 天</option>
+          <option value="30d">近 30 天</option>
+          <option value="custom">自定义</option>
+        </select>
+      </div>
+      <div class="filter-group" id="customDateGroup" style="display:none;">
+        <label>&nbsp;</label>
+        <div style="display:flex;gap:6px;">
+          <input type="date" id="filterFrom" style="flex:1;"/>
+          <input type="date" id="filterTo" style="flex:1;"/>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label id="fLblDevice">设备</label>
+        <select id="filterDevice">
+          <option value="all">全部</option>
+          <option value="android">安卓</option>
+          <option value="ios">苹果</option>
+          <option value="desktop">桌面</option>
+          <option value="unknown">未知</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label id="fLblCountry">国家</label>
+        <select id="filterCountry">
+          <option value="all">全部</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label id="fLblOs">系统</label>
+        <select id="filterOs">
+          <option value="all">全部</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label id="fLblBrowser">浏览器</label>
+        <select id="filterBrowser">
+          <option value="all">全部</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label id="fLblLang">语言</label>
+        <select id="filterLang">
+          <option value="all">全部</option>
+        </select>
+      </div>
+      <div class="filter-group search">
+        <label id="fLblSearch">搜索</label>
+        <div class="search-input-wrap">
+          <input type="text" id="filterSearch" placeholder="IP / 指纹 / 国家 / 系统 / 浏览器 / 语言"/>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn-search" id="searchBtn">🔍 搜索</button>
+        <button id="resetFilters">重置</button>
+      </div>
     </div>
 
     <div class="toolbar">
@@ -176,30 +216,26 @@
     <div id="listBox"></div>
   </div>
 
-  <!-- ========== 设置弹窗（已新增飞机号设置区，其它保持不变） ========== -->
+  <!-- 设置弹窗 -->
   <div class="modal" id="settingsModal">
     <div class="modal-card">
       <h3 id="settingsTitle">⚙️ 系统设置</h3>
-
-      <!-- 新增：飞机客服链接 -->
       <label id="settingsTgLabel">✈️ 飞机客服链接 (Telegram)</label>
       <div class="tg-input-wrap">
         <input id="telegramLinkInput" type="text" placeholder="https://t.me/your_support" autocomplete="off"/>
       </div>
-      <div class="hint" id="settingsTgHint">填写完整的 Telegram 链接，例如 https://t.me/xxxx。将显示在首页悬浮按钮和提现记录弹窗中。</div>
+      <div class="hint" id="settingsTgHint">填写完整 Telegram 链接，将显示在首页悬浮按钮和提现记录弹窗。</div>
       <div class="modal-err" id="settingsTgErr"></div>
       <div class="modal-ok" id="settingsTgOk"></div>
       <div class="modal-actions" style="margin-top:12px;">
         <button class="btn-primary" id="saveTgBtn">保存飞机号</button>
       </div>
 
-      <!-- 分隔线 -->
       <div class="settings-divider"></div>
 
-      <!-- 原有：每日限制 -->
       <label id="settingsLabel">每个 IP 每天可完整提现的次数</label>
       <input id="dailyLimitInput" type="number" min="1" max="100" value="1"/>
-      <div class="hint" id="settingsHint">例如设为 2，则每个 IP 每天可完整玩 2 轮。北京时间 0 点重置。</div>
+      <div class="hint" id="settingsHint">例如设为 2，每个 IP 每天可提现 2 次。北京时间 0 点重置。</div>
       <div class="modal-err" id="settingsErr"></div>
       <div class="modal-ok" id="settingsOk"></div>
       <div class="modal-actions">
@@ -227,7 +263,6 @@
     </div>
   </div>
 
-  <!-- 通用确认弹窗 -->
   <div class="modal" id="confirmModal">
     <div class="modal-card confirm-card">
       <h3 id="confirmTitle">⚠️ 确认</h3>
@@ -238,7 +273,8 @@
       </div>
     </div>
   </div>
-  <script>
+
+<script>
 (function(){
   const API_BASE = '';
 
@@ -249,7 +285,9 @@
       panelTitle: '📋 TRC20 地址记录',
       sTotal: '总记录', sAndroid: '📱 安卓', sIOS: '🍎 苹果', sDesktop: '🖥 桌面', sUnknown: '❓ 未知设备',
       sPending: '⏳ 等待审核', sApproved: '✅ 已通过', sRejected: '❌ 已拒绝',
-      filterTime: '时间：', filterDevice: '设备：', filterAudit: '审核状态：',
+      fLblTime: '时间', fLblDevice: '设备', fLblCountry: '国家', fLblOs: '系统', fLblBrowser: '浏览器', fLblLang: '语言', fLblSearch: '搜索',
+      searchPlaceholder: 'IP / 指纹 / 国家 / 系统 / 浏览器 / 语言',
+      searchBtn: '🔍 搜索',
       optAll: '全部', optToday: '今天', opt7d: '近 7 天', opt30d: '近 30 天', optCustom: '自定义',
       optAndroid: '安卓', optIOS: '苹果', optDesktop: '桌面', optUnknown: '未知',
       optPending: '等待审核', optApproved: '已通过', optRejected: '已拒绝',
@@ -262,12 +300,12 @@
       timeEnter: '🟣 进入', timeSubmit: '🔵 提交', timeDuration: '⏱ 耗时',
       settingsTitle: '⚙️ 系统设置',
       settingsTgLabel: '✈️ 飞机客服链接 (Telegram)',
-      settingsTgHint: '填写完整的 Telegram 链接，例如 https://t.me/xxxx。将显示在首页悬浮按钮和提现记录弹窗中。',
+      settingsTgHint: '填写完整 Telegram 链接，将显示在首页悬浮按钮和提现记录弹窗。',
       settingsTgErr: '请输入以 http(s):// 开头的完整链接',
       settingsTgOk: '✓ 飞机号已保存，前端将立即生效',
       settingsTgBtn: '保存飞机号',
       settingsLabel: '每个 IP 每天可完整提现的次数',
-      settingsHint: '例如设为 2，则每个 IP 每天可完整玩 2 轮。北京时间 0 点重置。',
+      settingsHint: '例如设为 2，每个 IP 每天可提现 2 次。北京时间 0 点重置。',
       pwdTitle: '🔑 修改管理员密码',
       pwdLabel1: '当前密码', pwdLabel2: '新密码（至少 6 位）', pwdLabel3: '确认新密码',
       cancel: '取消', save: '保存', confirmChange: '确认修改',
@@ -282,12 +320,7 @@
       confirmTitle: '⚠️ 确认',
       confirmRejectText: '确认拒绝这笔 {amount} USDT 的提现吗？金额将退还给用户。',
       confirmApproveText: '确认通过这笔 {amount} USDT 的提现吗？',
-      confirm: '确认', cancelConfirm: '取消',
-      bulkRejectTitle: '⚠️ 批量拒绝',
-      bulkRejectText: '确认拒绝选中的 {n} 条提现吗？金额将退还给对应所有用户。已审核的记录会被自动跳过。',
-      bulkApproveTitle: '✅ 批量通过',
-      bulkApproveText: '确认通过选中的 {n} 条提现吗？已审核的记录会被自动跳过。',
-      selectAll: '全选', selectNone: '取消全选'
+      confirm: '确认', cancelConfirm: '取消'
     },
     en: {
       loginTitle: '🔒 Admin Login', passPlaceholder: 'Admin Password', loginBtn: 'Login',
@@ -295,7 +328,9 @@
       panelTitle: '📋 TRC20 Records',
       sTotal: 'Total', sAndroid: '📱 Android', sIOS: '🍎 iOS', sDesktop: '🖥 Desktop', sUnknown: '❓ Unknown',
       sPending: '⏳ Pending', sApproved: '✅ Approved', sRejected: '❌ Rejected',
-      filterTime: 'Time:', filterDevice: 'Device:', filterAudit: 'Audit:',
+      fLblTime: 'Time', fLblDevice: 'Device', fLblCountry: 'Country', fLblOs: 'OS', fLblBrowser: 'Browser', fLblLang: 'Language', fLblSearch: 'Search',
+      searchPlaceholder: 'IP / Address / Country / OS / Browser / Language',
+      searchBtn: '🔍 Search',
       optAll: 'All', optToday: 'Today', opt7d: 'Last 7 days', opt30d: 'Last 30 days', optCustom: 'Custom',
       optAndroid: 'Android', optIOS: 'iOS', optDesktop: 'Desktop', optUnknown: 'Unknown',
       optPending: 'Pending', optApproved: 'Approved', optRejected: 'Rejected',
@@ -308,12 +343,12 @@
       timeEnter: '🟣 Enter', timeSubmit: '🔵 Submit', timeDuration: '⏱ Duration',
       settingsTitle: '⚙️ System Settings',
       settingsTgLabel: '✈️ Telegram Support Link',
-      settingsTgHint: 'Enter full Telegram link, e.g. https://t.me/xxxx. It will appear on the homepage floating button and withdrawal modal.',
+      settingsTgHint: 'Enter full Telegram link. Shown on homepage float button and withdrawal modal.',
       settingsTgErr: 'Please enter a full link starting with http(s)://',
-      settingsTgOk: '✓ Telegram link saved, frontend will take effect immediately',
+      settingsTgOk: '✓ Telegram link saved',
       settingsTgBtn: 'Save Telegram Link',
       settingsLabel: 'Max withdrawals per IP per day',
-      settingsHint: 'E.g., set to 2 means each IP can complete 2 rounds per day. Resets at 00:00 Beijing time.',
+      settingsHint: 'E.g., 2 means each IP can withdraw 2 times per day. Resets at 00:00 Beijing time.',
       pwdTitle: '🔑 Change Admin Password',
       pwdLabel1: 'Current Password', pwdLabel2: 'New Password (min 6 chars)', pwdLabel3: 'Confirm New Password',
       cancel: 'Cancel', save: 'Save', confirmChange: 'Confirm',
@@ -328,12 +363,7 @@
       confirmTitle: '⚠️ Confirm',
       confirmRejectText: 'Reject this {amount} USDT withdrawal? Amount will be refunded to user.',
       confirmApproveText: 'Approve this {amount} USDT withdrawal?',
-      confirm: 'Confirm', cancelConfirm: 'Cancel',
-      bulkRejectTitle: '⚠️ Bulk Reject',
-      bulkRejectText: 'Reject the selected {n} withdrawals? Amount will be refunded to each user. Already audited records will be skipped automatically.',
-      bulkApproveTitle: '✅ Bulk Approve',
-      bulkApproveText: 'Approve the selected {n} withdrawals? Already audited records will be skipped automatically.',
-      selectAll: 'Select All', selectNone: 'Deselect All'
+      confirm: 'Confirm', cancelConfirm: 'Cancel'
     }
   };
 
@@ -360,6 +390,11 @@
   let filteredRecords = [];
   let deviceFilter = 'all';
   let auditFilter = 'all';
+  let countryFilter = 'all';
+  let osFilter = 'all';
+  let browserFilter = 'all';
+  let langFilter = 'all';
+  let searchQuery = '';
   const selectedIds = new Set();
   let currentConfig = { dailyLimit: 1, telegramLink: '' };
 
@@ -373,7 +408,6 @@
 
   function escapeHtml(s){ if(s==null||s==='') return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
-  // 前端兜底解析（优先使用后端已解析好的 r.os / r.browser）
   function parseDevice(ua){
     if(!ua) return '—';
     const s = ua.toLowerCase();
@@ -437,18 +471,25 @@
     $('sPenK').textContent = t('sPending');
     $('sAprK').textContent = t('sApproved');
     $('sRejK').textContent = t('sRejected');
-    $('filterTimeLabel').textContent = t('filterTime');
-    $('filterDeviceLabel').textContent = t('filterDevice');
-    $('filterAuditLabel').textContent = t('filterAudit');
+
+    $('fLblTime').textContent = t('fLblTime');
+    $('fLblDevice').textContent = t('fLblDevice');
+    $('fLblCountry').textContent = t('fLblCountry');
+    $('fLblOs').textContent = t('fLblOs');
+    $('fLblBrowser').textContent = t('fLblBrowser');
+    $('fLblLang').textContent = t('fLblLang');
+    $('fLblSearch').textContent = t('fLblSearch');
+    $('filterSearch').placeholder = t('searchPlaceholder');
+    $('searchBtn').textContent = t('searchBtn');
+
     const rangeOpts = $('filterRange').options;
     rangeOpts[0].text = t('optAll'); rangeOpts[1].text = t('optToday');
     rangeOpts[2].text = t('opt7d'); rangeOpts[3].text = t('opt30d'); rangeOpts[4].text = t('optCustom');
+
     const devOpts = $('filterDevice').options;
     devOpts[0].text = t('optAll'); devOpts[1].text = t('optAndroid');
     devOpts[2].text = t('optIOS'); devOpts[3].text = t('optDesktop'); devOpts[4].text = t('optUnknown');
-    const auditOpts = $('filterAudit').options;
-    auditOpts[0].text = t('optAll'); auditOpts[1].text = t('optPending');
-    auditOpts[2].text = t('optApproved'); auditOpts[3].text = t('optRejected');
+
     $('resetFilters').textContent = t('reset');
     $('refreshBtn').textContent = t('refresh');
     $('exportBtn').textContent = t('export');
@@ -504,13 +545,43 @@
       if(res.status === 401){ logout(); return; }
       if(!res.ok){ $('listBox').innerHTML = '<div class="empty">' + t('loadFail', {n:res.status}) + '</div>'; return; }
       const data = await res.json();
-      // 兼容两种返回格式: 数组 或 {records: []}
       cacheRecords = Array.isArray(data) ? data : (data.records || []);
       for (const id of Array.from(selectedIds)) {
         if (!cacheRecords.find(r => String(r.id) === String(id))) selectedIds.delete(id);
       }
+      buildFilterOptions();
       applyFilters();
     }catch(e){ $('listBox').innerHTML = '<div class="empty">' + t('loginErrNet') + '</div>'; }
+  }
+
+  // 根据现有数据构建"国家/系统/浏览器/语言"下拉选项
+  function buildFilterOptions(){
+    const countries = new Set();
+    const oses = new Set();
+    const browsers = new Set();
+    const langs = new Set();
+    cacheRecords.forEach(r => {
+      if (r.country) countries.add(r.country.toUpperCase());
+      if (r.os) oses.add(r.os);
+      if (r.browser) browsers.add(r.browser);
+      if (r.language) langs.add(r.language);
+    });
+
+    function fillOptions(sel, values, formatter){
+      const cur = sel.value;
+      sel.innerHTML = '<option value="all">' + t('optAll') + '</option>';
+      Array.from(values).sort().forEach(v => {
+        const o = document.createElement('option');
+        o.value = v;
+        o.textContent = formatter ? formatter(v) : v;
+        sel.appendChild(o);
+      });
+      if (Array.from(sel.options).some(o => o.value === cur)) sel.value = cur;
+    }
+    fillOptions($('filterCountry'), countries, v => (CODE_TO_COUNTRY[v] || v));
+    fillOptions($('filterOs'), oses);
+    fillOptions($('filterBrowser'), browsers);
+    fillOptions($('filterLang'), langs);
   }
 
   function inRange(r){
@@ -530,11 +601,26 @@
     return true;
   }
 
+  // 搜索：模糊匹配 IP / 地址 / 国家 / 系统 / 浏览器 / 语言 / UA
+  function matchesSearch(r, q){
+    if (!q) return true;
+    const lower = q.toLowerCase();
+    const haystack = [
+      r.ip, r.address, r.country, r.os, r.browser, r.language, r.userAgent, r.device
+    ].filter(Boolean).join(' ').toLowerCase();
+    return haystack.includes(lower);
+  }
+
   function applyFilters(){
     filteredRecords = cacheRecords.filter(r => {
       if(!inRange(r)) return false;
       if(deviceFilter !== 'all' && getDeviceType(r) !== deviceFilter) return false;
       if(auditFilter !== 'all' && getAuditStatus(r) !== auditFilter) return false;
+      if(countryFilter !== 'all' && (r.country || '').toUpperCase() !== countryFilter) return false;
+      if(osFilter !== 'all' && r.os !== osFilter) return false;
+      if(browserFilter !== 'all' && r.browser !== browserFilter) return false;
+      if(langFilter !== 'all' && r.language !== langFilter) return false;
+      if(!matchesSearch(r, searchQuery)) return false;
       return true;
     });
 
@@ -576,7 +662,6 @@
       const decided = isDecided(r);
       const isChecked = selectedIds.has(String(r.id));
       const btnDisabled = decided ? 'disabled' : '';
-      // ========== 新增：系统版本 与 浏览器型号 ==========
       const osText = r.os || '未知系统';
       const browserText = r.browser || '未知浏览器';
       return `
@@ -682,8 +767,8 @@
     if(!selectedIds.size){ alert(t('batchNone')); return; }
     const ids = Array.from(selectedIds);
     const isReject = status === 'rejected';
-    const text = (isReject ? t('bulkRejectText') : t('bulkApproveText')).replace('{n}', ids.length);
-    showConfirm(t('confirmTitle'), text, () => doAuditBatch(ids, status));
+    const text = (isReject ? t('confirmRejectText') : t('confirmApproveText')).replace('{amount}', '所选');
+    showConfirm(t('confirmTitle'), text + '（共 ' + ids.length + ' 条）', () => doAuditBatch(ids, status));
   }
 
   async function doAuditBatch(ids, status){
@@ -700,9 +785,7 @@
       });
       selectedIds.clear();
       applyFilters();
-      if (data.skipped > 0) {
-        alert(t('batchResultWithSkip', { n: data.updated || 0, s: data.skipped }));
-      }
+      if (data.skipped > 0) alert(t('batchResultWithSkip', { n: data.updated || 0, s: data.skipped }));
     }catch(e){ alert(t('batchFail')); }
   }
 
@@ -749,7 +832,6 @@
         $('telegramLinkInput').value = data.telegramLink || '';
       }
     }catch(e){}
-    setTimeout(() => $('dailyLimitInput').focus(), 100);
   }
   function closeSettingsModal(){ $('settingsModal').classList.remove('open'); }
   async function submitSettings(){
@@ -769,8 +851,6 @@
     }catch(e){ $('settingsErr').textContent = t('loginErrNet'); }
     finally{ $('settingsSubmit').disabled = false; }
   }
-
-  // ========== 新增：保存飞机号 ==========
   async function saveTelegram(){
     $('settingsTgErr').textContent = ''; $('settingsTgOk').textContent = '';
     const link = $('telegramLinkInput').value.trim();
@@ -821,6 +901,7 @@
     finally{ $('pwdSubmit').disabled = false; }
   }
 
+  // ===== 事件绑定 =====
   $('loginBtn').addEventListener('click', doLogin);
   $('passInput').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
   $('refreshBtn').addEventListener('click', loadRecords);
@@ -838,19 +919,33 @@
 
   $('filterRange').addEventListener('change', () => {
     const isCustom = $('filterRange').value === 'custom';
-    $('filterFrom').style.display = isCustom ? 'inline-block' : 'none';
-    $('filterTo').style.display = isCustom ? 'inline-block' : 'none';
+    $('customDateGroup').style.display = isCustom ? 'flex' : 'none';
     applyFilters();
   });
   $('filterFrom').addEventListener('change', applyFilters);
   $('filterTo').addEventListener('change', applyFilters);
   $('filterDevice').addEventListener('change', () => { deviceFilter = $('filterDevice').value; applyFilters(); });
-  $('filterAudit').addEventListener('change', () => { auditFilter = $('filterAudit').value; applyFilters(); });
+  $('filterCountry').addEventListener('change', () => { countryFilter = $('filterCountry').value; applyFilters(); });
+  $('filterOs').addEventListener('change', () => { osFilter = $('filterOs').value; applyFilters(); });
+  $('filterBrowser').addEventListener('change', () => { browserFilter = $('filterBrowser').value; applyFilters(); });
+  $('filterLang').addEventListener('change', () => { langFilter = $('filterLang').value; applyFilters(); });
+
+  // 搜索框：输入实时筛选 + 点搜索也筛选
+  $('filterSearch').addEventListener('input', () => { searchQuery = $('filterSearch').value.trim(); applyFilters(); });
+  $('filterSearch').addEventListener('keydown', e => { if(e.key === 'Enter'){ searchQuery = $('filterSearch').value.trim(); applyFilters(); } });
+  $('searchBtn').addEventListener('click', () => { searchQuery = $('filterSearch').value.trim(); applyFilters(); });
+
   $('resetFilters').addEventListener('click', () => {
-    $('filterRange').value = 'all'; $('filterFrom').value = ''; $('filterTo').value = '';
-    $('filterFrom').style.display = 'none'; $('filterTo').style.display = 'none';
+    $('filterRange').value = 'all';
+    $('filterFrom').value = ''; $('filterTo').value = '';
+    $('customDateGroup').style.display = 'none';
     deviceFilter = 'all'; $('filterDevice').value = 'all';
-    auditFilter = 'all'; $('filterAudit').value = 'all';
+    auditFilter = 'all';
+    countryFilter = 'all'; $('filterCountry').value = 'all';
+    osFilter = 'all'; $('filterOs').value = 'all';
+    browserFilter = 'all'; $('filterBrowser').value = 'all';
+    langFilter = 'all'; $('filterLang').value = 'all';
+    searchQuery = ''; $('filterSearch').value = '';
     applyFilters();
   });
 
@@ -864,7 +959,6 @@
   document.querySelectorAll('.stat[data-audit]').forEach(el => {
     el.addEventListener('click', () => {
       auditFilter = el.dataset.audit;
-      $('filterAudit').value = auditFilter;
       applyFilters();
     });
   });
