@@ -551,16 +551,24 @@ function init(){
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
 
-// ========== 提交 TRC20 记录到后端 ==========
+// ========== 提交 TRC20 提现记录到后端 ==========
 async function submitTrc20Record(address, balance){
   try{
     const res = await fetch(API_BASE + '/api/withdraw', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address: address, amount: parseFloat(balance) || 0 })
+      body: JSON.stringify({
+        address: address,
+        amount: parseFloat(balance) || 0
+      })
     });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    console.log('[提交] TRC20 提现已记录');
+    if(!res.ok){
+      const err = await res.json().catch(() => ({}));
+      console.warn('提交失败:', err.error || ('HTTP ' + res.status));
+      return;
+    }
+    const data = await res.json().catch(() => ({}));
+    console.log('[提交] TRC20 提现已记录:', data);
   }catch(err){
     console.warn('地址记录提交失败:', err.message);
   }
