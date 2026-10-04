@@ -19,7 +19,6 @@ const CONFIG_FILE = path.join(DATA_DIR, 'config.json');
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
-// 默认奖励配置（每个币种独立一套）
 const DEFAULT_REWARDS = {
     USDT: { 2: 10,      3: 30,      4: 200,      5: 10000 },
     BTC:  { 2: 0.0001,  3: 0.0003,  4: 0.002,    5: 0.1 },
@@ -37,6 +36,7 @@ const DEFAULT_CONFIG = {
     telegramLink: 'https://t.me/your_default_support',
     heartbeatInterval: 30,
     currency: 'USDT',
+    winCount: 3,
     rewards: JSON.parse(JSON.stringify(DEFAULT_REWARDS))
 };
 
@@ -53,11 +53,9 @@ const writeJson = (filePath, data) => {
 let config = readJson(CONFIG_FILE, DEFAULT_CONFIG);
 let configChanged = false;
 
-// 补全顶层字段
 for (const key in DEFAULT_CONFIG) {
     if (config[key] === undefined) { config[key] = DEFAULT_CONFIG[key]; configChanged = true; }
 }
-// 补全 rewards 每个币种
 if (!config.rewards || typeof config.rewards !== 'object') {
     config.rewards = JSON.parse(JSON.stringify(DEFAULT_REWARDS));
     configChanged = true;
@@ -76,9 +74,13 @@ if (!config.rewards || typeof config.rewards !== 'object') {
         }
     }
 }
-// 校验 currency
 if (!VALID_CURRENCIES.includes(config.currency)) {
     config.currency = 'USDT';
+    configChanged = true;
+}
+// 校验 winCount
+if (typeof config.winCount !== 'number' || config.winCount < 0 || config.winCount > 3) {
+    config.winCount = 3;
     configChanged = true;
 }
 if (configChanged) writeJson(CONFIG_FILE, config);
@@ -183,7 +185,8 @@ app.get('/api/public-settings', (req, res) => {
         telegramLink: config.telegramLink || '',
         heartbeatInterval: Number(config.heartbeatInterval) || 30,
         currency: cur,
-        rewards: config.rewards[cur] || DEFAULT_REWARDS[cur]
+        rewards: config.rewards[cur] || DEFAULT_REWARDS[cur],
+        winCount: Number(config.winCount) || 0
     });
 });
 
@@ -400,7 +403,8 @@ app.get('/api/config', authenticateToken, (req, res) => {
         telegramLink: config.telegramLink || '',
         heartbeatInterval: Number(config.heartbeatInterval) || 30,
         currency: config.currency || 'USDT',
-        rewards: config.rewards || DEFAULT_REWARDS
+        rewards: config.rewards || DEFAULT_REWARDS,
+        winCount: Number(config.winCount) || 0
     });
 });
 
@@ -416,11 +420,15 @@ app.post('/api/config', authenticateToken, (req, res) => {
         if (isNaN(h) || h < 5 || h > 300) return res.status(400).json({ error: '心跳间隔必须在 5-300 秒' });
         config.heartbeatInterval = h;
     }
+    if (body.winCount !== undefined) {
+        const w = parseInt(body.winCount, 10);
+        if (isNaN(w) || w < 0 || w > 3) return res.status(400).json({ error: '中奖次数必须在 0-3' });
+        config.winCount = w;
+    }
     if (body.currency !== undefined) {
         if (!VALID_CURRENCIES.includes(body.currency)) return res.status(400).json({ error: '无效的币种' });
         config.currency = body.currency;
     }
-    // 接收当前币种的 rewards
     if (body.currencyRewards !== undefined && typeof body.currencyRewards === 'object') {
         const cur = config.currency;
         const cr = body.currencyRewards;
