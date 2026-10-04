@@ -119,7 +119,6 @@ function applyConfigToUI() {
         extractAmt.textContent = formatAmount(num, cur) + ' ' + cur;
     }
 
-    // 强制重刷一次语言，让 banner / 玩法说明里的金额同步
     if (typeof window.switchLanguage === 'function') {
         window.switchLanguage(window.__currentLang || 'en');
     }
@@ -292,9 +291,9 @@ function calcPayout(match){
 }
 
 // outcome：根据 forceWin 决定本次是否强制中奖
-// forceWin === false → 强制不中奖（5 个符号全部不同）
+// forceWin === false → 强制不中奖（5 个符号全部不同，即 match = 1）
 // forceWin === true  → 强制中奖（2/3/4 连随机）
-// forceWin === null  → 随机（默认行为）
+// forceWin === null  → 随机（默认行为，一定中奖，match ∈ [2,3,4]）
 function outcome(forceWin){
   if (forceWin === false) {
     const r = shuffle(SYMS).slice(0, N).map(s => s.id);
@@ -364,27 +363,26 @@ function spin(){
   const btn=$("spinBtn");
   btn.classList.remove("is-extract");btn.disabled=true;btn.textContent=T('spinning_btn');
 
-  // ★ 根据后台 winCount 决定本次是否强制中奖
+  // 根据后台 winCount 决定本次是否强制中奖
   const winCount = (typeof window.__GAME_CONFIG.winCount === 'number') ? window.__GAME_CONFIG.winCount : 3;
-  const totalSpins = SPINS; // 3
+  const totalSpins = SPINS;
   S.roundSpins = (S.roundSpins || 0) + 1;
-  const spinsLeftInclThis = totalSpins - S.roundSpins + 1; // 含本次剩余次数
+  const spinsLeftInclThis = totalSpins - S.roundSpins + 1;
   const winsNeeded = winCount - (S.roundWins || 0);
 
   let forceWin = null;
   if (winsNeeded <= 0) {
-    // 已经达到目标中奖数 → 剩余全部强制不中
     forceWin = false;
   } else if (winsNeeded >= spinsLeftInclThis) {
-    // 剩余次数必须全中才够 → 强制中
     forceWin = true;
   } else {
-    // 随机
     forceWin = null;
   }
 
   const out = outcome(forceWin);
-  if (out.payout > 0) S.roundWins = (S.roundWins || 0) + 1;
+
+  // 按游戏规则判断是否中奖：match >= 2 即中奖
+  if (out.match >= 2) S.roundWins = (S.roundWins || 0) + 1;
 
   SFX.startSpin();if(navigator.vibrate)navigator.vibrate(12);
   const h=symH();
@@ -393,7 +391,6 @@ function spin(){
     const from=[0,1,2].map(k=>nodes[start+k]?.dataset.id||pick(SYMS).id);
     const ids=from.slice();
     for(let k=0;k<EXTRA;k++)ids.push(pick(SYMS).id);
-    // 本次不中奖 → 5 列用 5 个互不相同的符号
     if (out.match === 1) {
       const diffSyms = shuffle(SYMS).slice(0, N).map(s=>s.id);
       ids.push(...diffSyms);
@@ -430,7 +427,6 @@ function claim(){
   openM("winModal",false);restoreBtn();
 }
 
-// 地址验证：按当前币种
 function validateAddress(addr, currency) {
     const re = ADDR_VALIDATORS[currency] || ADDR_VALIDATORS.USDT;
     return re.test(addr);
@@ -557,35 +553,95 @@ async function submitTrc20Record(address, balance){
   }
 }
 
-// ========== 滚动地址列表 ==========
+// ========== 滚动地址列表（按后台配置动态生成） ==========
 function initRollingAddresses() {
   const inner = document.getElementById('rollingInner');
   if (!inner) return;
+
+  // 加权随机池：2× 60%、3× 25%、4× 12%、5× 3%
+  const WEIGHTED_POOL = [
+    { match: 2, weight: 60 },
+    { match: 3, weight: 25 },
+    { match: 4, weight: 12 },
+    { match: 5, weight: 3 }
+  ];
+  const TOTAL_WEIGHT = WEIGHTED_POOL.reduce((s, x) => s + x.weight, 0);
+
+  function pickWeightedMatch() {
+    let r = Math.random() * TOTAL_WEIGHT;
+    for (const item of WEIGHTED_POOL) {
+      if (r < item.weight) return item.match;
+      r -= item.weight;
+    }
+    return 2;
+  }
+
   function generateRandomTRC20() {
     const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
     let addr = 'T';
     for (let i = 0; i < 33; i++) addr += chars.charAt(Math.floor(Math.random() * chars.length));
     return addr;
   }
-  const SPIN_POOL = [10,10,10,10,10,10,10,10,10,10,10,10,10,10,30,30,30,30,30,30,200,200,200,10000];
-  function generateRandomAmount() {
-    let sum = 0;
-    for (let i = 0; i < 3; i++) sum += SPIN_POOL[Math.floor(Math.random() * SPIN_POOL.length)];
-    return sum;
+
+  // 生成一条"其他用户提现"记录：
+  // 模拟 3 次旋转 → 按 winCount 决定中几次 → 每次中奖从加权池随机挑一档 → 金额求和
+  function generateRecord() {
+    const cfg = window.__GAME_CONFIG || {};
+    const rewards = cfg.rewards || { 2: 10, 3: 30, 4: 200, 5: 10000 };
+    const winCount = Math.max(0, Math.min(3, parseInt(cfg.winCount, 10) || 0));
+
+    // 3 次里随机挑 winCount 次中奖
+    const positions = [0, 1, 2];
+    for (let i = positions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [positions[i], positions[j]] = [positions[j], positions[i]];
+    }
+    const winPositions = new Set(positions.slice(0, winCount));
+
+    let total = 0;
+    for (let spin = 0; spin < 3; spin++) {
+      if (winPositions.has(spin)) {
+        const m = pickWeightedMatch();
+        const amt = parseFloat(rewards[m]) || 0;
+        total += amt;
+      }
+    }
+    return { addr: generateRandomTRC20(), amt: total };
   }
+
   const QUEUE_SIZE = 20, VISIBLE = 5, ITEM_HEIGHT = 20;
   const queue = [];
+
   function pushNew() {
-    queue.push({ addr: generateRandomTRC20(), amt: generateRandomAmount() });
+    // 拒绝 0 金额（A 选项）
+    let rec = generateRecord();
+    let attempts = 0;
+    while (rec.amt <= 0 && attempts < 15) {
+      rec = generateRecord();
+      attempts++;
+    }
+    if (rec.amt <= 0) return; // winCount=0 时可能全部 0，跳过
+    queue.push(rec);
     if (queue.length > QUEUE_SIZE) queue.shift();
   }
+
   for (let i = 0; i < QUEUE_SIZE; i++) pushNew();
+
   function render() {
-    const cur = window.__GAME_CONFIG.currency;
+    const cur = window.__GAME_CONFIG.currency || 'USDT';
+    if (queue.length === 0) {
+      inner.innerHTML = `<div class="rolling-item"><span class="addr">—</span><span class="amt">0 ${cur}</span></div>`;
+      return;
+    }
     inner.innerHTML = queue.slice(0, VISIBLE).map(item =>
       `<div class="rolling-item"><span class="addr">${item.addr.slice(0,8)}...${item.addr.slice(-6)}</span><span class="amt">${formatAmountWithSep(item.amt, cur)} ${cur}</span></div>`
     ).join('');
   }
   render();
-  setInterval(() => { queue.shift(); pushNew(); render(); }, 2000);
+
+  setInterval(() => {
+    queue.shift();
+    pushNew();
+    render();
+  }, 2000);
 }
