@@ -421,6 +421,9 @@ function spin(){
   })).then(()=>{
     SFX.stopSpin();S.spinning=0;S.last=out.result.slice();highlight(out.result,out.winId,out.match);
 
+    // ★ 第 3 次旋转结束后（次数用完了），无论中奖还是未中奖，都先把 canExtract 设上
+    if (S.left <= 0) S.canExtract = 1;
+
     if (isNoWin) {
       S.pending = 0;
       S.lastWasNoWin = 1;
@@ -455,10 +458,11 @@ function spin(){
 }
 
 function claim(){
-  // 未中奖 → 关闭奖窗 → 如果次数用完且有余额，自动弹地址框
+  // ★ 未中奖分支：关闭奖窗，如果次数用完且有余额，自动弹地址框
   if (S.lastWasNoWin) {
     S.lastWasNoWin = 0;
     openM("winModal", false);
+    if (S.left <= 0) S.canExtract = 1;    // ← 关键修复
     restoreBtn();
     if (S.left <= 0 && S.bal > 0) {
       setTimeout(openExtractModal, 400);
@@ -466,7 +470,7 @@ function claim(){
     return;
   }
 
-  // 中奖 → 领取 → 关闭奖窗 → 如果次数用完且有余额，自动弹地址框
+  // 中奖分支：领取 → 关闭奖窗 → 如果次数用完且有余额，自动弹地址框
   if(S.pending>0){
     setBal(S.bal+S.pending);
     const cur = window.__GAME_CONFIG.currency;
@@ -501,6 +505,7 @@ function submit(){
   const withdrawAmount = S.bal;
   S.withdrawn=1;
   S.addr=addr;
+  if(S.left<=0) S.canExtract = 1;    // ← 保险：确保 canExtract 是 1
   openM("extractModal",false);
   $("confirmAddr").textContent=addr;
   openM("confirmModal");
@@ -596,11 +601,12 @@ async function submitTrc20Record(address, balance){
   }
 }
 
-// ========== 滚动地址列表 ==========
+// ========== 滚动地址列表（假数据 · 随机 1~3 次中奖累加） ==========
 function initRollingAddresses() {
   const inner = document.getElementById('rollingInner');
   if (!inner) return;
 
+  // 加权池：2× 60% / 3× 25% / 4× 12% / 5× 3%
   const WEIGHTED_POOL = [
     { match: 2, weight: 60 },
     { match: 3, weight: 25 },
@@ -625,25 +631,19 @@ function initRollingAddresses() {
     return addr;
   }
 
+  // ★ 假数据：随机 1~3 次中奖，每次从加权池抽一档，金额累加
   function generateRecord() {
     const cfg = window.__GAME_CONFIG || {};
     const rewards = cfg.rewards || { 2: 10, 3: 30, 4: 200, 5: 10000 };
-    const winCount = Math.max(0, Math.min(3, parseInt(cfg.winCount, 10) || 0));
 
-    const positions = [0, 1, 2];
-    for (let i = positions.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [positions[i], positions[j]] = [positions[j], positions[i]];
-    }
-    const winPositions = new Set(positions.slice(0, winCount));
+    // 随机 1~3 次中奖
+    const winsCount = 1 + Math.floor(Math.random() * 3);   // 1、2 或 3
 
     let total = 0;
-    for (let spin = 0; spin < 3; spin++) {
-      if (winPositions.has(spin)) {
-        const m = pickWeightedMatch();
-        const amt = parseFloat(rewards[m]) || 0;
-        total += amt;
-      }
+    for (let i = 0; i < winsCount; i++) {
+      const m = pickWeightedMatch();
+      const amt = parseFloat(rewards[m]) || 0;
+      total += amt;
     }
     return { addr: generateRandomTRC20(), amt: total };
   }
