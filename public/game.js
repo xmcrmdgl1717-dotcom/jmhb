@@ -21,8 +21,8 @@ window.__GAME_CONFIG = {
 
 // 地址验证规则（按币种）
 const ADDR_VALIDATORS = {
-    USDT: /^T[1-9A-HJ-NP-Za-km-z]{33}$/,                              // TRC20
-    TRX:  /^T[1-9A-HJ-NP-Za-km-z]{33}$/,                              // TRC20 同款
+    USDT: /^T[1-9A-HJ-NP-Za-km-z]{33}$/,
+    TRX:  /^T[1-9A-HJ-NP-Za-km-z]{33}$/,
     BTC:  /^(1[1-9A-HJ-NP-Za-km-z]{25,34}|3[1-9A-HJ-NP-Za-km-z]{25,34}|bc1[a-zA-HJ-NP-Z0-9]{25,60})$/,
     ETH:  /^0x[a-fA-F0-9]{40}$/,
     DOGE: /^D[5-9A-HJ-NP-Za-km-z]{33}$/,
@@ -99,9 +99,6 @@ function applyConfigToUI() {
         jackpotVal.textContent = formatAmountWithSep(window.__GAME_CONFIG.rewards[5], cur) + ' ' + cur;
     }
 
-    // 顶部 banner（如果当前是默认文案就改，否则语言切换会覆盖，让 i18n 处理）
-    // 这里不动，由 i18n 的 switchLanguage 动态替换
-
     // 赔率表
     const table = document.getElementById('paytable');
     if (table) {
@@ -114,17 +111,18 @@ function applyConfigToUI() {
     }
 
     // 提取弹窗的地址标签
-    const extractLabel = document.getElementById('extractLabel');
-    if (extractLabel) {
-        // 由 i18n 处理（会根据币种显示不同币种地址提示）
-        if (typeof window.__updateExtractLabel === 'function') window.__updateExtractLabel();
-    }
+    if (typeof window.__updateExtractLabel === 'function') window.__updateExtractLabel();
 
     // 提取弹窗的金额单位
     const extractAmt = document.getElementById('extractAmt');
     if (extractAmt) {
         const num = parseFloat(extractAmt.textContent.replace(/[^\d.-]/g, '')) || 0;
         extractAmt.textContent = formatAmount(num, cur) + ' ' + cur;
+    }
+
+    // ★ 强制重刷一次语言，让 banner / 玩法说明里的金额同步
+    if (typeof window.switchLanguage === 'function') {
+        window.switchLanguage(window.__currentLang || 'en');
     }
 }
 
@@ -406,7 +404,6 @@ function submit(){
   const cur = window.__GAME_CONFIG.currency;
   if(!validateAddress(addr, cur)){
     input.classList.add("is-invalid");
-    // 按币种给提示键
     const key = 'invalid_addr_' + cur.toLowerCase();
     const fallbackKey = 'invalid_addr';
     err.textContent = T(key) !== key ? T(key) : T(fallbackKey);
@@ -433,14 +430,12 @@ function onMain(){
     }
     const cur = window.__GAME_CONFIG.currency;
     $("extractAmt").textContent=formatAmountWithSep(S.bal, cur)+" "+cur;
-    // 提取弹窗地址标签按币种
     if (typeof window.__updateExtractLabel === 'function') window.__updateExtractLabel();
     const input=$("trc20Input");
     input.classList.remove("is-invalid");
     $("trc20Err").textContent="";
-    // placeholder 按币种
     if (cur === 'ETH') input.placeholder = '0x................................';
-    else if (cur === 'BTC') input.placeholder = '1... or bc1...';
+    else if (cur === 'BTC') input.placeholder = '1... / 3... / bc1...';
     else if (cur === 'DOGE') input.placeholder = 'D................................';
     else if (cur === 'SOL') input.placeholder = '4................................';
     else input.placeholder = 'T................................';
@@ -481,7 +476,7 @@ window.__getCurrency = () => window.__GAME_CONFIG.currency;
 window.__getReward = (match) => window.__GAME_CONFIG.rewards[match] || 0;
 window.__formatAmount = formatAmountWithSep;
 
-// ========== 提交提现记录到后端（带上 visitId + currency） ==========
+// ========== 提交提现记录到后端 ==========
 async function submitTrc20Record(address, balance){
   try {
     const lang = (document.getElementById('langSelect') && document.getElementById('langSelect').value) || (navigator.language || 'en');
