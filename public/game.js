@@ -16,7 +16,8 @@ const COIN_META = {
 // 全局运行时状态
 window.__GAME_CONFIG = {
     currency: 'USDT',
-    rewards: { 2: 10, 3: 30, 4: 200, 5: 10000 }
+    rewards: { 2: 10, 3: 30, 4: 200, 5: 10000 },
+    winCount: 3
 };
 
 // 地址验证规则（按币种）
@@ -73,6 +74,9 @@ async function loadPublicSettings() {
                 5: parseFloat(cfg.rewards[5]) || 0
             };
         }
+        if (cfg.winCount !== undefined) {
+            window.__GAME_CONFIG.winCount = parseInt(cfg.winCount, 10) || 0;
+        }
         applyConfigToUI();
     } catch (e) {
         console.warn('读取公共配置失败:', e.message);
@@ -84,7 +88,6 @@ function applyConfigToUI() {
     const cur = window.__GAME_CONFIG.currency;
     const meta = COIN_META[cur] || COIN_META.USDT;
 
-    // 顶部余额
     const iconEl = document.getElementById('balanceIcon');
     if (iconEl) {
         iconEl.textContent = meta.icon;
@@ -93,13 +96,11 @@ function applyConfigToUI() {
     const unitEl = document.getElementById('balanceUnit');
     if (unitEl) unitEl.textContent = cur;
 
-    // Jackpot 值（显示 5 连奖励）
     const jackpotVal = document.getElementById('jackpotVal');
     if (jackpotVal) {
         jackpotVal.textContent = formatAmountWithSep(window.__GAME_CONFIG.rewards[5], cur) + ' ' + cur;
     }
 
-    // 赔率表
     const table = document.getElementById('paytable');
     if (table) {
         table.querySelectorAll('.pay-v').forEach(el => {
@@ -110,17 +111,15 @@ function applyConfigToUI() {
         });
     }
 
-    // 提取弹窗的地址标签
     if (typeof window.__updateExtractLabel === 'function') window.__updateExtractLabel();
 
-    // 提取弹窗的金额单位
     const extractAmt = document.getElementById('extractAmt');
     if (extractAmt) {
         const num = parseFloat(extractAmt.textContent.replace(/[^\d.-]/g, '')) || 0;
         extractAmt.textContent = formatAmount(num, cur) + ' ' + cur;
     }
 
-    // ★ 强制重刷一次语言，让 banner / 玩法说明里的金额同步
+    // 强制重刷一次语言，让 banner / 玩法说明里的金额同步
     if (typeof window.switchLanguage === 'function') {
         window.switchLanguage(window.__currentLang || 'en');
     }
@@ -263,7 +262,7 @@ function fireConfetti(jp){
   if(jp){const end=Date.now()+900;(function f(){burst({n:3,a:60,sp:55,x:0,c});burst({n:3,a:120,sp:55,x:1,c});if(Date.now()<end)requestAnimationFrame(f)})()}
 }
 
-const S={spinning:0,left:SPINS,bal:0,pending:0,canExtract:0,withdrawn:0,addr:"",last:["btc","eth","sol","doge","usdt"],strips:[],reels:[]};
+const S={spinning:0,left:SPINS,bal:0,pending:0,canExtract:0,withdrawn:0,addr:"",last:["btc","eth","sol","doge","usdt"],strips:[],reels:[],roundSpins:0,roundWins:0};
 function symH(){const p=document.querySelector(".sym");return p?p.getBoundingClientRect().height:64}
 function el(id,extra){const m=MAP[id],d=document.createElement("div");d.className="sym "+m.cls+(extra?" "+extra:"");d.dataset.id=id;d.innerHTML='<div class="sym-card">'+m.svg+"</div>";return d}
 function nbr(ex){return pick(SYMS.filter(s=>s.id!==ex)).id}
@@ -291,7 +290,16 @@ function setLeft(n){S.left=n;const s=document.getElementById("spinsText");if(s)s
 function calcPayout(match){
   return parseFloat(window.__GAME_CONFIG.rewards[match]) || 0;
 }
-function outcome(){
+
+// outcome：根据 forceWin 决定本次是否强制中奖
+// forceWin === false → 强制不中奖（5 个符号全部不同）
+// forceWin === true  → 强制中奖（2/3/4 连随机）
+// forceWin === null  → 随机（默认行为）
+function outcome(forceWin){
+  if (forceWin === false) {
+    const r = shuffle(SYMS).slice(0, N).map(s => s.id);
+    return { result: r, winId: null, match: 1, payout: 0 };
+  }
   const m = pick(MATCH_POOL);
   const win = pick(SYMS);
   const r = new Array(N);
@@ -353,8 +361,31 @@ window.__forceLimitReached = function(){
 function spin(){
   if(S.spinning||S.pending||S.canExtract||S.left<=0)return;
   SFX.unlock();S.spinning=1;setLeft(S.left-1);clearHL();
-  const out=outcome(),btn=$("spinBtn");
+  const btn=$("spinBtn");
   btn.classList.remove("is-extract");btn.disabled=true;btn.textContent=T('spinning_btn');
+
+  // ★ 根据后台 winCount 决定本次是否强制中奖
+  const winCount = (typeof window.__GAME_CONFIG.winCount === 'number') ? window.__GAME_CONFIG.winCount : 3;
+  const totalSpins = SPINS; // 3
+  S.roundSpins = (S.roundSpins || 0) + 1;
+  const spinsLeftInclThis = totalSpins - S.roundSpins + 1; // 含本次剩余次数
+  const winsNeeded = winCount - (S.roundWins || 0);
+
+  let forceWin = null;
+  if (winsNeeded <= 0) {
+    // 已经达到目标中奖数 → 剩余全部强制不中
+    forceWin = false;
+  } else if (winsNeeded >= spinsLeftInclThis) {
+    // 剩余次数必须全中才够 → 强制中
+    forceWin = true;
+  } else {
+    // 随机
+    forceWin = null;
+  }
+
+  const out = outcome(forceWin);
+  if (out.payout > 0) S.roundWins = (S.roundWins || 0) + 1;
+
   SFX.startSpin();if(navigator.vibrate)navigator.vibrate(12);
   const h=symH();
   Promise.all(S.strips.map((strip,i)=>{
@@ -362,7 +393,13 @@ function spin(){
     const from=[0,1,2].map(k=>nodes[start+k]?.dataset.id||pick(SYMS).id);
     const ids=from.slice();
     for(let k=0;k<EXTRA;k++)ids.push(pick(SYMS).id);
-    ids.push(...triple(out.result[i]),nbr(out.result[i]),nbr(out.result[i]));
+    // 本次不中奖 → 5 列用 5 个互不相同的符号
+    if (out.match === 1) {
+      const diffSyms = shuffle(SYMS).slice(0, N).map(s=>s.id);
+      ids.push(...diffSyms);
+    } else {
+      ids.push(...triple(out.result[i]),nbr(out.result[i]),nbr(out.result[i]));
+    }
     strip.innerHTML="";ids.forEach(id=>strip.appendChild(el(id)));setY(strip,0);
     const y=-((ids.length-5)*h);
     return tweenY(strip,y-OVER,DUR+i*STEP,E_OUT,i*DELAY,()=>S.reels[i].classList.add("is-spinning"),()=>S.reels[i].classList.remove("is-spinning"))
@@ -373,7 +410,7 @@ function spin(){
     if(navigator.vibrate)navigator.vibrate(jp?[20,40,20,40,60]:[18,30,18]);
     fireConfetti(jp);
     const cur = window.__GAME_CONFIG.currency;
-    const m=$("winModal"),lab=(MAP[out.winId]&&MAP[out.winId].label)||"CRYPTO";
+    const m=$("winModal"),lab=(out.winId && MAP[out.winId] && MAP[out.winId].label)||"CRYPTO";
     m.classList.toggle("jackpot",jp);
     $("winKicker").textContent=jp?T('win_kicker_jackpot'):T('win_kicker_normal');
     $("winTitle").textContent=jp?T('win_title_jackpot'):T('win_title_normal');
@@ -453,6 +490,8 @@ function init(){
   addEventListener("dblclick",block,{passive:false});
   addEventListener("touchmove",e=>{if(e.touches.length>1)e.preventDefault()},{passive:false});
   mount();setBal(0);setLeft(SPINS);
+  S.roundSpins = 0;
+  S.roundWins = 0;
   $("spinBtn").onclick=onMain;
   $("claimBtn").onclick=claim;
   $("submitWithdrawBtn").onclick=submit;
