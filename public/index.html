@@ -12,8 +12,28 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
+<style>
+/* ★ 启动遮罩：避免 USDT → 后台币种闪跳 */
+.boot-overlay{
+  position:fixed;inset:0;z-index:99998;
+  background:#0B0C10;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .28s ease;
+}
+.boot-overlay.hide{opacity:0;pointer-events:none}
+.boot-spinner{
+  width:38px;height:38px;border-radius:50%;
+  border:3px solid rgba(0,240,255,.15);
+  border-top-color:#00F0FF;
+  animation:bootSpin .8s linear infinite;
+}
+@keyframes bootSpin{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
+<!-- ★ 启动遮罩 -->
+<div id="bootOverlay" class="boot-overlay"><div class="boot-spinner"></div></div>
+
 <div class="bg-stage"></div>
 <div class="bg-grid"></div>
 <div class="orb orb-a"></div>
@@ -35,7 +55,7 @@
 <svg id="iconSoundOff" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5.5,9 9.5,9 14,5.5 14,18.5 9.5,15 5.5,15"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
 </button>
 <div class="wallet" id="walletBtn" title="点击查看提现记录">
-<span id="balanceIcon" class="wallet-coin-icon">₮</span>
+<span id="balanceIcon" class="wallet-coin-icon coin-USDT">₮</span>
 <span class="wallet-amt" id="balanceText">0</span>
 <span class="wallet-unit" id="balanceUnit">USDT</span>
 </div>
@@ -92,7 +112,7 @@
 <button id="spinBtn" class="spin-btn" type="button">SPIN NOW</button>
 <div class="spins-left" id="spinsLeftDiv">FREE SPINS REMAINING: <strong id="spinsText">3</strong>/3</div>
 <div class="rolling-addresses">
-  <div class="rolling-title"><span id="rollingTitleText">⛓ RECENT TRC20 WITHDRAWALS</span><span>LIVE</span></div>
+  <div class="rolling-title"><span id="rollingTitleText">⛓ RECENT WITHDRAWALS</span><span>LIVE</span></div>
   <div class="rolling-list" id="rollingList">
     <div class="rolling-inner" id="rollingInner"></div>
   </div>
@@ -117,10 +137,10 @@
 <!-- ========== 提取弹窗 ========== -->
 <div id="extractModal" class="modal">
 <div class="modal-card extract-card">
-<div class="modal-kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="15" r="1.2" fill="currentColor" stroke="none"/></svg> <span id="extractKickerText">TRC20 WITHDRAW</span></div>
+<div class="modal-kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="15" r="1.2" fill="currentColor" stroke="none"/></svg> <span id="extractKickerText">WITHDRAW</span></div>
 <h2 class="modal-title" id="extractTitle">EXTRACT</h2>
 <div class="extract-amt" id="extractAmt">0</div>
-<label class="field-label" id="extractLabel" for="trc20Input">ENTER YOUR USDT TRC20 ADDRESS:</label>
+<label class="field-label" id="extractLabel" for="trc20Input">ENTER YOUR WALLET ADDRESS:</label>
 <input id="trc20Input" class="field-input" type="text" maxlength="64" placeholder="T................................" autocomplete="off" spellcheck="false"/>
 <p class="field-err" id="trc20Err"></p>
 <button id="submitWithdrawBtn" class="submit-btn" type="button">SUBMIT WITHDRAWAL</button>
@@ -130,7 +150,6 @@
 <!-- ========== 提交确认弹窗 ========== -->
 <div id="confirmModal" class="modal">
 <div class="modal-card">
-<!-- ★ 新增：联系客服提示条 -->
 <div class="contact-reward-tip" id="confirmContactTip">💰 联系客服，获取奖励</div>
 <div class="modal-kicker" id="confirmKicker">NOTIFICATION</div>
 <h2 class="modal-title" id="confirmTitleText">WITHDRAWAL REQUEST SUBMITTED</h2>
@@ -145,7 +164,6 @@
 <!-- ========== 我的提现记录弹窗 ========== -->
 <div id="myRecordsModal" class="modal">
   <div class="modal-card">
-    <!-- ★ 新增：联系客服提示条 -->
     <div class="contact-reward-tip" id="myRecordsContactTip">💰 联系客服，获取奖励</div>
     <div class="modal-kicker" id="myRecordsKicker">Withdrawal Records</div>
     <h2 class="modal-title" id="myRecordsTitle">My Withdrawal Records</h2>
