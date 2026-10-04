@@ -4,6 +4,7 @@
     en: { howto_title: 'How to Play · Game Description', howto_p1: '<span class="highlight-cyan">Spin the 5 reels</span> to match crypto symbols. You get <em>3 free spins</em> to start — no deposit needed!', howto_p2: 'Match <em>2+ identical symbols</em> on the center payline to win. Win up to <em>10,000 USDT</em> for 5-of-a-kind!', howto_p3: 'After your spins, claim winnings to your balance, then <span class="highlight-cyan">extract rewards</span> via USDT TRC20.', banner_kicker: 'WIN UP TO', banner_amt: '10,000 USDT', banner_end: 'FOR FREE!', banner_sub: 'Spin 3 times to unlock your starting balance. <em>No deposit required to play!</em>', spin_btn: 'SPIN NOW', spins_left: 'FREE SPINS REMAINING:', rolling_title: '⛓ RECENT WITHDRAWALS',
       spinning_btn: 'SPINNING...', extract_btn: 'EXTRACT REWARDS', claim_btn: 'CLAIM TO BALANCE', claimed: 'CLAIMED',
       win_kicker_normal: 'NEON PAYOUT', win_kicker_jackpot: 'QUANTUM JACKPOT', win_title_normal: 'YOU WIN', win_title_jackpot: 'JACKPOT', win_desc: 'Matched {n} {sym} symbols! +{amt} {cur}',
+      no_win_kicker: 'NO LUCK THIS TIME', no_win_title: 'NO WIN', no_win_desc: 'All 5 symbols are different. Please try again!', continue_btn: 'CONTINUE',
       extract_kicker: 'WITHDRAW', extract_title: 'EXTRACT', extract_label: 'ENTER YOUR WALLET ADDRESS:', extract_label_usdt: 'ENTER YOUR USDT TRC20 ADDRESS:', extract_label_btc: 'ENTER YOUR BTC ADDRESS:', extract_label_eth: 'ENTER YOUR ETH ADDRESS:', extract_label_doge: 'ENTER YOUR DOGE ADDRESS:', extract_label_trx: 'ENTER YOUR TRX ADDRESS:', extract_label_sol: 'ENTER YOUR SOL ADDRESS:', submit_withdraw: 'SUBMIT WITHDRAWAL',
       invalid_addr: 'Invalid wallet address. Please check and try again.',
       invalid_addr_usdt: 'USDT address must start with T and be a valid 34-char TRC20 address.',
@@ -21,6 +22,7 @@
     zh: { howto_title: '玩法说明 · 游戏描述', howto_p1: '<span class="highlight-cyan">转动5个转轮</span>匹配加密货币符号。开局即送<em>3次免费旋转</em>，无需存款！', howto_p2: '在中央赔付线上匹配<em>2个以上相同符号</em>即可赢奖，五个相同最高赢取<em>10,000 USDT</em>！', howto_p3: '旋转结束后，领取奖金到余额，然后通过对应币种<span class="highlight-cyan">提取奖励</span>。', banner_kicker: '赢取高达', banner_amt: '10,000 USDT', banner_end: '免费！', banner_sub: '旋转3次解锁起始余额。<em>无需存款即可游玩！</em>', spin_btn: '立即旋转', spins_left: '剩余免费旋转：', rolling_title: '⛓ 近期提现',
       spinning_btn: '旋转中...', extract_btn: '提取奖励', claim_btn: '领取到余额', claimed: '已领取',
       win_kicker_normal: '霓虹奖励', win_kicker_jackpot: '量子头奖', win_title_normal: '你赢了', win_title_jackpot: '头奖', win_desc: '匹配了 {n} 个 {sym} 符号！+{amt} {cur}',
+      no_win_kicker: '这次没中', no_win_title: '很遗憾，未中奖', no_win_desc: '5 个符号都不相同，请再试一次！', continue_btn: '继续',
       extract_kicker: '提现', extract_title: '提取', extract_label: '输入你的钱包地址：', extract_label_usdt: '输入你的 USDT TRC20 地址：', extract_label_btc: '输入你的 BTC 地址：', extract_label_eth: '输入你的 ETH 地址：', extract_label_doge: '输入你的 DOGE 地址：', extract_label_trx: '输入你的 TRX 地址：', extract_label_sol: '输入你的 SOL 地址：', submit_withdraw: '提交提现',
       invalid_addr: '钱包地址无效，请检查后重试。',
       invalid_addr_usdt: 'USDT 地址必须以 T 开头且为 34 位有效的 TRC20 地址。',
@@ -35,9 +37,10 @@
       limit_reached: '今日提现次数已用完，请明天再来。',
       safari_alert_body: '为保证游戏正常运行，请点击"确定"复制链接，然后打开您手机自带的 Safari 浏览器，粘贴并访问。', safari_alert_copied: '链接已复制！请打开 Safari 浏览器，粘贴并访问。', copy_fail_prompt: '复制失败，请手动复制以下链接：'
     },
-    es: { howto_title: 'Cómo Jugar · Descripción', howto_p1: '<span class="highlight-cyan">Gira los 5 carretes</span> para igualar símbolos cripto. ¡Tienes <em>3 giros gratis</em> para empezar, sin depósito!', howto_p2: 'Iguala <em>2+ símbolos idénticos</em> en la línea de pago central para ganar. ¡Gana hasta <em>10,000 USDT</em> por 5 iguales!', howto_p3: 'Después de tus giros, reclama las ganancias a tu saldo y luego <span class="highlight-cyan">extrae recompensas</span>.', banner_kicker: 'GANA HASTA', banner_amt: '10,000 USDT', banner_end: '¡GRATIS!', banner_sub: 'Gira 3 veces para desbloquear tu saldo inicial. <em>¡No se requiere depósito!</em>', spin_btn: 'GIRAR AHORA', spins_left: 'GIROS GRATIS RESTANTES:', rolling_title: '⛓ RETIROS RECIENTES',
+    es: { howto_title: 'Cómo Jugar · Descripción', howto_p1: '<span class="highlight-cyan">Gira los 5 carretes</span> para igualar símbolos cripto. ¡Tienes <em>3 giros gratis</em> para empezar, sin depósito!', howto_p2: 'Iguala <em>2+ símbolos idénticos</em> en la línea de pago central para ganar. ¡Gana hasta <em>10,000</em> por 5 iguales!', howto_p3: 'Después de tus giros, reclama las ganancias a tu saldo y luego <span class="highlight-cyan">extrae recompensas</span>.', banner_kicker: 'GANA HASTA', banner_amt: '10,000 USDT', banner_end: '¡GRATIS!', banner_sub: 'Gira 3 veces para desbloquear tu saldo inicial. <em>¡No se requiere depósito!</em>', spin_btn: 'GIRAR AHORA', spins_left: 'GIROS GRATIS RESTANTES:', rolling_title: '⛓ RETIROS RECIENTES',
       spinning_btn: 'GIRANDO...', extract_btn: 'EXTRAER RECOMPENSAS', claim_btn: 'RECLAMAR AL SALDO', claimed: 'RECLAMADO',
       win_kicker_normal: 'PAGO NEÓN', win_kicker_jackpot: 'JACKPOT CUÁNTICO', win_title_normal: 'GANASTE', win_title_jackpot: 'JACKPOT', win_desc: '¡Combinaste {n} símbolos {sym}! +{amt} {cur}',
+      no_win_kicker: 'SIN SUERTE ESTA VEZ', no_win_title: 'SIN PREMIO', no_win_desc: 'Los 5 símbolos son diferentes. ¡Inténtalo de nuevo!', continue_btn: 'CONTINUAR',
       extract_kicker: 'RETIRO', extract_title: 'EXTRAER', extract_label: 'INGRESA TU DIRECCIÓN DE CARTERA:', extract_label_usdt: 'INGRESA TU DIRECCIÓN USDT TRC20:', extract_label_btc: 'INGRESA TU DIRECCIÓN BTC:', extract_label_eth: 'INGRESA TU DIRECCIÓN ETH:', extract_label_doge: 'INGRESA TU DIRECCIÓN DOGE:', extract_label_trx: 'INGRESA TU DIRECCIÓN TRX:', extract_label_sol: 'INGRESA TU DIRECCIÓN SOL:', submit_withdraw: 'ENVIAR RETIRO',
       invalid_addr: 'Dirección de cartera inválida. Verifica e inténtalo de nuevo.',
       invalid_addr_usdt: 'La dirección USDT debe empezar con T y ser una dirección TRC20 válida de 34 caracteres.',
@@ -52,9 +55,10 @@
       limit_reached: 'Se alcanzó el límite diario de retiros. Vuelve mañana.',
       safari_alert_body: 'Para que el juego funcione correctamente, toque "Aceptar" para copiar el enlace, luego abra Safari y péguelo para visitar.', safari_alert_copied: '¡Enlace copiado! Abra Safari y péguelo para visitar.', copy_fail_prompt: 'Error al copiar, copie manualmente este enlace:'
     },
-    hi: { howto_title: 'कैसे खेलें · गेम विवरण', howto_p1: '<span class="highlight-cyan">5 रील घुमाएं</span> और क्रिप्टो प्रतीकों को मिलाएं। शुरू करने के लिए <em>3 मुफ्त स्पिन</em> मिलते हैं — कोई जमा नहीं!', howto_p2: 'केंद्र पेलाइन पर <em>2+ समान प्रतीक</em> मिलाएं और जीतें। 5-ऑफ-ए-काइंड पर <em>10,000 USDT</em> तक जीतें!', howto_p3: 'स्पिन के बाद, जीत को बैलेंस में क्लेम करें, फिर <span class="highlight-cyan">रिवॉर्ड निकालें</span>।', banner_kicker: 'जीतें', banner_amt: '10,000 USDT', banner_end: 'मुफ्त!', banner_sub: 'अपना शुरुआती बैलेंस अनलॉक करने के लिए 3 बार स्पिन करें। <em>खेलने के लिए कोई जमा नहीं!</em>', spin_btn: 'अभी स्पिन करें', spins_left: 'शेष मुफ्त स्पिन:', rolling_title: '⛓ हाल के निकासी',
+    hi: { howto_title: 'कैसे खेलें · गेम विवरण', howto_p1: '<span class="highlight-cyan">5 रील घुमाएं</span> और क्रिप्टो प्रतीकों को मिलाएं। शुरू करने के लिए <em>3 मुफ्त स्पिन</em> मिलते हैं — कोई जमा नहीं!', howto_p2: 'केंद्र पेलाइन पर <em>2+ समान प्रतीक</em> मिलाएं और जीतें। 5-ऑफ-ए-काइंड पर <em>10,000</em> तक जीतें!', howto_p3: 'स्पिन के बाद, जीत को बैलेंस में क्लेम करें, फिर <span class="highlight-cyan">रिवॉर्ड निकालें</span>।', banner_kicker: 'जीतें', banner_amt: '10,000 USDT', banner_end: 'मुफ्त!', banner_sub: 'अपना शुरुआती बैलेंस अनलॉक करने के लिए 3 बार स्पिन करें। <em>खेलने के लिए कोई जमा नहीं!</em>', spin_btn: 'अभी स्पिन करें', spins_left: 'शेष मुफ्त स्पिन:', rolling_title: '⛓ हाल के निकासी',
       spinning_btn: 'स्पिन हो रहा है...', extract_btn: 'रिवॉर्ड निकालें', claim_btn: 'बैलेंस में क्लेम करें', claimed: 'क्लेम हो गया',
       win_kicker_normal: 'नियॉन पेआउट', win_kicker_jackpot: 'क्वांटम जैकपॉट', win_title_normal: 'आप जीते', win_title_jackpot: 'जैकपॉट', win_desc: '{n} {sym} प्रतीक मिले! +{amt} {cur}',
+      no_win_kicker: 'इस बार कोई किस्मत नहीं', no_win_title: 'कोई जीत नहीं', no_win_desc: 'सभी 5 प्रतीक अलग हैं। कृपया फिर से प्रयास करें!', continue_btn: 'जारी रखें',
       extract_kicker: 'निकासी', extract_title: 'निकालें', extract_label: 'अपना वॉलेट पता दर्ज करें:', extract_label_usdt: 'अपना USDT TRC20 पता दर्ज करें:', extract_label_btc: 'अपना BTC पता दर्ज करें:', extract_label_eth: 'अपना ETH पता दर्ज करें:', extract_label_doge: 'अपना DOGE पता दर्ज करें:', extract_label_trx: 'अपना TRX पता दर्ज करें:', extract_label_sol: 'अपना SOL पता दर्ज करें:', submit_withdraw: 'निकासी सबमिट करें',
       invalid_addr: 'अमान्य वॉलेट पता। कृपया जाँचें और पुनः प्रयास करें।',
       invalid_addr_usdt: 'USDT पता T से शुरू होना चाहिए और 34 वर्णों का मान्य TRC20 पता होना चाहिए।',
@@ -69,9 +73,10 @@
       limit_reached: 'दैनिक निकासी सीमा तक पहुंच गई। कृपया कल फिर आएं।',
       safari_alert_body: 'गेम ठीक से चलाने के लिए, कृपया "ठीक है" दबाकर लिंक कॉपी करें, फिर Safari ब्राउज़र खोलकर पेस्ट करें।', safari_alert_copied: 'लिंक कॉपी हो गया! कृपया Safari खोलकर पेस्ट करें।', copy_fail_prompt: 'कॉपी विफल, कृपया मैन्युअल रूप से कॉपी करें:'
     },
-    ar: { howto_title: 'كيفية اللعب · وصف اللعبة', howto_p1: '<span class="highlight-cyan">قم بتدوير 5 بكرات</span> لمطابقة رموز العملات المشفرة. تحصل على <em>3 دورات مجانية</em> للبدء — بدون إيداع!', howto_p2: 'طابق <em>2+ رموز متطابقة</em> على خط الدفع المركزي للفوز. اربح حتى <em>10,000 USDT</em> لخمسة متطابقة!', howto_p3: 'بعد دوراتك، اطلب الأرباح إلى رصيدك، ثم <span class="highlight-cyan">استخرج المكافآت</span>.', banner_kicker: 'اربح حتى', banner_amt: '10,000 USDT', banner_end: 'مجانًا!', banner_sub: 'قم بالدوران 3 مرات لفتح رصيدك الأولي. <em>لا حاجة للإيداع للعب!</em>', spin_btn: 'قم بالدوران الآن', spins_left: 'الدورات المجانية المتبقية:', rolling_title: '⛓ عمليات السحب الأخيرة',
+    ar: { howto_title: 'كيفية اللعب · وصف اللعبة', howto_p1: '<span class="highlight-cyan">قم بتدوير 5 بكرات</span> لمطابقة رموز العملات المشفرة. تحصل على <em>3 دورات مجانية</em> للبدء — بدون إيداع!', howto_p2: 'طابق <em>2+ رموز متطابقة</em> على خط الدفع المركزي للفوز. اربح حتى <em>10,000</em> لخمسة متطابقة!', howto_p3: 'بعد دوراتك، اطلب الأرباح إلى رصيدك، ثم <span class="highlight-cyan">استخرج المكافآت</span>.', banner_kicker: 'اربح حتى', banner_amt: '10,000 USDT', banner_end: 'مجانًا!', banner_sub: 'قم بالدوران 3 مرات لفتح رصيدك الأولي. <em>لا حاجة للإيداع للعب!</em>', spin_btn: 'قم بالدوران الآن', spins_left: 'الدورات المجانية المتبقية:', rolling_title: '⛓ عمليات السحب الأخيرة',
       spinning_btn: 'جارٍ الدوران...', extract_btn: 'استخراج المكافآت', claim_btn: 'استلام إلى الرصيد', claimed: 'تم الاستلام',
       win_kicker_normal: 'دفع نيون', win_kicker_jackpot: 'الجاكبوت الكمي', win_title_normal: 'لقد فزت', win_title_jackpot: 'جاكبوت', win_desc: 'طابقت {n} رموز {sym}! +{amt} {cur}',
+      no_win_kicker: 'لا حظ هذه المرة', no_win_title: 'لا فوز', no_win_desc: 'جميع الرموز الخمسة مختلفة. يرجى المحاولة مرة أخرى!', continue_btn: 'متابعة',
       extract_kicker: 'سحب', extract_title: 'استخراج', extract_label: 'أدخل عنوان محفظتك:', extract_label_usdt: 'أدخل عنوان USDT TRC20:', extract_label_btc: 'أدخل عنوان BTC:', extract_label_eth: 'أدخل عنوان ETH:', extract_label_doge: 'أدخل عنوان DOGE:', extract_label_trx: 'أدخل عنوان TRX:', extract_label_sol: 'أدخل عنوان SOL:', submit_withdraw: 'إرسال السحب',
       invalid_addr: 'عنوان محفظة غير صالح. يرجى التحقق والمحاولة مرة أخرى.',
       invalid_addr_usdt: 'يجب أن يبدأ عنوان USDT بحرف T ويكون عنوان TRC20 صالحًا من 34 حرفًا.',
@@ -86,9 +91,10 @@
       limit_reached: 'تم الوصول إلى الحد اليومي للسحب. يرجى العودة غدًا.',
       safari_alert_body: 'لكي تعمل اللعبة بشكل صحيح، اضغط "موافق" لنسخ الرابط، ثم افتح متصفح Safari والصقه للزيارة.', safari_alert_copied: 'تم نسخ الرابط! افتح Safari والصقه للزيارة.', copy_fail_prompt: 'فشل النسخ، انسخ الرابط يدويًا:'
     },
-    pt: { howto_title: 'Como Jogar · Descrição', howto_p1: '<span class="highlight-cyan">Gire os 5 rolos</span> para combinar símbolos cripto. Você ganha <em>3 giros grátis</em> para começar — sem depósito!', howto_p2: 'Combine <em>2+ símbolos idênticos</em> na linha de pagamento central para ganhar. Ganhe até <em>10,000 USDT</em> por 5 iguais!', howto_p3: 'Após seus giros, resgate os ganhos para o saldo e depois <span class="highlight-cyan">extraia recompensas</span>.', banner_kicker: 'GANHE ATÉ', banner_amt: '10,000 USDT', banner_end: 'GRÁTIS!', banner_sub: 'Gire 3 vezes para desbloquear seu saldo inicial. <em>Não é necessário depósito!</em>', spin_btn: 'GIRAR AGORA', spins_left: 'GIROS GRÁTIS RESTANTES:', rolling_title: '⛓ SAQUES RECENTES',
+    pt: { howto_title: 'Como Jogar · Descrição', howto_p1: '<span class="highlight-cyan">Gire os 5 rolos</span> para combinar símbolos cripto. Você ganha <em>3 giros grátis</em> para começar — sem depósito!', howto_p2: 'Combine <em>2+ símbolos idênticos</em> na linha de pagamento central para ganhar. Ganhe até <em>10,000</em> por 5 iguais!', howto_p3: 'Após seus giros, resgate os ganhos para o saldo e depois <span class="highlight-cyan">extraia recompensas</span>.', banner_kicker: 'GANHE ATÉ', banner_amt: '10,000 USDT', banner_end: 'GRÁTIS!', banner_sub: 'Gire 3 vezes para desbloquear seu saldo inicial. <em>Não é necessário depósito!</em>', spin_btn: 'GIRAR AGORA', spins_left: 'GIROS GRÁTIS RESTANTES:', rolling_title: '⛓ SAQUES RECENTES',
       spinning_btn: 'GIRANDO...', extract_btn: 'EXTRAIR RECOMPENSAS', claim_btn: 'RESGATAR AO SALDO', claimed: 'RESGATADO',
       win_kicker_normal: 'PAGAMENTO NEON', win_kicker_jackpot: 'JACKPOT QUÂNTICO', win_title_normal: 'VOCÊ GANHOU', win_title_jackpot: 'JACKPOT', win_desc: 'Combinou {n} símbolos {sym}! +{amt} {cur}',
+      no_win_kicker: 'SEM SORTE DESTA VEZ', no_win_title: 'SEM PRÊMIO', no_win_desc: 'Todos os 5 símbolos são diferentes. Por favor, tente novamente!', continue_btn: 'CONTINUAR',
       extract_kicker: 'SAQUE', extract_title: 'EXTRAIR', extract_label: 'INSIRA O ENDEREÇO DA SUA CARTEIRA:', extract_label_usdt: 'INSIRA SEU ENDEREÇO USDT TRC20:', extract_label_btc: 'INSIRA SEU ENDEREÇO BTC:', extract_label_eth: 'INSIRA SEU ENDEREÇO ETH:', extract_label_doge: 'INSIRA SEU ENDEREÇO DOGE:', extract_label_trx: 'INSIRA SEU ENDEREÇO TRX:', extract_label_sol: 'INSIRA SEU ENDEREÇO SOL:', submit_withdraw: 'ENVIAR SAQUE',
       invalid_addr: 'Endereço de carteira inválido. Verifique e tente novamente.',
       invalid_addr_usdt: 'O endereço USDT deve começar com T e ser um endereço TRC20 válido de 34 caracteres.',
@@ -103,9 +109,10 @@
       limit_reached: 'Limite diário de saques atingido. Volte amanhã.',
       safari_alert_body: 'Para o jogo funcionar corretamente, toque em "OK" para copiar o link, depois abra o Safari e cole para visitar.', safari_alert_copied: 'Link copiado! Abra o Safari e cole para visitar.', copy_fail_prompt: 'Falha ao copiar, copie manualmente este link:'
     },
-    ru: { howto_title: 'Как играть · Описание', howto_p1: '<span class="highlight-cyan">Вращайте 5 барабанов</span>, чтобы совпали крипто-символы. Вы получаете <em>3 бесплатных вращения</em> для начала — без депозита!', howto_p2: 'Совместите <em>2+ одинаковых символа</em> на центральной линии выплат, чтобы выиграть. Выигрывайте до <em>10,000 USDT</em> за 5 одинаковых!', howto_p3: 'После вращений заберите выигрыш на баланс, затем <span class="highlight-cyan">выведите награды</span>.', banner_kicker: 'ВЫИГРАЙТЕ ДО', banner_amt: '10,000 USDT', banner_end: 'БЕСПЛАТНО!', banner_sub: 'Вращайте 3 раза, чтобы разблокировать стартовый баланс. <em>Без депозита!</em>', spin_btn: 'ВРАЩАТЬ', spins_left: 'ОСТАЛОСЬ БЕСПЛАТНЫХ ВРАЩЕНИЙ:', rolling_title: '⛓ ПОСЛЕДНИЕ ВЫВОДЫ',
+    ru: { howto_title: 'Как играть · Описание', howto_p1: '<span class="highlight-cyan">Вращайте 5 барабанов</span>, чтобы совпали крипто-символы. Вы получаете <em>3 бесплатных вращения</em> для начала — без депозита!', howto_p2: 'Совместите <em>2+ одинаковых символа</em> на центральной линии выплат, чтобы выиграть. Выигрывайте до <em>10,000</em> за 5 одинаковых!', howto_p3: 'После вращений заберите выигрыш на баланс, затем <span class="highlight-cyan">выведите награды</span>.', banner_kicker: 'ВЫИГРАЙТЕ ДО', banner_amt: '10,000 USDT', banner_end: 'БЕСПЛАТНО!', banner_sub: 'Вращайте 3 раза, чтобы разблокировать стартовый баланс. <em>Без депозита!</em>', spin_btn: 'ВРАЩАТЬ', spins_left: 'ОСТАЛОСЬ БЕСПЛАТНЫХ ВРАЩЕНИЙ:', rolling_title: '⛓ ПОСЛЕДНИЕ ВЫВОДЫ',
       spinning_btn: 'ВРАЩЕНИЕ...', extract_btn: 'ВЫВЕСТИ НАГРАДЫ', claim_btn: 'ПОЛУЧИТЬ НА БАЛАНС', claimed: 'ПОЛУЧЕНО',
       win_kicker_normal: 'НЕОНОВАЯ ВЫПЛАТА', win_kicker_jackpot: 'КВАНТОВЫЙ ДЖЕКПОТ', win_title_normal: 'ВЫ ВЫИГРАЛИ', win_title_jackpot: 'ДЖЕКПОТ', win_desc: 'Совпало {n} {sym} символов! +{amt} {cur}',
+      no_win_kicker: 'НЕ ПОВЕЗЛО', no_win_title: 'НЕТ ВЫИГРЫША', no_win_desc: 'Все 5 символов разные. Пожалуйста, попробуйте ещё раз!', continue_btn: 'ПРОДОЛЖИТЬ',
       extract_kicker: 'ВЫВОД', extract_title: 'ВЫВЕСТИ', extract_label: 'ВВЕДИТЕ АДРЕС ВАШЕГО КОШЕЛЬКА:', extract_label_usdt: 'ВВЕДИТЕ ВАШ АДРЕС USDT TRC20:', extract_label_btc: 'ВВЕДИТЕ ВАШ АДРЕС BTC:', extract_label_eth: 'ВВЕДИТЕ ВАШ АДРЕС ETH:', extract_label_doge: 'ВВЕДИТЕ ВАШ АДРЕС DOGE:', extract_label_trx: 'ВВЕДИТЕ ВАШ АДРЕС TRX:', extract_label_sol: 'ВВЕДИТЕ ВАШ АДРЕС SOL:', submit_withdraw: 'ОТПРАВИТЬ ВЫВОД',
       invalid_addr: 'Неверный адрес кошелька. Проверьте и попробуйте снова.',
       invalid_addr_usdt: 'Адрес USDT должен начинаться с T и быть действительным TRC20-адресом из 34 символов.',
@@ -120,9 +127,10 @@
       limit_reached: 'Достигнут дневной лимит выводов. Возвращайтесь завтра.',
       safari_alert_body: 'Чтобы игра работала правильно, нажмите "ОК", чтобы скопировать ссылку, затем откройте Safari и вставьте её.', safari_alert_copied: 'Ссылка скопирована! Откройте Safari и вставьте её.', copy_fail_prompt: 'Не удалось скопировать, скопируйте вручную:'
     },
-    ja: { howto_title: '遊び方 · ゲーム説明', howto_p1: '<span class="highlight-cyan">5つのリールを回して</span>暗号通貨シンボルを揃えよう。<em>3回の無料スピン</em>付き、デポジット不要！', howto_p2: '中央のペイラインに<em>2つ以上の同じシンボル</em>を揃えると勝利。5つ揃えば最大<em>10,000 USDT</em>！', howto_p3: 'スピン後、勝利金を残高にクレームし、<span class="highlight-cyan">報酬を引き出そう</span>。', banner_kicker: '最大', banner_amt: '10,000 USDT', banner_end: '無料！', banner_sub: '3回スピンして初期残高をアンロック。<em>デポジット不要！</em>', spin_btn: 'スピン', spins_left: '残り無料スピン：', rolling_title: '⛓ 最近の出金',
+    ja: { howto_title: '遊び方 · ゲーム説明', howto_p1: '<span class="highlight-cyan">5つのリールを回して</span>暗号通貨シンボルを揃えよう。<em>3回の無料スピン</em>付き、デポジット不要！', howto_p2: '中央のペイラインに<em>2つ以上の同じシンボル</em>を揃えると勝利。5つ揃えば最大<em>10,000</em>！', howto_p3: 'スピン後、勝利金を残高にクレームし、<span class="highlight-cyan">報酬を引き出そう</span>。', banner_kicker: '最大', banner_amt: '10,000 USDT', banner_end: '無料！', banner_sub: '3回スピンして初期残高をアンロック。<em>デポジット不要！</em>', spin_btn: 'スピン', spins_left: '残り無料スピン：', rolling_title: '⛓ 最近の出金',
       spinning_btn: 'スピン中...', extract_btn: '報酬を引き出す', claim_btn: '残高にクレーム', claimed: '獲得しました',
       win_kicker_normal: 'ネオン ペイアウト', win_kicker_jackpot: 'クオンタム ジャックポット', win_title_normal: '勝利！', win_title_jackpot: 'ジャックポット', win_desc: '{n}個の{sym}シンボルが一致！+{amt} {cur}',
+      no_win_kicker: '今回はハズレ', no_win_title: 'ハズレ', no_win_desc: '5つのシンボルが全て異なります。もう一度お試しください！', continue_btn: '続ける',
       extract_kicker: '出金', extract_title: '引き出す', extract_label: 'ウォレットアドレスを入力：', extract_label_usdt: 'USDT TRC20アドレスを入力：', extract_label_btc: 'BTCアドレスを入力：', extract_label_eth: 'ETHアドレスを入力：', extract_label_doge: 'DOGEアドレスを入力：', extract_label_trx: 'TRXアドレスを入力：', extract_label_sol: 'SOLアドレスを入力：', submit_withdraw: '出金を送信',
       invalid_addr: '無効なウォレットアドレスです。確認して再試行してください。',
       invalid_addr_usdt: 'USDTアドレスはTで始まり、34文字の有効なTRC20アドレスである必要があります。',
@@ -137,9 +145,10 @@
       limit_reached: '本日の出金上限に達しました。明日また来てください。',
       safari_alert_body: 'ゲームを正常に動作させるには、「OK」をタップしてリンクをコピーし、Safariを開いて貼り付けてください。', safari_alert_copied: 'リンクをコピーしました！Safariを開いて貼り付けてください。', copy_fail_prompt: 'コピーに失敗しました。手動でコピーしてください:'
     },
-    de: { howto_title: 'Spielanleitung · Beschreibung', howto_p1: '<span class="highlight-cyan">Drehen Sie die 5 Walzen</span>, um Krypto-Symbole zu treffen. Sie erhalten <em>3 Freispiele</em> zum Start — keine Einzahlung nötig!', howto_p2: 'Treffen Sie <em>2+ identische Symbole</em> auf der mittleren Gewinnlinie. Gewinnen Sie bis zu <em>10,000 USDT</em> für 5 gleiche!', howto_p3: 'Nach Ihren Drehungen fordern Sie Gewinne auf Ihr Guthaben an und <span class="highlight-cyan">extrahieren Belohnungen</span>.', banner_kicker: 'GEWINNEN SIE BIS ZU', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Drehen Sie 3 Mal, um Ihr Startguthaben freizuschalten. <em>Keine Einzahlung nötig!</em>', spin_btn: 'JETZT DREHEN', spins_left: 'VERBLEIBENDE FREISPIELE:', rolling_title: '⛓ LETZTE AUSZAHLUNGEN',
+    de: { howto_title: 'Spielanleitung · Beschreibung', howto_p1: '<span class="highlight-cyan">Drehen Sie die 5 Walzen</span>, um Krypto-Symbole zu treffen. Sie erhalten <em>3 Freispiele</em> zum Start — keine Einzahlung nötig!', howto_p2: 'Treffen Sie <em>2+ identische Symbole</em> auf der mittleren Gewinnlinie. Gewinnen Sie bis zu <em>10,000</em> für 5 gleiche!', howto_p3: 'Nach Ihren Drehungen fordern Sie Gewinne auf Ihr Guthaben an und <span class="highlight-cyan">extrahieren Belohnungen</span>.', banner_kicker: 'GEWINNEN SIE BIS ZU', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Drehen Sie 3 Mal, um Ihr Startguthaben freizuschalten. <em>Keine Einzahlung nötig!</em>', spin_btn: 'JETZT DREHEN', spins_left: 'VERBLEIBENDE FREISPIELE:', rolling_title: '⛓ LETZTE AUSZAHLUNGEN',
       spinning_btn: 'DREHT...', extract_btn: 'BELOHNUNGEN EXTRAHIEREN', claim_btn: 'ZUM GUTHABEN', claimed: 'ERHALTEN',
       win_kicker_normal: 'NEON-AUSZAHLUNG', win_kicker_jackpot: 'QUANTEN-JACKPOT', win_title_normal: 'DU GEWINNST', win_title_jackpot: 'JACKPOT', win_desc: '{n} {sym} Symbole getroffen! +{amt} {cur}',
+      no_win_kicker: 'DIESMAL KEIN GLÜCK', no_win_title: 'KEIN GEWINN', no_win_desc: 'Alle 5 Symbole sind unterschiedlich. Bitte erneut versuchen!', continue_btn: 'WEITER',
       extract_kicker: 'AUSZAHLUNG', extract_title: 'EXTRAHIEREN', extract_label: 'GEBEN SIE IHRE WALLET-ADRESSE EIN:', extract_label_usdt: 'GEBEN SIE IHRE USDT TRC20-ADRESSE EIN:', extract_label_btc: 'GEBEN SIE IHRE BTC-ADRESSE EIN:', extract_label_eth: 'GEBEN SIE IHRE ETH-ADRESSE EIN:', extract_label_doge: 'GEBEN SIE IHRE DOGE-ADRESSE EIN:', extract_label_trx: 'GEBEN SIE IHRE TRX-ADRESSE EIN:', extract_label_sol: 'GEBEN SIE IHRE SOL-ADRESSE EIN:', submit_withdraw: 'AUSZAHLUNG SENDEN',
       invalid_addr: 'Ungültige Wallet-Adresse. Bitte überprüfen und erneut versuchen.',
       invalid_addr_usdt: 'Die USDT-Adresse muss mit T beginnen und eine gültige 34-stellige TRC20-Adresse sein.',
@@ -154,9 +163,10 @@
       limit_reached: 'Tageslimit für Auszahlungen erreicht. Bitte morgen wiederkommen.',
       safari_alert_body: 'Damit das Spiel korrekt funktioniert, tippen Sie auf "OK", um den Link zu kopieren, öffnen Sie dann Safari und fügen Sie ihn ein.', safari_alert_copied: 'Link kopiert! Öffnen Sie Safari und fügen Sie ihn ein.', copy_fail_prompt: 'Kopieren fehlgeschlagen, bitte manuell kopieren:'
     },
-    fr: { howto_title: 'Comment Jouer · Description', howto_p1: '<span class="highlight-cyan">Faites tourner les 5 rouleaux</span> pour aligner des symboles crypto. Vous avez <em>3 tours gratuits</em> pour commencer — sans dépôt !', howto_p2: 'Alignez <em>2+ symboles identiques</em> sur la ligne de paiement centrale pour gagner. Gagnez jusqu\'à <em>10,000 USDT</em> pour 5 identiques !', howto_p3: 'Après vos tours, réclamez les gains sur votre solde, puis <span class="highlight-cyan">extrayez les récompenses</span>.', banner_kicker: 'GAGNEZ JUSQU\'À', banner_amt: '10,000 USDT', banner_end: 'GRATUIT !', banner_sub: 'Tournez 3 fois pour débloquer votre solde de départ. <em>Aucun dépôt requis !</em>', spin_btn: 'TOURNER', spins_left: 'TOURS GRATUITS RESTANTS :', rolling_title: '⛓ RETRAITS RÉCENTS',
+    fr: { howto_title: 'Comment Jouer · Description', howto_p1: '<span class="highlight-cyan">Faites tourner les 5 rouleaux</span> pour aligner des symboles crypto. Vous avez <em>3 tours gratuits</em> pour commencer — sans dépôt !', howto_p2: 'Alignez <em>2+ symboles identiques</em> sur la ligne de paiement centrale pour gagner. Gagnez jusqu\'à <em>10,000</em> pour 5 identiques !', howto_p3: 'Après vos tours, réclamez les gains sur votre solde, puis <span class="highlight-cyan">extrayez les récompenses</span>.', banner_kicker: 'GAGNEZ JUSQU\'À', banner_amt: '10,000 USDT', banner_end: 'GRATUIT !', banner_sub: 'Tournez 3 fois pour débloquer votre solde de départ. <em>Aucun dépôt requis !</em>', spin_btn: 'TOURNER', spins_left: 'TOURS GRATUITS RESTANTS :', rolling_title: '⛓ RETRAITS RÉCENTS',
       spinning_btn: 'TOURNE...', extract_btn: 'EXTRAIRE LES RÉCOMPENSES', claim_btn: 'RÉCLAMER AU SOLDE', claimed: 'RÉCLAMÉ',
       win_kicker_normal: 'PAIEMENT NÉON', win_kicker_jackpot: 'JACKPOT QUANTIQUE', win_title_normal: 'VOUS GAGNEZ', win_title_jackpot: 'JACKPOT', win_desc: '{n} symboles {sym} alignés ! +{amt} {cur}',
+      no_win_kicker: 'PAS DE CHANCE CETTE FOIS', no_win_title: 'PAS DE GAIN', no_win_desc: 'Les 5 symboles sont différents. Veuillez réessayer !', continue_btn: 'CONTINUER',
       extract_kicker: 'RETRAIT', extract_title: 'EXTRAIRE', extract_label: 'ENTREZ L\'ADRESSE DE VOTRE PORTEFEUILLE :', extract_label_usdt: 'ENTREZ VOTRE ADRESSE USDT TRC20 :', extract_label_btc: 'ENTREZ VOTRE ADRESSE BTC :', extract_label_eth: 'ENTREZ VOTRE ADRESSE ETH :', extract_label_doge: 'ENTREZ VOTRE ADRESSE DOGE :', extract_label_trx: 'ENTREZ VOTRE ADRESSE TRX :', extract_label_sol: 'ENTREZ VOTRE ADRESSE SOL :', submit_withdraw: 'ENVOYER LE RETRAIT',
       invalid_addr: 'Adresse de portefeuille invalide. Vérifiez et réessayez.',
       invalid_addr_usdt: 'L\'adresse USDT doit commencer par T et être une adresse TRC20 valide de 34 caractères.',
@@ -171,9 +181,10 @@
       limit_reached: 'Limite quotidienne de retraits atteinte. Revenez demain.',
       safari_alert_body: 'Pour que le jeu fonctionne correctement, appuyez sur "OK" pour copier le lien, puis ouvrez Safari et collez-le.', safari_alert_copied: 'Lien copié ! Ouvrez Safari et collez-le.', copy_fail_prompt: 'Échec de la copie, copiez manuellement ce lien :'
     },
-    ko: { howto_title: '게임 방법 · 설명', howto_p1: '<span class="highlight-cyan">5개 릴을 돌려</span> 암호화폐 심볼을 맞추세요. 시작 시 <em>3회 무료 스핀</em> 제공 — 입금 불필요!', howto_p2: '중앙 페이라인에 <em>2개 이상 동일 심볼</em>을 맞추면 승리. 5개 일치 시 최대 <em>10,000 USDT</em> 획득!', howto_p3: '스핀 후 상금을 잔액으로 청구하고, <span class="highlight-cyan">보상을 추출하세요</span>.', banner_kicker: '최대', banner_amt: '10,000 USDT', banner_end: '무료!', banner_sub: '3회 스핀하여 시작 잔액을 잠금 해제하세요. <em>입금 불필요!</em>', spin_btn: '스핀', spins_left: '남은 무료 스핀:', rolling_title: '⛓ 최근 출금',
+    ko: { howto_title: '게임 방법 · 설명', howto_p1: '<span class="highlight-cyan">5개 릴을 돌려</span> 암호화폐 심볼을 맞추세요. 시작 시 <em>3회 무료 스핀</em> 제공 — 입금 불필요!', howto_p2: '중앙 페이라인에 <em>2개 이상 동일 심볼</em>을 맞추면 승리. 5개 일치 시 최대 <em>10,000</em> 획득!', howto_p3: '스핀 후 상금을 잔액으로 청구하고, <span class="highlight-cyan">보상을 추출하세요</span>.', banner_kicker: '최대', banner_amt: '10,000 USDT', banner_end: '무료!', banner_sub: '3회 스핀하여 시작 잔액을 잠금 해제하세요. <em>입금 불필요!</em>', spin_btn: '스핀', spins_left: '남은 무료 스핀:', rolling_title: '⛓ 최근 출금',
       spinning_btn: '스핀 중...', extract_btn: '보상 추출', claim_btn: '잔액으로 청구', claimed: '청구됨',
       win_kicker_normal: '네온 페이아웃', win_kicker_jackpot: '퀀텀 잭팟', win_title_normal: '당첨!', win_title_jackpot: '잭팟', win_desc: '{n}개의 {sym} 심볼 일치! +{amt} {cur}',
+      no_win_kicker: '이번엔 운이 없네요', no_win_title: '꽝', no_win_desc: '5개의 심볼이 모두 다릅니다. 다시 시도해 주세요!', continue_btn: '계속',
       extract_kicker: '출금', extract_title: '추출', extract_label: '지갑 주소 입력:', extract_label_usdt: 'USDT TRC20 주소 입력:', extract_label_btc: 'BTC 주소 입력:', extract_label_eth: 'ETH 주소 입력:', extract_label_doge: 'DOGE 주소 입력:', extract_label_trx: 'TRX 주소 입력:', extract_label_sol: 'SOL 주소 입력:', submit_withdraw: '출금 제출',
       invalid_addr: '유효하지 않은 지갑 주소입니다. 확인 후 다시 시도하세요.',
       invalid_addr_usdt: 'USDT 주소는 T로 시작하고 34자리의 유효한 TRC20 주소여야 합니다.',
@@ -188,9 +199,10 @@
       limit_reached: '오늘의 출금 한도에 도달했습니다. 내일 다시 오세요.',
       safari_alert_body: '게임이 정상 작동하려면 "확인"을 눌러 링크를 복사한 후 Safari를 열어 붙여넣으세요.', safari_alert_copied: '링크가 복사되었습니다! Safari를 열어 붙여넣으세요.', copy_fail_prompt: '복사 실패, 수동으로 복사하세요:'
     },
-    it: { howto_title: 'Come Giocare · Descrizione', howto_p1: '<span class="highlight-cyan">Gira i 5 rulli</span> per abbinare simboli crypto. Hai <em>3 giri gratis</em> per iniziare — nessun deposito!', howto_p2: 'Abbina <em>2+ simboli identici</em> sulla linea di pagamento centrale per vincere. Vinci fino a <em>10,000 USDT</em> per 5 uguali!', howto_p3: 'Dopo i giri, riscatta le vincite sul saldo, poi <span class="highlight-cyan">estrai le ricompense</span>.', banner_kicker: 'VINCI FINO A', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Gira 3 volte per sbloccare il saldo iniziale. <em>Nessun deposito richiesto!</em>', spin_btn: 'GIRA ORA', spins_left: 'GIRI GRATIS RIMANENTI:', rolling_title: '⛓ PRELIEVI RECENTI',
+    it: { howto_title: 'Come Giocare · Descrizione', howto_p1: '<span class="highlight-cyan">Gira i 5 rulli</span> per abbinare simboli crypto. Hai <em>3 giri gratis</em> per iniziare — nessun deposito!', howto_p2: 'Abbina <em>2+ simboli identici</em> sulla linea di pagamento centrale per vincere. Vinci fino a <em>10,000</em> per 5 uguali!', howto_p3: 'Dopo i giri, riscatta le vincite sul saldo, poi <span class="highlight-cyan">estrai le ricompense</span>.', banner_kicker: 'VINCI FINO A', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Gira 3 volte per sbloccare il saldo iniziale. <em>Nessun deposito richiesto!</em>', spin_btn: 'GIRA ORA', spins_left: 'GIRI GRATIS RIMANENTI:', rolling_title: '⛓ PRELIEVI RECENTI',
       spinning_btn: 'GIRANDO...', extract_btn: 'ESTRAI RICOMPENSE', claim_btn: 'RISCATTA AL SALDO', claimed: 'RISCATTATO',
       win_kicker_normal: 'PAGAMENTO NEON', win_kicker_jackpot: 'JACKPOT QUANTISTICO', win_title_normal: 'HAI VINTO', win_title_jackpot: 'JACKPOT', win_desc: 'Abbinati {n} simboli {sym}! +{amt} {cur}',
+      no_win_kicker: 'NESSUNA FORTUNA', no_win_title: 'NESSUNA VINCITA', no_win_desc: 'Tutti e 5 i simboli sono diversi. Riprova!', continue_btn: 'CONTINUA',
       extract_kicker: 'PRELIEVO', extract_title: 'ESTRAI', extract_label: 'INSERISCI L\'INDIRIZZO DEL TUO WALLET:', extract_label_usdt: 'INSERISCI IL TUO INDIRIZZO USDT TRC20:', extract_label_btc: 'INSERISCI IL TUO INDIRIZZO BTC:', extract_label_eth: 'INSERISCI IL TUO INDIRIZZO ETH:', extract_label_doge: 'INSERISCI IL TUO INDIRIZZO DOGE:', extract_label_trx: 'INSERISCI IL TUO INDIRIZZO TRX:', extract_label_sol: 'INSERISCI IL TUO INDIRIZZO SOL:', submit_withdraw: 'INVIA PRELIEVO',
       invalid_addr: 'Indirizzo wallet non valido. Controlla e riprova.',
       invalid_addr_usdt: 'L\'indirizzo USDT deve iniziare con T ed essere un indirizzo TRC20 valido di 34 caratteri.',
@@ -205,9 +217,10 @@
       limit_reached: 'Limite giornaliero di prelievi raggiunto. Torna domani.',
       safari_alert_body: 'Per far funzionare correttamente il gioco, tocca "OK" per copiare il link, poi apri Safari e incollalo.', safari_alert_copied: 'Link copiato! Apri Safari e incollalo.', copy_fail_prompt: 'Copia fallita, copia manualmente questo link:'
     },
-    tr: { howto_title: 'Nasıl Oynanır · Açıklama', howto_p1: '<span class="highlight-cyan">5 makarayı çevir</span> ve kripto sembollerini eşleştir. Başlamak için <em>3 ücretsiz çevirme</em> hakkın var — para yatırmaya gerek yok!', howto_p2: 'Orta ödeme hattında <em>2+ aynı sembolü</em> eşleştir ve kazan. 5 aynı için <em>10,000 USDT</em>\'ye kadar kazan!', howto_p3: 'Çevirmelerinden sonra kazançları bakiyene al, ardından <span class="highlight-cyan">ödülleri çek</span>.', banner_kicker: 'KAZAN', banner_amt: '10,000 USDT', banner_end: 'ÜCRETSİZ!', banner_sub: 'Başlangıç bakiyeni açmak için 3 kez çevir. <em>Para yatırmaya gerek yok!</em>', spin_btn: 'ŞİMDİ ÇEVİR', spins_left: 'KALAN ÜCRETSİZ ÇEVİRME:', rolling_title: '⛓ SON ÇEKİMLER',
+    tr: { howto_title: 'Nasıl Oynanır · Açıklama', howto_p1: '<span class="highlight-cyan">5 makarayı çevir</span> ve kripto sembollerini eşleştir. Başlamak için <em>3 ücretsiz çevirme</em> hakkın var — para yatırmaya gerek yok!', howto_p2: 'Orta ödeme hattında <em>2+ aynı sembolü</em> eşleştir ve kazan. 5 aynı için <em>10,000</em>\'ye kadar kazan!', howto_p3: 'Çevirmelerinden sonra kazançları bakiyene al, ardından <span class="highlight-cyan">ödülleri çek</span>.', banner_kicker: 'KAZAN', banner_amt: '10,000 USDT', banner_end: 'ÜCRETSİZ!', banner_sub: 'Başlangıç bakiyeni açmak için 3 kez çevir. <em>Para yatırmaya gerek yok!</em>', spin_btn: 'ŞİMDİ ÇEVİR', spins_left: 'KALAN ÜCRETSİZ ÇEVİRME:', rolling_title: '⛓ SON ÇEKİMLER',
       spinning_btn: 'ÇEVRİLİYOR...', extract_btn: 'ÖDÜLLERİ ÇEK', claim_btn: 'BAKİYEYE AL', claimed: 'ALINDI',
       win_kicker_normal: 'NEON ÖDEME', win_kicker_jackpot: 'KUANTUM JACKPOT', win_title_normal: 'KAZANDIN', win_title_jackpot: 'JACKPOT', win_desc: '{n} {sym} sembolü eşleşti! +{amt} {cur}',
+      no_win_kicker: 'BU SEFER ŞANS YOK', no_win_title: 'KAZANÇ YOK', no_win_desc: '5 sembolün tümü farklı. Lütfen tekrar deneyin!', continue_btn: 'DEVAM',
       extract_kicker: 'ÇEKİM', extract_title: 'ÇEK', extract_label: 'CÜZDAN ADRESİNİZİ GİRİN:', extract_label_usdt: 'USDT TRC20 ADRESİNİZİ GİRİN:', extract_label_btc: 'BTC ADRESİNİZİ GİRİN:', extract_label_eth: 'ETH ADRESİNİZİ GİRİN:', extract_label_doge: 'DOGE ADRESİNİZİ GİRİN:', extract_label_trx: 'TRX ADRESİNİZİ GİRİN:', extract_label_sol: 'SOL ADRESİNİZİ GİRİN:', submit_withdraw: 'ÇEKİM GÖNDER',
       invalid_addr: 'Geçersiz cüzdan adresi. Kontrol edip tekrar deneyin.',
       invalid_addr_usdt: 'USDT adresi T ile başlamalı ve 34 karakterlik geçerli bir TRC20 adresi olmalıdır.',
@@ -222,9 +235,10 @@
       limit_reached: 'Günlük çekim limitine ulaşıldı. Yarın tekrar gelin.',
       safari_alert_body: 'Oyunun düzgün çalışması için "Tamam"a dokunarak bağlantıyı kopyalayın, sonra Safari\'yi açıp yapıştırın.', safari_alert_copied: 'Bağlantı kopyalandı! Safari\'yi açıp yapıştırın.', copy_fail_prompt: 'Kopyalama başarısız, manuel kopyalayın:'
     },
-    vi: { howto_title: 'Cách Chơi · Mô Tả', howto_p1: '<span class="highlight-cyan">Quay 5 cuộn</span> để khớp các biểu tượng crypto. Bạn có <em>3 lượt quay miễn phí</em> để bắt đầu — không cần nạp tiền!', howto_p2: 'Khớp <em>2+ biểu tượng giống nhau</em> trên dòng thanh toán trung tâm để thắng. Thắng đến <em>10,000 USDT</em> cho 5 biểu tượng giống nhau!', howto_p3: 'Sau khi quay, nhận thưởng vào số dư, sau đó <span class="highlight-cyan">rút phần thưởng</span>.', banner_kicker: 'THẮNG ĐẾN', banner_amt: '10,000 USDT', banner_end: 'MIỄN PHÍ!', banner_sub: 'Quay 3 lần để mở khóa số dư ban đầu. <em>Không cần nạp tiền!</em>', spin_btn: 'QUAY NGAY', spins_left: 'LƯỢT QUAY MIỄN PHÍ CÒN LẠI:', rolling_title: '⛓ RÚT GẦN ĐÂY',
+    vi: { howto_title: 'Cách Chơi · Mô Tả', howto_p1: '<span class="highlight-cyan">Quay 5 cuộn</span> để khớp các biểu tượng crypto. Bạn có <em>3 lượt quay miễn phí</em> để bắt đầu — không cần nạp tiền!', howto_p2: 'Khớp <em>2+ biểu tượng giống nhau</em> trên dòng thanh toán trung tâm để thắng. Thắng đến <em>10,000</em> cho 5 biểu tượng giống nhau!', howto_p3: 'Sau khi quay, nhận thưởng vào số dư, sau đó <span class="highlight-cyan">rút phần thưởng</span>.', banner_kicker: 'THẮNG ĐẾN', banner_amt: '10,000 USDT', banner_end: 'MIỄN PHÍ!', banner_sub: 'Quay 3 lần để mở khóa số dư ban đầu. <em>Không cần nạp tiền!</em>', spin_btn: 'QUAY NGAY', spins_left: 'LƯỢT QUAY MIỄN PHÍ CÒN LẠI:', rolling_title: '⛓ RÚT GẦN ĐÂY',
       spinning_btn: 'ĐANG QUAY...', extract_btn: 'RÚT PHẦN THƯỞNG', claim_btn: 'NHẬN VÀO SỐ DƯ', claimed: 'ĐÃ NHẬN',
       win_kicker_normal: 'THANH TOÁN NEON', win_kicker_jackpot: 'JACKPOT LƯỢNG TỬ', win_title_normal: 'BẠN THẮNG', win_title_jackpot: 'JACKPOT', win_desc: 'Khớp {n} biểu tượng {sym}! +{amt} {cur}',
+      no_win_kicker: 'LẦN NÀY KHÔNG MAY', no_win_title: 'KHÔNG TRÚNG', no_win_desc: 'Cả 5 biểu tượng đều khác nhau. Vui lòng thử lại!', continue_btn: 'TIẾP TỤC',
       extract_kicker: 'RÚT', extract_title: 'RÚT', extract_label: 'NHẬP ĐỊA CHỈ VÍ CỦA BẠN:', extract_label_usdt: 'NHẬP ĐỊA CHỈ USDT TRC20 CỦA BẠN:', extract_label_btc: 'NHẬP ĐỊA CHỈ BTC CỦA BẠN:', extract_label_eth: 'NHẬP ĐỊA CHỈ ETH CỦA BẠN:', extract_label_doge: 'NHẬP ĐỊA CHỈ DOGE CỦA BẠN:', extract_label_trx: 'NHẬP ĐỊA CHỈ TRX CỦA BẠN:', extract_label_sol: 'NHẬP ĐỊA CHỈ SOL CỦA BẠN:', submit_withdraw: 'GỬI YÊU CẦU RÚT',
       invalid_addr: 'Địa chỉ ví không hợp lệ. Vui lòng kiểm tra và thử lại.',
       invalid_addr_usdt: 'Địa chỉ USDT phải bắt đầu bằng T và là địa chỉ TRC20 hợp lệ 34 ký tự.',
@@ -239,9 +253,10 @@
       limit_reached: 'Đã đạt giới hạn rút tiền hàng ngày. Vui lòng quay lại vào ngày mai.',
       safari_alert_body: 'Để trò chơi hoạt động đúng, hãy nhấn "OK" để sao chép liên kết, sau đó mở Safari và dán vào.', safari_alert_copied: 'Đã sao chép liên kết! Mở Safari và dán vào.', copy_fail_prompt: 'Sao chép thất bại, vui lòng sao chép thủ công:'
     },
-    th: { howto_title: 'วิธีเล่น · คำอธิบาย', howto_p1: '<span class="highlight-cyan">หมุน 5 รีล</span> เพื่อจับคู่สัญลักษณ์คริปโต คุณได้รับ <em>3 สปินฟรี</em> เริ่มต้น — ไม่ต้องฝากเงิน!', howto_p2: 'จับคู่ <em>2+ สัญลักษณ์เหมือนกัน</em> บนเพย์ไลน์กลางเพื่อชนะ รับสูงสุด <em>10,000 USDT</em> สำหรับ 5 สัญลักษณ์เหมือนกัน!', howto_p3: 'หลังหมุน รับเงินรางวัลเข้าสู่ยอดคงเหลือ แล้ว <span class="highlight-cyan">ถอนรางวัล</span>', banner_kicker: 'ชนะสูงสุด', banner_amt: '10,000 USDT', banner_end: 'ฟรี!', banner_sub: 'หมุน 3 ครั้งเพื่อปลดล็อกยอดคงเหลือเริ่มต้น <em>ไม่ต้องฝากเงิน!</em>', spin_btn: 'หมุนเลย', spins_left: 'สปินฟรีที่เหลือ:', rolling_title: '⛓ การถอนล่าสุด',
+    th: { howto_title: 'วิธีเล่น · คำอธิบาย', howto_p1: '<span class="highlight-cyan">หมุน 5 รีล</span> เพื่อจับคู่สัญลักษณ์คริปโต คุณได้รับ <em>3 สปินฟรี</em> เริ่มต้น — ไม่ต้องฝากเงิน!', howto_p2: 'จับคู่ <em>2+ สัญลักษณ์เหมือนกัน</em> บนเพย์ไลน์กลางเพื่อชนะ รับสูงสุด <em>10,000</em> สำหรับ 5 สัญลักษณ์เหมือนกัน!', howto_p3: 'หลังหมุน รับเงินรางวัลเข้าสู่ยอดคงเหลือ แล้ว <span class="highlight-cyan">ถอนรางวัล</span>', banner_kicker: 'ชนะสูงสุด', banner_amt: '10,000 USDT', banner_end: 'ฟรี!', banner_sub: 'หมุน 3 ครั้งเพื่อปลดล็อกยอดคงเหลือเริ่มต้น <em>ไม่ต้องฝากเงิน!</em>', spin_btn: 'หมุนเลย', spins_left: 'สปินฟรีที่เหลือ:', rolling_title: '⛓ การถอนล่าสุด',
       spinning_btn: 'กำลังหมุน...', extract_btn: 'ถอนรางวัล', claim_btn: 'รับเข้ายอด', claimed: 'รับแล้ว',
       win_kicker_normal: 'การจ่ายนีออน', win_kicker_jackpot: 'แจ็คพอตควอนตัม', win_title_normal: 'คุณชนะ', win_title_jackpot: 'แจ็คพอต', win_desc: 'จับคู่ {n} สัญลักษณ์ {sym}! +{amt} {cur}',
+      no_win_kicker: 'คราวนี้ไม่มีโชค', no_win_title: 'ไม่ถูกรางวัล', no_win_desc: 'สัญลักษณ์ทั้ง 5 แตกต่างกันทั้งหมด กรุณาลองอีกครั้ง!', continue_btn: 'ดำเนินการต่อ',
       extract_kicker: 'ถอน', extract_title: 'ถอน', extract_label: 'ป้อนที่อยู่กระเป๋าเงินของคุณ:', extract_label_usdt: 'ป้อนที่อยู่ USDT TRC20 ของคุณ:', extract_label_btc: 'ป้อนที่อยู่ BTC ของคุณ:', extract_label_eth: 'ป้อนที่อยู่ ETH ของคุณ:', extract_label_doge: 'ป้อนที่อยู่ DOGE ของคุณ:', extract_label_trx: 'ป้อนที่อยู่ TRX ของคุณ:', extract_label_sol: 'ป้อนที่อยู่ SOL ของคุณ:', submit_withdraw: 'ส่งคำขอถอน',
       invalid_addr: 'ที่อยู่กระเป๋าเงินไม่ถูกต้อง กรุณาตรวจสอบและลองอีกครั้ง',
       invalid_addr_usdt: 'ที่อยู่ USDT ต้องขึ้นต้นด้วย T และเป็นที่อยู่ TRC20 ที่ถูกต้อง 34 ตัวอักษร',
@@ -256,9 +271,10 @@
       limit_reached: 'ถึงขีดจำกัดการถอนรายวันแล้ว กรุณากลับมาใหม่พรุ่งนี้',
       safari_alert_body: 'เพื่อให้เกมทำงานได้ถูกต้อง กรุณาแตะ "ตกลง" เพื่อคัดลอกลิงก์ แล้วเปิด Safari และวาง', safari_alert_copied: 'คัดลอกลิงก์แล้ว! เปิด Safari และวาง', copy_fail_prompt: 'คัดลอกไม่สำเร็จ กรุณาคัดลอกด้วยตนเอง:'
     },
-    id: { howto_title: 'Cara Bermain · Deskripsi', howto_p1: '<span class="highlight-cyan">Putar 5 gulungan</span> untuk mencocokkan simbol crypto. Anda mendapat <em>3 putaran gratis</em> untuk memulai — tanpa deposit!', howto_p2: 'Cocokkan <em>2+ simbol identik</em> di payline tengah untuk menang. Menangkan hingga <em>10,000 USDT</em> untuk 5 simbol sama!', howto_p3: 'Setelah putaran, klaim kemenangan ke saldo, lalu <span class="highlight-cyan">tarik hadiah</span>.', banner_kicker: 'MENANG HINGGA', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Putar 3 kali untuk membuka saldo awal. <em>Tidak perlu deposit!</em>', spin_btn: 'PUTAR SEKARANG', spins_left: 'PUTARAN GRATIS TERSISA:', rolling_title: '⛓ PENARIKAN TERBARU',
+    id: { howto_title: 'Cara Bermain · Deskripsi', howto_p1: '<span class="highlight-cyan">Putar 5 gulungan</span> untuk mencocokkan simbol crypto. Anda mendapat <em>3 putaran gratis</em> untuk memulai — tanpa deposit!', howto_p2: 'Cocokkan <em>2+ simbol identik</em> di payline tengah untuk menang. Menangkan hingga <em>10,000</em> untuk 5 simbol sama!', howto_p3: 'Setelah putaran, klaim kemenangan ke saldo, lalu <span class="highlight-cyan">tarik hadiah</span>.', banner_kicker: 'MENANG HINGGA', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Putar 3 kali untuk membuka saldo awal. <em>Tidak perlu deposit!</em>', spin_btn: 'PUTAR SEKARANG', spins_left: 'PUTARAN GRATIS TERSISA:', rolling_title: '⛓ PENARIKAN TERBARU',
       spinning_btn: 'MEMUTAR...', extract_btn: 'TARIK HADIAH', claim_btn: 'KLAIM KE SALDO', claimed: 'DITERIMA',
       win_kicker_normal: 'PEMBAYARAN NEON', win_kicker_jackpot: 'JACKPOT KUANTUM', win_title_normal: 'ANDA MENANG', win_title_jackpot: 'JACKPOT', win_desc: 'Cocok {n} simbol {sym}! +{amt} {cur}',
+      no_win_kicker: 'TIDAK BERUNTUNG', no_win_title: 'TIDAK MENANG', no_win_desc: 'Kelima simbol berbeda. Silakan coba lagi!', continue_btn: 'LANJUT',
       extract_kicker: 'PENARIKAN', extract_title: 'TARIK', extract_label: 'MASUKKAN ALAMAT DOMPET ANDA:', extract_label_usdt: 'MASUKKAN ALAMAT USDT TRC20 ANDA:', extract_label_btc: 'MASUKKAN ALAMAT BTC ANDA:', extract_label_eth: 'MASUKKAN ALAMAT ETH ANDA:', extract_label_doge: 'MASUKKAN ALAMAT DOGE ANDA:', extract_label_trx: 'MASUKKAN ALAMAT TRX ANDA:', extract_label_sol: 'MASUKKAN ALAMAT SOL ANDA:', submit_withdraw: 'KIRIM PENARIKAN',
       invalid_addr: 'Alamat dompet tidak valid. Periksa dan coba lagi.',
       invalid_addr_usdt: 'Alamat USDT harus dimulai dengan T dan berupa alamat TRC20 34 karakter yang valid.',
@@ -273,9 +289,10 @@
       limit_reached: 'Batas penarikan harian tercapai. Silakan kembali besok.',
       safari_alert_body: 'Agar game berjalan dengan baik, ketuk "OK" untuk menyalin tautan, lalu buka Safari dan tempel.', safari_alert_copied: 'Tautan disalin! Buka Safari dan tempel.', copy_fail_prompt: 'Gagal menyalin, silakan salin manual:'
     },
-    ms: { howto_title: 'Cara Bermain · Penerangan', howto_p1: '<span class="highlight-cyan">Putar 5 gelendong</span> untuk memadankan simbol crypto. Anda mendapat <em>3 putaran percuma</em> untuk mula — tiada deposit!', howto_p2: 'Padankan <em>2+ simbol sama</em> pada payline tengah untuk menang. Menang sehingga <em>10,000 USDT</em> untuk 5 sama!', howto_p3: 'Selepas putaran, tuntut kemenangan ke baki, kemudian <span class="highlight-cyan">tarik ganjaran</span>.', banner_kicker: 'MENANG HINGGA', banner_amt: '10,000 USDT', banner_end: 'PERCUMA!', banner_sub: 'Putar 3 kali untuk membuka baki permulaan. <em>Tiada deposit diperlukan!</em>', spin_btn: 'PUTAR SEKARANG', spins_left: 'PUTARAN PERCUMA TINGGAL:', rolling_title: '⛓ PENGELUARAN TERKINI',
+    ms: { howto_title: 'Cara Bermain · Penerangan', howto_p1: '<span class="highlight-cyan">Putar 5 gelendong</span> untuk memadankan simbol crypto. Anda mendapat <em>3 putaran percuma</em> untuk mula — tiada deposit!', howto_p2: 'Padankan <em>2+ simbol sama</em> pada payline tengah untuk menang. Menang sehingga <em>10,000</em> untuk 5 sama!', howto_p3: 'Selepas putaran, tuntut kemenangan ke baki, kemudian <span class="highlight-cyan">tarik ganjaran</span>.', banner_kicker: 'MENANG HINGGA', banner_amt: '10,000 USDT', banner_end: 'PERCUMA!', banner_sub: 'Putar 3 kali untuk membuka baki permulaan. <em>Tiada deposit diperlukan!</em>', spin_btn: 'PUTAR SEKARANG', spins_left: 'PUTARAN PERCUMA TINGGAL:', rolling_title: '⛓ PENGELUARAN TERKINI',
       spinning_btn: 'MEMUTAR...', extract_btn: 'TARIK GANJARAN', claim_btn: 'TUNTUT KE BAKI', claimed: 'DITERIMA',
       win_kicker_normal: 'BAYARAN NEON', win_kicker_jackpot: 'JACKPOT KUANTUM', win_title_normal: 'ANDA MENANG', win_title_jackpot: 'JACKPOT', win_desc: 'Padan {n} simbol {sym}! +{amt} {cur}',
+      no_win_kicker: 'TIADA TUAH KALI INI', no_win_title: 'TIADA KEMENANGAN', no_win_desc: 'Kelima-lima simbol berbeza. Sila cuba lagi!', continue_btn: 'TERUSKAN',
       extract_kicker: 'PENGELUARAN', extract_title: 'TARIK', extract_label: 'MASUKKAN ALAMAT DOMPET ANDA:', extract_label_usdt: 'MASUKKAN ALAMAT USDT TRC20 ANDA:', extract_label_btc: 'MASUKKAN ALAMAT BTC ANDA:', extract_label_eth: 'MASUKKAN ALAMAT ETH ANDA:', extract_label_doge: 'MASUKKAN ALAMAT DOGE ANDA:', extract_label_trx: 'MASUKKAN ALAMAT TRX ANDA:', extract_label_sol: 'MASUKKAN ALAMAT SOL ANDA:', submit_withdraw: 'HANTAR PENGELUARAN',
       invalid_addr: 'Alamat dompet tidak sah. Sila semak dan cuba lagi.',
       invalid_addr_usdt: 'Alamat USDT mesti bermula dengan T dan merupakan alamat TRC20 34 aksara yang sah.',
@@ -290,9 +307,10 @@
       limit_reached: 'Had pengeluaran harian dicapai. Sila kembali esok.',
       safari_alert_body: 'Supaya permainan berfungsi dengan baik, ketik "OK" untuk menyalin pautan, kemudian buka Safari dan tampal.', safari_alert_copied: 'Pautan disalin! Buka Safari dan tampal.', copy_fail_prompt: 'Gagal menyalin, sila salin secara manual:'
     },
-    nl: { howto_title: 'Hoe te Spelen · Beschrijving', howto_p1: '<span class="highlight-cyan">Draai de 5 rollen</span> om crypto-symbolen te matchen. Je krijgt <em>3 gratis spins</em> om te starten — geen storting nodig!', howto_p2: 'Match <em>2+ identieke symbolen</em> op de middelste payline om te winnen. Win tot <em>10,000 USDT</em> voor 5 dezelfde!', howto_p3: 'Na je spins, claim winsten naar je saldo en <span class="highlight-cyan">extraheer beloningen</span>.', banner_kicker: 'WIN TOT', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Draai 3 keer om je startsaldo te ontgrendelen. <em>Geen storting nodig!</em>', spin_btn: 'NU DRAAIEN', spins_left: 'RESTERENDE GRATIS SPINS:', rolling_title: '⛓ RECENTE OPNAMES',
+    nl: { howto_title: 'Hoe te Spelen · Beschrijving', howto_p1: '<span class="highlight-cyan">Draai de 5 rollen</span> om crypto-symbolen te matchen. Je krijgt <em>3 gratis spins</em> om te starten — geen storting nodig!', howto_p2: 'Match <em>2+ identieke symbolen</em> op de middelste payline om te winnen. Win tot <em>10,000</em> voor 5 dezelfde!', howto_p3: 'Na je spins, claim winsten naar je saldo en <span class="highlight-cyan">extraheer beloningen</span>.', banner_kicker: 'WIN TOT', banner_amt: '10,000 USDT', banner_end: 'GRATIS!', banner_sub: 'Draai 3 keer om je startsaldo te ontgrendelen. <em>Geen storting nodig!</em>', spin_btn: 'NU DRAAIEN', spins_left: 'RESTERENDE GRATIS SPINS:', rolling_title: '⛓ RECENTE OPNAMES',
       spinning_btn: 'DRAAIT...', extract_btn: 'BELONINGEN EXTRAHEREN', claim_btn: 'CLAIM NAAR SALDO', claimed: 'GEÏNCASSEERD',
       win_kicker_normal: 'NEON UITBETALING', win_kicker_jackpot: 'QUANTUM JACKPOT', win_title_normal: 'JE WINT', win_title_jackpot: 'JACKPOT', win_desc: '{n} {sym} symbolen gematcht! +{amt} {cur}',
+      no_win_kicker: 'DEZE KEER GEEN GELUK', no_win_title: 'GEEN WINST', no_win_desc: 'Alle 5 symbolen zijn verschillend. Probeer het opnieuw!', continue_btn: 'DOORGAAN',
       extract_kicker: 'OPNAME', extract_title: 'EXTRAHEREN', extract_label: 'VOER UW WALLET-ADRES IN:', extract_label_usdt: 'VOER UW USDT TRC20-ADRES IN:', extract_label_btc: 'VOER UW BTC-ADRES IN:', extract_label_eth: 'VOER UW ETH-ADRES IN:', extract_label_doge: 'VOER UW DOGE-ADRES IN:', extract_label_trx: 'VOER UW TRX-ADRES IN:', extract_label_sol: 'VOER UW SOL-ADRES IN:', submit_withdraw: 'OPNAME VERZENDEN',
       invalid_addr: 'Ongeldig wallet-adres. Controleer en probeer opnieuw.',
       invalid_addr_usdt: 'USDT-adres moet beginnen met T en een geldig 34-tekens TRC20-adres zijn.',
@@ -307,9 +325,10 @@
       limit_reached: 'Dagelijkse opnamelimiet bereikt. Kom morgen terug.',
       safari_alert_body: 'Om het spel goed te laten werken, tikt u op "OK" om de link te kopiëren, opent u vervolgens Safari en plakt u deze.', safari_alert_copied: 'Link gekopieerd! Open Safari en plak.', copy_fail_prompt: 'Kopiëren mislukt, kopieer handmatig:'
     },
-    pl: { howto_title: 'Jak Grać · Opis', howto_p1: '<span class="highlight-cyan">Obracaj 5 bębnów</span>, aby dopasować symbole krypto. Masz <em>3 darmowe obroty</em> na start — bez depozytu!', howto_p2: 'Dopasuj <em>2+ identyczne symbole</em> na środkowej linii wypłat, aby wygrać. Wygraj do <em>10,000 USDT</em> za 5 takich samych!', howto_p3: 'Po obrotach odbierz wygrane na saldo, następnie <span class="highlight-cyan">wypłać nagrody</span>.', banner_kicker: 'WYGRAJ DO', banner_amt: '10,000 USDT', banner_end: 'ZA DARMO!', banner_sub: 'Obracaj 3 razy, aby odblokować saldo startowe. <em>Bez depozytu!</em>', spin_btn: 'OBRACAJ TERAZ', spins_left: 'POZOSTAŁE DARMOWE OBROTY:', rolling_title: '⛓ OSTATNIE WYPŁATY',
+    pl: { howto_title: 'Jak Grać · Opis', howto_p1: '<span class="highlight-cyan">Obracaj 5 bębnów</span>, aby dopasować symbole krypto. Masz <em>3 darmowe obroty</em> na start — bez depozytu!', howto_p2: 'Dopasuj <em>2+ identyczne symbole</em> na środkowej linii wypłat, aby wygrać. Wygraj do <em>10,000</em> za 5 takich samych!', howto_p3: 'Po obrotach odbierz wygrane na saldo, następnie <span class="highlight-cyan">wypłać nagrody</span>.', banner_kicker: 'WYGRAJ DO', banner_amt: '10,000 USDT', banner_end: 'ZA DARMO!', banner_sub: 'Obracaj 3 razy, aby odblokować saldo startowe. <em>Bez depozytu!</em>', spin_btn: 'OBRACAJ TERAZ', spins_left: 'POZOSTAŁE DARMOWE OBROTY:', rolling_title: '⛓ OSTATNIE WYPŁATY',
       spinning_btn: 'OBRACANIE...', extract_btn: 'WYCOFAJ NAGRODY', claim_btn: 'ODBIERZ NA SALDO', claimed: 'ODEBRANE',
       win_kicker_normal: 'WYPŁATA NEON', win_kicker_jackpot: 'JACKPOT KWANTOWY', win_title_normal: 'WYGRAŁEŚ', win_title_jackpot: 'JACKPOT', win_desc: 'Dopasowano {n} symboli {sym}! +{amt} {cur}',
+      no_win_kicker: 'TYM RAZEM BEZ SZCZĘŚCIA', no_win_title: 'BRAK WYGRANEJ', no_win_desc: 'Wszystkie 5 symboli są różne. Spróbuj ponownie!', continue_btn: 'KONTYNUUJ',
       extract_kicker: 'WYPŁATA', extract_title: 'WYCOFAJ', extract_label: 'WPROWADŹ ADRES SWOJEGO PORTFELA:', extract_label_usdt: 'WPROWADŹ SWÓJ ADRES USDT TRC20:', extract_label_btc: 'WPROWADŹ SWÓJ ADRES BTC:', extract_label_eth: 'WPROWADŹ SWÓJ ADRES ETH:', extract_label_doge: 'WPROWADŹ SWÓJ ADRES DOGE:', extract_label_trx: 'WPROWADŹ SWÓJ ADRES TRX:', extract_label_sol: 'WPROWADŹ SWÓJ ADRES SOL:', submit_withdraw: 'WYŚLIJ WYPŁATĘ',
       invalid_addr: 'Nieprawidłowy adres portfela. Sprawdź i spróbuj ponownie.',
       invalid_addr_usdt: 'Adres USDT musi zaczynać się od T i być prawidłowym 34-znakowym adresem TRC20.',
@@ -334,12 +353,10 @@
     return (trans && trans[key]) || (TRANSLATIONS.en && TRANSLATIONS.en[key]) || key;
   }
 
-  // 当前币种
   function getCur(){
     return (window.__GAME_CONFIG && window.__GAME_CONFIG.currency) || 'USDT';
   }
 
-  // 按币种更新提取弹窗 label 和 placeholder
   window.__updateExtractLabel = function(){
     const cur = getCur();
     const key = 'extract_label_' + cur.toLowerCase();
@@ -355,7 +372,6 @@
     }
   };
 
-  // 按币种更新 banner_amt（Jackpot 数字）—— 动态替换 "10,000 USDT"
   function getAmountStr(){
     const cur = getCur();
     const r5 = (window.__GAME_CONFIG && window.__GAME_CONFIG.rewards && window.__GAME_CONFIG.rewards[5]) || 0;
@@ -365,9 +381,8 @@
 
   function updateModalTexts(trans) {
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    // 只在初始时设置，避免覆盖动态内容
     set('claimBtn', trans.claim_btn);
-    set('winKicker', trans.win_kicker_normal);
-    set('winTitle', trans.win_title_normal);
     set('extractKickerText', trans.extract_kicker);
     set('extractTitle', trans.extract_title);
     if (typeof window.__updateExtractLabel === 'function') window.__updateExtractLabel();
@@ -393,36 +408,23 @@
     window.__currentLang = code;
 
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
-    // ★ 动态金额字符串
     const { fmt5, amtStr } = getAmountStr();
 
-    // 顶部说明
     set('howtoTitleText', trans.howto_title);
     const h1 = document.getElementById('howtoP1'); if (h1) h1.innerHTML = trans.howto_p1;
-    // howto_p2 里的 "10,000 USDT" 动态替换
     const h2 = document.getElementById('howtoP2');
-    if (h2) {
-      h2.innerHTML = trans.howto_p2
-        .replace(/10,000\s+USDT/g, amtStr)
-        .replace(/10,000/g, fmt5);
-    }
+    if (h2) h2.innerHTML = trans.howto_p2.replace(/10,000\s+USDT/g, amtStr).replace(/10,000/g, fmt5);
     const h3 = document.getElementById('howtoP3'); if (h3) h3.innerHTML = trans.howto_p3;
 
-    // Banner
     set('bannerKicker', trans.banner_kicker);
-    // banner_amt 里的 "10,000 USDT" 动态替换
     const bannerAmtEl = document.getElementById('bannerAmt');
     if (bannerAmtEl) {
-      bannerAmtEl.textContent = trans.banner_amt
-        .replace(/10,000\s+USDT/g, amtStr)
-        .replace(/10,000/g, fmt5);
+      bannerAmtEl.textContent = trans.banner_amt.replace(/10,000\s+USDT/g, amtStr).replace(/10,000/g, fmt5);
     }
     set('bannerEnd', trans.banner_end);
     const sub = document.getElementById('bannerSub'); if (sub) sub.innerHTML = trans.banner_sub;
     set('rollingTitleText', trans.rolling_title);
 
-    // 旋转按钮
     if (typeof window.__refreshSpinBtn === 'function') {
       window.__refreshSpinBtn();
     } else {
@@ -433,7 +435,6 @@
       }
     }
 
-    // 剩余次数
     const spinsLeftDiv = document.getElementById('spinsLeftDiv');
     if (spinsLeftDiv) {
       const strong = spinsLeftDiv.querySelector('strong');
@@ -443,7 +444,6 @@
 
     updateModalTexts(trans);
 
-    // 记录弹窗如果打开着，重新渲染
     const mrModal = document.getElementById('myRecordsModal');
     if (mrModal && mrModal.classList.contains('open') && window.__reloadMyRecords) {
       window.__reloadMyRecords();
