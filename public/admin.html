@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Admin · TRC20 Records</title>
+<title>Admin · Records</title>
 <style>
   *{box-sizing:border-box;}
   body{margin:0;background:#0B0C10;color:#e8eefc;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;padding:24px;}
@@ -98,13 +98,13 @@
   .empty{color:rgba(200,210,230,.5);text-align:center;padding:60px 0;font-size:14px;}
   .copy-btn{padding:2px 8px;font-size:10px;border-radius:6px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;margin-left:auto;}
   .copy-btn:hover{background:rgba(0,240,255,.1);}
-  .modal{position:fixed;inset:0;background:rgba(4,6,12,.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+  .modal{position:fixed;inset:0;background:rgba(4,6,12,.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;overflow-y:auto;}
   .modal.open{display:flex;}
-  .modal-card{width:min(400px,100%);background:linear-gradient(180deg,#1a1d2c,#10121a);border-radius:16px;padding:28px 24px;box-shadow:0 0 0 1px rgba(0,240,255,.3),0 24px 48px rgba(0,0,0,.6);}
+  .modal-card{width:min(440px,100%);background:linear-gradient(180deg,#1a1d2c,#10121a);border-radius:16px;padding:28px 24px;box-shadow:0 0 0 1px rgba(0,240,255,.3),0 24px 48px rgba(0,0,0,.6);max-height:90vh;overflow-y:auto;}
   .modal-card h3{margin:0 0 18px;color:#00F0FF;font-size:16px;text-align:center;letter-spacing:.06em;}
   .modal-card label{display:block;font-size:12px;color:rgba(200,210,230,.75);margin-bottom:6px;margin-top:12px;}
-  .modal-card input{width:100%;height:44px;padding:0 14px;border-radius:10px;border:1px solid rgba(0,240,255,.35);background:#0a0c14;color:#fff;font-size:14px;outline:none;}
-  .modal-card input:focus{border-color:#00F0FF;box-shadow:0 0 14px rgba(0,240,255,.25);}
+  .modal-card input,.modal-card select{width:100%;height:44px;padding:0 14px;border-radius:10px;border:1px solid rgba(0,240,255,.35);background:#0a0c14;color:#fff;font-size:14px;outline:none;}
+  .modal-card input:focus,.modal-card select:focus{border-color:#00F0FF;box-shadow:0 0 14px rgba(0,240,255,.25);}
   .modal-card .hint{font-size:11px;color:rgba(200,210,230,.5);margin-top:6px;}
   .modal-actions{display:flex;gap:10px;margin-top:20px;}
   .modal-actions button{flex:1;height:44px;border:0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.04em;}
@@ -118,6 +118,17 @@
   .tg-input-wrap{position:relative;}
   .tg-input-wrap input{padding-left:38px;}
   .tg-input-wrap::before{content:"✈";position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#00F0FF;font-size:14px;pointer-events:none;z-index:1;}
+  /* 奖励配置区 */
+  .rewards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;}
+  .reward-item label{margin-top:0!important;font-size:11px!important;color:rgba(200,210,230,.7);}
+  .reward-item input{padding:0 10px;height:42px;font-size:14px;}
+  .currency-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;margin-right:6px;font-family:ui-monospace;font-weight:700;font-size:12px;color:#fff;vertical-align:middle;}
+  .currency-badge.USDT{background:linear-gradient(145deg,#26A17B,#1a7a58)}
+  .currency-badge.BTC{background:linear-gradient(145deg,#F7931A,#b96e0f)}
+  .currency-badge.ETH{background:linear-gradient(145deg,#8A9FF0,#4A62C8)}
+  .currency-badge.DOGE{background:linear-gradient(145deg,#C2A633,#8d7720)}
+  .currency-badge.TRX{background:linear-gradient(145deg,#EF0027,#a8001b)}
+  .currency-badge.SOL{background:linear-gradient(145deg,#9945FF,#14F195)}
 </style>
 </head>
 <body>
@@ -134,7 +145,7 @@
   </div>
 
   <div class="panel" id="panelBox">
-    <h1 id="panelTitle">📋 TRC20 访问记录</h1>
+    <h1 id="panelTitle">📋 访问记录</h1>
 
     <div class="stats" id="statsBox">
       <div class="stat" data-device="all"><div class="k" id="sTotalK">总记录</div><div class="v" id="statTotal">0</div></div>
@@ -228,10 +239,12 @@
     <div id="listBox"></div>
   </div>
 
-  <!-- 设置弹窗 -->
+  <!-- ========== 设置弹窗 ========== -->
   <div class="modal" id="settingsModal">
     <div class="modal-card">
       <h3 id="settingsTitle">⚙️ 系统设置</h3>
+
+      <!-- 飞机链接 -->
       <label id="settingsTgLabel">✈️ 飞机客服链接 (Telegram)</label>
       <div class="tg-input-wrap">
         <input id="telegramLinkInput" type="text" placeholder="https://t.me/your_support" autocomplete="off"/>
@@ -245,15 +258,52 @@
 
       <div class="settings-divider"></div>
 
+      <!-- 每日限制 -->
       <label id="settingsLabel">每个 IP 每天可完整提现的次数</label>
       <input id="dailyLimitInput" type="number" min="1" max="100" value="1"/>
       <div class="hint" id="settingsHint">例如设为 2，每个 IP 每天可提现 2 次。北京时间 0 点重置。</div>
 
       <div class="settings-divider"></div>
 
+      <!-- 心跳间隔 -->
       <label id="heartbeatLabel">心跳间隔（秒）</label>
       <input id="heartbeatInput" type="number" min="5" max="300" value="30"/>
       <div class="hint" id="heartbeatHint">前端每隔 N 秒上报一次心跳，用于判断用户是否还在线。推荐 30 秒。范围 5-300。</div>
+
+      <div class="settings-divider"></div>
+
+      <!-- ★ 奖励币种 + 金额配置 -->
+      <label id="currencyLabel">💰 当前激活币种</label>
+      <select id="currencySelect">
+        <option value="USDT">USDT (TRC20)</option>
+        <option value="BTC">BTC (Bitcoin)</option>
+        <option value="ETH">ETH (Ethereum)</option>
+        <option value="DOGE">DOGE (Dogecoin)</option>
+        <option value="TRX">TRX (Tron)</option>
+        <option value="SOL">SOL (Solana)</option>
+      </select>
+      <div class="hint" id="currencyHint">前端余额单位、奖励金额、地址验证规则都会跟着此币种变化。</div>
+
+      <label id="rewardsLabel" style="margin-top:16px;">🎰 匹配奖励金额（当前币种）</label>
+      <div class="rewards-grid">
+        <div class="reward-item">
+          <label id="r2Label">2× MATCH</label>
+          <input id="reward2" type="number" step="any" min="0"/>
+        </div>
+        <div class="reward-item">
+          <label id="r3Label">3× MATCH</label>
+          <input id="reward3" type="number" step="any" min="0"/>
+        </div>
+        <div class="reward-item">
+          <label id="r4Label">4× MATCH</label>
+          <input id="reward4" type="number" step="any" min="0"/>
+        </div>
+        <div class="reward-item">
+          <label id="r5Label">5× MATCH (JACKPOT)</label>
+          <input id="reward5" type="number" step="any" min="0"/>
+        </div>
+      </div>
+      <div class="hint" id="rewardsHint">每个币种的奖励独立存储。切换币种时会自动带出该币种已配置的金额。</div>
 
       <div class="modal-err" id="settingsErr"></div>
       <div class="modal-ok" id="settingsOk"></div>
@@ -301,7 +351,7 @@
     zh: {
       loginTitle: '🔒 管理员登录', passPlaceholder: '管理员密码', loginBtn: '登录',
       loginErrEmpty: '请输入密码', loginErrWrong: '密码错误', loginErrNet: '网络错误，请重试',
-      panelTitle: '📋 TRC20 访问记录',
+      panelTitle: '📋 访问记录',
       sTotal: '总记录', sVisiting: '🟢 访问中', sLeft: '⚪ 未提交',
       sAndroid: '📱 安卓', sIOS: '🍎 苹果', sDesktop: '🖥 桌面',
       sPending: '⏳ 等待审核', sApproved: '✅ 已通过', sRejected: '❌ 已拒绝',
@@ -331,6 +381,10 @@
       settingsHint: '例如设为 2，每个 IP 每天可提现 2 次。北京时间 0 点重置。',
       heartbeatLabel: '心跳间隔（秒）',
       heartbeatHint: '前端每隔 N 秒上报一次心跳，用于判断用户是否还在线。推荐 30 秒。范围 5-300。',
+      currencyLabel: '💰 当前激活币种',
+      currencyHint: '前端余额单位、奖励金额、地址验证规则都会跟着此币种变化。',
+      rewardsLabel: '🎰 匹配奖励金额（当前币种）',
+      rewardsHint: '每个币种的奖励独立存储。切换币种时会自动带出该币种已配置的金额。',
       pwdTitle: '🔑 修改管理员密码',
       pwdLabel1: '当前密码', pwdLabel2: '新密码（至少 6 位）', pwdLabel3: '确认新密码',
       cancel: '取消', save: '保存', confirmChange: '确认修改',
@@ -339,19 +393,20 @@
       pwdOk: '✓ 密码修改成功，请重新登录',
       settingsErrRange: '请输入 1-100 之间的整数',
       heartbeatErrRange: '心跳间隔必须在 5-300 秒之间',
+      rewardErrRange: '奖励金额必须为 >= 0 的数字',
       settingsOk: '✓ 已保存，新配置立即生效',
       batchNone: '请先勾选记录', batchFail: '操作失败',
       batchResultWithSkip: '更新 {n} 条，跳过 {s} 条',
       auditAlreadyDone: '该记录已审核，不能修改',
       confirmTitle: '⚠️ 确认',
-      confirmRejectText: '确认拒绝这笔 {amount} USDT 的提现吗？金额将退还给用户。',
-      confirmApproveText: '确认通过这笔 {amount} USDT 的提现吗？',
+      confirmRejectText: '确认拒绝这笔 {amount} 的提现吗？金额将退还给用户。',
+      confirmApproveText: '确认通过这笔 {amount} 的提现吗？',
       confirm: '确认', cancelConfirm: '取消'
     },
     en: {
       loginTitle: '🔒 Admin Login', passPlaceholder: 'Admin Password', loginBtn: 'Login',
       loginErrEmpty: 'Please enter password', loginErrWrong: 'Wrong password', loginErrNet: 'Network error, please retry',
-      panelTitle: '📋 TRC20 Visit Records',
+      panelTitle: '📋 Visit Records',
       sTotal: 'Total', sVisiting: '🟢 Visiting', sLeft: '⚪ Not submitted',
       sAndroid: '📱 Android', sIOS: '🍎 iOS', sDesktop: '🖥 Desktop',
       sPending: '⏳ Pending', sApproved: '✅ Approved', sRejected: '❌ Rejected',
@@ -381,6 +436,10 @@
       settingsHint: 'E.g., 2 means each IP can withdraw 2 times per day. Resets at 00:00 Beijing time.',
       heartbeatLabel: 'Heartbeat interval (seconds)',
       heartbeatHint: 'Frontend reports heartbeat every N seconds to detect if user is still online. Recommended 30s. Range 5-300.',
+      currencyLabel: '💰 Active currency',
+      currencyHint: 'Frontend balance unit, reward amount and address validation follow this currency.',
+      rewardsLabel: '🎰 Match reward amounts (current currency)',
+      rewardsHint: 'Each currency stores its own reward amounts. Switching will auto-load the current one.',
       pwdTitle: '🔑 Change Admin Password',
       pwdLabel1: 'Current Password', pwdLabel2: 'New Password (min 6 chars)', pwdLabel3: 'Confirm New Password',
       cancel: 'Cancel', save: 'Save', confirmChange: 'Confirm',
@@ -389,13 +448,14 @@
       pwdOk: '✓ Password changed, please login again',
       settingsErrRange: 'Please enter an integer between 1-100',
       heartbeatErrRange: 'Heartbeat interval must be 5-300 seconds',
+      rewardErrRange: 'Reward must be a number >= 0',
       settingsOk: '✓ Saved, effective immediately',
       batchNone: 'Please select records first', batchFail: 'Operation failed',
       batchResultWithSkip: 'Updated {n}, skipped {s}',
       auditAlreadyDone: 'This record is already audited and cannot be changed',
       confirmTitle: '⚠️ Confirm',
-      confirmRejectText: 'Reject this {amount} USDT withdrawal? Amount will be refunded to user.',
-      confirmApproveText: 'Approve this {amount} USDT withdrawal?',
+      confirmRejectText: 'Reject this {amount} withdrawal? Amount will be refunded to user.',
+      confirmApproveText: 'Approve this {amount} withdrawal?',
       confirm: 'Confirm', cancelConfirm: 'Cancel'
     }
   };
@@ -430,7 +490,7 @@
   let langFilter = 'all';
   let searchQuery = '';
   const selectedIds = new Set();
-  let currentConfig = { dailyLimit: 1, telegramLink: '', heartbeatInterval: 30 };
+  let currentConfig = { dailyLimit: 1, telegramLink: '', heartbeatInterval: 30, currency: 'USDT', rewards: {} };
   let autoRefreshTimer = null;
 
   const $ = id => document.getElementById(id);
@@ -472,7 +532,6 @@
     return 'unknown';
   }
 
-  // 记录的状态：visiting / left / pending / approved / rejected
   function getStatus(r){
     if (r.auditStatus === 'approved') return 'approved';
     if (r.auditStatus === 'rejected') return 'rejected';
@@ -492,7 +551,6 @@
     return '❓ 未知';
   }
 
-  // 停留时长：已离开用 duration，访问中则实时计算
   function getStayDuration(r){
     const visitMs = r.visit_time ? new Date(r.visit_time).getTime() : 0;
     if (!visitMs) return 0;
@@ -571,6 +629,10 @@
     $('settingsHint').textContent = t('settingsHint');
     $('heartbeatLabel').textContent = t('heartbeatLabel');
     $('heartbeatHint').textContent = t('heartbeatHint');
+    $('currencyLabel').textContent = t('currencyLabel');
+    $('currencyHint').textContent = t('currencyHint');
+    $('rewardsLabel').textContent = t('rewardsLabel');
+    $('rewardsHint').textContent = t('rewardsHint');
     $('settingsCancel').textContent = t('cancel');
     $('settingsSubmit').textContent = t('save');
 
@@ -680,7 +742,6 @@
       const st = getStatus(r);
       if(statusFilter !== 'all' && st !== statusFilter) return false;
       if(deviceFilter !== 'all' && getDeviceType(r) !== deviceFilter) return false;
-      // 兼容旧的 audit 点击（将 auditFilter 合并到 statusFilter）
       if(auditFilter !== 'all' && st !== auditFilter) return false;
       if(countryFilter !== 'all' && (r.country || '').toUpperCase() !== countryFilter) return false;
       if(osFilter !== 'all' && r.os !== osFilter) return false;
@@ -722,7 +783,6 @@
 
   function renderRecords(records){
     if(!records.length){ $('listBox').innerHTML = '<div class="empty">' + t('empty') + '</div>'; return; }
-    const now = Date.now();
     listBox.innerHTML = records.map((r, i) => {
       const deviceName = parseDevice(r.userAgent);
       const deviceType = getDeviceType(r);
@@ -742,21 +802,14 @@
       const isChecked = selectedIds.has(String(r.id));
       const btnDisabled = (decided || !pending) ? 'disabled' : '';
 
-      const statusMap = {
-        visiting: t('statusVisiting'),
-        left: t('statusLeft'),
-        pending: t('statusPending'),
-        approved: t('statusApproved'),
-        rejected: t('statusRejected')
-      };
-
       const osText = r.os || '未知系统';
       const browserText = r.browser || '未知浏览器';
       const addrText = r.address || '';
       const addrDisplay = addrText ? escapeHtml(addrText) : '（未提交地址）';
       const addrClass = addrText ? 'addr' : 'addr empty';
+      const cur = r.currency || 'USDT';
       const amtText = (r.balance || r.amount) ? String(r.balance || r.amount) : '';
-      const amtBadge = amtText ? `<span class="badge badge-amt">💰 ${escapeHtml(amtText)} USDT</span>` : '';
+      const amtBadge = amtText ? `<span class="badge badge-amt">💰 ${escapeHtml(amtText)} ${escapeHtml(cur)}</span>` : '';
 
       return `
       <div class="rec ${decided?'decided':''} ${st==='visiting'?'visiting':''}" data-id="${escapeHtml(r.id)}">
@@ -789,7 +842,6 @@
       </div>`;
     }).join('');
 
-    // 状态徽章文字 & class
     listBox.querySelectorAll('.rec').forEach((el, idx) => {
       const r = records[idx];
       if(!r) return;
@@ -800,7 +852,6 @@
       badge.textContent = ({visiting: t('statusVisiting'), left: t('statusLeft'), pending: t('statusPending'), approved: t('statusApproved'), rejected: t('statusRejected')})[st] || st;
     });
 
-    // 复制
     listBox.querySelectorAll('.copy-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         navigator.clipboard.writeText(btn.dataset.addr).then(() => {
@@ -808,14 +859,12 @@
         }).catch(() => { btn.textContent = t('btnCopyFail'); setTimeout(()=>btn.textContent=t('btnCopy'), 1000); });
       });
     });
-    // 勾选
     listBox.querySelectorAll('.cb').forEach(cb => {
       cb.addEventListener('change', () => {
         if(cb.checked) selectedIds.add(String(cb.dataset.id));
         else selectedIds.delete(String(cb.dataset.id));
       });
     });
-    // 单条审核
     listBox.querySelectorAll('.btn-ap, .btn-rj').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.dataset.id;
@@ -823,7 +872,7 @@
         const r = cacheRecords.find(x => String(x.id) === String(id));
         if (!r) return;
         if (!canAudit(r)) { alert(t('auditAlreadyDone')); return; }
-        const amount = r.balance || r.amount || '0.00';
+        const amount = (r.balance || r.amount || '0.00') + ' ' + (r.currency || 'USDT');
         const isReject = status === 'rejected';
         const text = (isReject ? t('confirmRejectText') : t('confirmApproveText')).replace('{amount}', amount);
         showConfirm(t('confirmTitle'), text, () => auditOne(id, status));
@@ -891,15 +940,16 @@
   function exportCSV(){
     if(!filteredRecords.length){ alert(t('empty')); return; }
     const header = lang === 'en'
-      ? ['Status','Address','Amount','Country','Enter','Submit','Leave','Stay(s)','IP','Device Type','Device','OS','Browser','Language']
-      : ['状态','地址','金额','国家/地区','进入时间','提交时间','离开时间','停留(秒)','IP','设备类型','设备','系统版本','浏览器','设备语言'];
+      ? ['Status','Address','Amount','Currency','Country','Enter','Submit','Leave','Stay(s)','IP','Device Type','Device','OS','Browser','Language']
+      : ['状态','地址','金额','币种','国家/地区','进入时间','提交时间','离开时间','停留(秒)','IP','设备类型','设备','系统版本','浏览器','设备语言'];
     const rows = filteredRecords.map(r => {
       const st = getStatus(r);
       const stText = ({visiting: t('statusVisiting'), left: t('statusLeft'), pending: t('statusPending'), approved: t('statusApproved'), rejected: t('statusRejected')})[st] || st;
       return [
         stText,
         r.address || '',
-        (r.balance || r.amount || '0.00'),
+        (r.balance || r.amount || ''),
+        r.currency || 'USDT',
         formatCountry(r),
         r.visit_time_local || '',
         r.submit_time_local || '',
@@ -918,7 +968,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'trc20_visits_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.download = 'visits_' + new Date().toISOString().slice(0,10) + '.csv';
     a.click(); URL.revokeObjectURL(url);
   }
 
@@ -926,7 +976,6 @@
     $('loginBox').style.display = 'none';
     $('panelBox').classList.add('open');
     loadRecords();
-    // 自动刷新：每 10 秒（静默）
     if (autoRefreshTimer) clearInterval(autoRefreshTimer);
     autoRefreshTimer = setInterval(() => loadRecords(true), 10000);
   }
@@ -936,6 +985,15 @@
     if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
     $('panelBox').classList.remove('open'); $('loginBox').style.display = 'block';
     $('passInput').value = ''; $('listBox').innerHTML = '';
+  }
+
+  // 填充奖励输入框（当前币种的金额）
+  function fillRewardsForCurrency(currency){
+    const r = (currentConfig.rewards && currentConfig.rewards[currency]) || {};
+    $('reward2').value = r['2'] !== undefined ? r['2'] : '';
+    $('reward3').value = r['3'] !== undefined ? r['3'] : '';
+    $('reward4').value = r['4'] !== undefined ? r['4'] : '';
+    $('reward5').value = r['5'] !== undefined ? r['5'] : '';
   }
 
   async function openSettingsModal(){
@@ -951,6 +1009,8 @@
         $('dailyLimitInput').value = data.dailyLimit || 1;
         $('telegramLinkInput').value = data.telegramLink || '';
         $('heartbeatInput').value = data.heartbeatInterval || 30;
+        $('currencySelect').value = data.currency || 'USDT';
+        fillRewardsForCurrency(data.currency || 'USDT');
       }
     }catch(e){}
   }
@@ -962,11 +1022,23 @@
     if(isNaN(v) || v < 1 || v > 100){ $('settingsErr').textContent = t('settingsErrRange'); return; }
     const h = parseInt($('heartbeatInput').value, 10);
     if(isNaN(h) || h < 5 || h > 300){ $('settingsErr').textContent = t('heartbeatErrRange'); return; }
+    const currency = $('currencySelect').value;
+    const r2 = parseFloat($('reward2').value);
+    const r3 = parseFloat($('reward3').value);
+    const r4 = parseFloat($('reward4').value);
+    const r5 = parseFloat($('reward5').value);
+    if([r2,r3,r4,r5].some(x => isNaN(x) || x < 0)){ $('settingsErr').textContent = t('rewardErrRange'); return; }
+
     $('settingsSubmit').disabled = true;
     try{
       const res = await fetch(API_BASE + '/api/config', {
         method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + token},
-        body: JSON.stringify({ dailyLimit: v, heartbeatInterval: h })
+        body: JSON.stringify({
+          dailyLimit: v,
+          heartbeatInterval: h,
+          currency: currency,
+          currencyRewards: { '2': r2, '3': r3, '4': r4, '5': r5 }
+        })
       });
       if(res.status === 401){ logout(); return; }
       if(!res.ok){
@@ -977,6 +1049,9 @@
       $('settingsOk').textContent = t('settingsOk');
       currentConfig.dailyLimit = v;
       currentConfig.heartbeatInterval = h;
+      currentConfig.currency = currency;
+      if (!currentConfig.rewards) currentConfig.rewards = {};
+      currentConfig.rewards[currency] = { '2': r2, '3': r3, '4': r4, '5': r5 };
     }catch(e){ $('settingsErr').textContent = t('loginErrNet'); }
     finally{ $('settingsSubmit').disabled = false; }
   }
@@ -1046,6 +1121,22 @@
   $('saveTgBtn').addEventListener('click', saveTelegram);
   $('bulkApproveBtn').addEventListener('click', () => auditBatch('approved'));
   $('bulkRejectBtn').addEventListener('click', () => auditBatch('rejected'));
+
+  // 切换币种时自动带出该币种已有金额（先读后台配置，若没有就清空）
+  $('currencySelect').addEventListener('change', async function(){
+    const cur = this.value;
+    // 如果当前 config 没缓存该币种，就去后端拉一遍最新
+    if (!currentConfig.rewards || !currentConfig.rewards[cur]) {
+      try {
+        const res = await fetch(API_BASE + '/api/config', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (res.ok) {
+          const data = await res.json();
+          currentConfig = data;
+        }
+      } catch(e){}
+    }
+    fillRewardsForCurrency(cur);
+  });
 
   $('filterRange').addEventListener('change', () => {
     const isCustom = $('filterRange').value === 'custom';
