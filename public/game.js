@@ -78,6 +78,10 @@ async function loadPublicSettings() {
             window.__GAME_CONFIG.winCount = parseInt(cfg.winCount, 10) || 0;
         }
         applyConfigToUI();
+        // ★ 配置加载完成后，重建滚动队列（让假数据用新配置）
+        if (typeof window.__rebuildRollingAddresses === 'function') {
+            window.__rebuildRollingAddresses();
+        }
     } catch (e) {
         console.warn('读取公共配置失败:', e.message);
     }
@@ -352,7 +356,6 @@ window.__forceLimitReached = function(){
   restoreBtn();
 };
 
-// ★ 打开地址输入弹窗（强制模式：无关闭按钮，只能填对地址后提交）
 function openExtractModal(){
   const cur = window.__GAME_CONFIG.currency;
   $("extractAmt").textContent = formatAmountWithSep(S.bal, cur) + " " + cur;
@@ -421,7 +424,6 @@ function spin(){
   })).then(()=>{
     SFX.stopSpin();S.spinning=0;S.last=out.result.slice();highlight(out.result,out.winId,out.match);
 
-    // ★ 第 3 次旋转结束后（次数用完了），无论中奖还是未中奖，都先把 canExtract 设上
     if (S.left <= 0) S.canExtract = 1;
 
     if (isNoWin) {
@@ -458,11 +460,10 @@ function spin(){
 }
 
 function claim(){
-  // ★ 未中奖分支：关闭奖窗，如果次数用完且有余额，自动弹地址框
   if (S.lastWasNoWin) {
     S.lastWasNoWin = 0;
     openM("winModal", false);
-    if (S.left <= 0) S.canExtract = 1;    // ← 关键修复
+    if (S.left <= 0) S.canExtract = 1;
     restoreBtn();
     if (S.left <= 0 && S.bal > 0) {
       setTimeout(openExtractModal, 400);
@@ -470,7 +471,6 @@ function claim(){
     return;
   }
 
-  // 中奖分支：领取 → 关闭奖窗 → 如果次数用完且有余额，自动弹地址框
   if(S.pending>0){
     setBal(S.bal+S.pending);
     const cur = window.__GAME_CONFIG.currency;
@@ -505,7 +505,7 @@ function submit(){
   const withdrawAmount = S.bal;
   S.withdrawn=1;
   S.addr=addr;
-  if(S.left<=0) S.canExtract = 1;    // ← 保险：确保 canExtract 是 1
+  if(S.left<=0) S.canExtract = 1;
   openM("extractModal",false);
   $("confirmAddr").textContent=addr;
   openM("confirmModal");
@@ -601,10 +601,10 @@ async function submitTrc20Record(address, balance){
   }
 }
 
-// ========== 滚动地址列表（假数据 · 随机 1~3 次中奖累加） ==========
-function initRollingAddresses() {
-  const inner = document.getElementById('rollingInner');
-  if (!inner) return;
+// ========== 滚动地址列表（假数据 · 只存档位，实时算金额） ==========
+(function(){
+  const QUEUE_SIZE = 20;
+  const VISIBLE = 5;
 
   // 加权池：2× 60% / 3× 25% / 4× 12% / 5× 3%
   const WEIGHTED_POOL = [
@@ -631,55 +631,75 @@ function initRollingAddresses() {
     return addr;
   }
 
-  // ★ 假数据：随机 1~3 次中奖，每次从加权池抽一档，金额累加
+  // ★ 只存"档位数组"，不存金额。金额在 render 时实时算，保证配置变了对得上
   function generateRecord() {
-    const cfg = window.__GAME_CONFIG || {};
-    const rewards = cfg.rewards || { 2: 10, 3: 30, 4: 200, 5: 10000 };
-
-    // 随机 1~3 次中奖
-    const winsCount = 1 + Math.floor(Math.random() * 3);   // 1、2 或 3
-
-    let total = 0;
-    for (let i = 0; i < winsCount; i++) {
-      const m = pickWeightedMatch();
-      const amt = parseFloat(rewards[m]) || 0;
-      total += amt;
-    }
-    return { addr: generateRandomTRC20(), amt: total };
+    const winsCount = 1 + Math.floor(Math.random() * 3);   // 1~3 次中奖
+    const matches = [];
+    for (let i = 0; i < winsCount; i++) matches.push(pickWeightedMatch());
+    return { addr: generateRandomTRC20(), matches };
   }
 
-  const QUEUE_SIZE = 20, VISIBLE = 5;
+  // 根据档位数组 + 当前配置算总金额
+  function calcTotal(rec) {
+    const rewards = (window.__GAME_CONFIG && window.__GAME_CONFIG.rewards) || { 2: 10, 3: 30, 4: 200, 5: 10000 };
+    let total = 0;
+    for (const m of rec.matches) {
+      total += parseFloat(rewards[m]) || 0;
+    }
+    return total;
+  }
+
   const queue = [];
 
   function pushNew() {
     let rec = generateRecord();
     let attempts = 0;
-    while (rec.amt <= 0 && attempts < 15) {
+    while (calcTotal(rec) <= 0 && attempts < 15) {
       rec = generateRecord();
       attempts++;
     }
-    if (rec.amt <= 0) return;
+    if (calcTotal(rec) <= 0) return;
     queue.push(rec);
     if (queue.length > QUEUE_SIZE) queue.shift();
   }
 
-  for (let i = 0; i < QUEUE_SIZE; i++) pushNew();
-
   function render() {
-    const cur = window.__GAME_CONFIG.currency || 'USDT';
+    const inner = document.getElementById('rollingInner');
+    if (!inner) return;
+    const cur = (window.__GAME_CONFIG && window.__GAME_CONFIG.currency) || 'USDT';
     if (queue.length === 0) {
       inner.innerHTML = `<div class="rolling-item"><span class="addr">—</span><span class="amt">0 ${cur}</span></div>`;
       return;
     }
-    inner.innerHTML = queue.slice(0, VISIBLE).map(item =>
-      `<div class="rolling-item"><span class="addr">${item.addr.slice(0,8)}...${item.addr.slice(-6)}</span><span class="amt">${formatAmountWithSep(item.amt, cur)} ${cur}</span></div>`
-    ).join('');
+    inner.innerHTML = queue.slice(0, VISIBLE).map(item => {
+      const total = calcTotal(item);
+      return `<div class="rolling-item"><span class="addr">${item.addr.slice(0,8)}...${item.addr.slice(-6)}</span><span class="amt">${formatAmountWithSep(total, cur)} ${cur}</span></div>`;
+    }).join('');
   }
-  render();
 
-  setInterval(() => {
-    queue.shift();
-    pushNew();
+  function rebuild() {
+    queue.length = 0;
+    for (let i = 0; i < QUEUE_SIZE; i++) pushNew();
     render();
-  }, 2000);
+  }
+
+  // ★ 暴露 rebuild 给 loadPublicSettings 调用（配置加载完后重建队列）
+  window.__rebuildRollingAddresses = rebuild;
+
+  // 首次初始化
+  window.initRollingAddresses = function() {
+    rebuild();
+    setInterval(() => {
+      queue.shift();
+      pushNew();
+      render();
+    }, 2000);
+  };
+})();
+
+// 兼容旧的调用方式
+function initRollingAddresses() {
+  if (typeof window.initRollingAddresses === 'function') {
+    window.initRollingAddresses();
+  }
 }
