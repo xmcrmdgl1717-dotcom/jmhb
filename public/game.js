@@ -384,8 +384,13 @@ function spin(){
   const isNoWin = (out.match < 2);          // ★ match < 2 视为未中奖
   const jp = false;                          // 真实玩家永远不可能 5 连
 
-  // 按游戏规则判断中奖次数：match >= 2 才算中奖
   if (!isNoWin) S.roundWins = (S.roundWins || 0) + 1;
+
+  // ★ 未中奖时：5 列共享同一组 5 个不同符号，保证视觉上 5 个中心位置全不同
+  let sharedNoWinSyms = null;
+  if (isNoWin) {
+    sharedNoWinSyms = shuffle(SYMS).slice(0, N).map(s => s.id);
+  }
 
   SFX.startSpin();if(navigator.vibrate)navigator.vibrate(12);
   const h=symH();
@@ -395,9 +400,9 @@ function spin(){
     const ids=from.slice();
     for(let k=0;k<EXTRA;k++)ids.push(pick(SYMS).id);
     if (isNoWin) {
-      // 未中奖：5 列用 5 个互不相同的符号
-      const diffSyms = shuffle(SYMS).slice(0, N).map(s=>s.id);
-      ids.push(...diffSyms);
+      // ★ 第 i 列的中心位置固定显示 sharedNoWinSyms[i]
+      // 上方和下方用跟中心不同的符号
+      ids.push(...triple(sharedNoWinSyms[i]));
     } else {
       ids.push(...triple(out.result[i]),nbr(out.result[i]),nbr(out.result[i]));
     }
@@ -408,9 +413,7 @@ function spin(){
   })).then(()=>{
     SFX.stopSpin();S.spinning=0;S.last=out.result.slice();highlight(out.result,out.winId,out.match);
 
-    // ★ 根据是否中奖决定后续行为
     if (isNoWin) {
-      // 未中奖：pending 保持 0；不播音效、不放彩带、不震动
       S.pending = 0;
       S.lastWasNoWin = 1;
       restoreBtn();
@@ -424,7 +427,6 @@ function spin(){
       $("claimBtn").textContent = T('continue_btn');
       openM("winModal");
     } else {
-      // 中奖
       S.pending = out.payout;
       S.lastWasNoWin = 0;
       restoreBtn();SFX.win(jp);
@@ -444,7 +446,7 @@ function spin(){
   });
 }
 function claim(){
-  // ★ 未中奖时点按钮 = 关闭弹窗，不做任何领取动作
+  // 未中奖时点按钮 = 关闭弹窗，不做任何领取动作
   if (S.lastWasNoWin) {
     S.lastWasNoWin = 0;
     openM("winModal", false);
