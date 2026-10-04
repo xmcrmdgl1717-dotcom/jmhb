@@ -291,10 +291,6 @@ function calcPayout(match){
   return parseFloat(window.__GAME_CONFIG.rewards[match]) || 0;
 }
 
-// outcome：根据 forceWin 决定本次是否强制中奖
-// forceWin === false → 强制不中奖（5 个符号全部不同，即 match = 1）
-// forceWin === true  → 强制中奖（2/3/4 连随机）
-// forceWin === null  → 随机（默认行为，一定中奖，match ∈ [2,3,4]）
 function outcome(forceWin){
   if (forceWin === false) {
     const r = shuffle(SYMS).slice(0, N).map(s => s.id);
@@ -381,12 +377,12 @@ function spin(){
   }
 
   const out = outcome(forceWin);
-  const isNoWin = (out.match < 2);          // ★ match < 2 视为未中奖
-  const jp = false;                          // 真实玩家永远不可能 5 连
+  const isNoWin = (out.match < 2);
+  const jp = false;
 
   if (!isNoWin) S.roundWins = (S.roundWins || 0) + 1;
 
-  // ★ 未中奖时：5 列共享同一组 5 个不同符号，保证视觉上 5 个中心位置全不同
+  // ★ 未中奖时：5 列共享同一组 5 个不同符号
   let sharedNoWinSyms = null;
   if (isNoWin) {
     sharedNoWinSyms = shuffle(SYMS).slice(0, N).map(s => s.id);
@@ -400,9 +396,10 @@ function spin(){
     const ids=from.slice();
     for(let k=0;k<EXTRA;k++)ids.push(pick(SYMS).id);
     if (isNoWin) {
-      // ★ 第 i 列的中心位置固定显示 sharedNoWinSyms[i]
-      // 上方和下方用跟中心不同的符号
-      ids.push(...triple(sharedNoWinSyms[i]));
+      // ★ 关键修复：必须 push 5 个（3 个 triple + 2 个额外）
+      // triple(c) = [nbr(c), c, nbr(c)]，所以这 5 个的中心位置（index 1）就是 c = sharedNoWinSyms[i]
+      const c = sharedNoWinSyms[i];
+      ids.push(...triple(c), nbr(c), nbr(c));
     } else {
       ids.push(...triple(out.result[i]),nbr(out.result[i]),nbr(out.result[i]));
     }
@@ -446,7 +443,6 @@ function spin(){
   });
 }
 function claim(){
-  // 未中奖时点按钮 = 关闭弹窗，不做任何领取动作
   if (S.lastWasNoWin) {
     S.lastWasNoWin = 0;
     openM("winModal", false);
@@ -463,7 +459,6 @@ function claim(){
   openM("winModal",false);restoreBtn();
 }
 
-// 地址验证：按当前币种
 function validateAddress(addr, currency) {
     const re = ADDR_VALIDATORS[currency] || ADDR_VALIDATORS.USDT;
     return re.test(addr);
@@ -596,7 +591,6 @@ function initRollingAddresses() {
   const inner = document.getElementById('rollingInner');
   if (!inner) return;
 
-  // 假数据允许出现 5×，加权：2× 60% / 3× 25% / 4× 12% / 5× 3%
   const WEIGHTED_POOL = [
     { match: 2, weight: 60 },
     { match: 3, weight: 25 },
@@ -621,13 +615,11 @@ function initRollingAddresses() {
     return addr;
   }
 
-  // 一条记录 = 一个假用户模拟 3 次旋转的累计提现
   function generateRecord() {
     const cfg = window.__GAME_CONFIG || {};
     const rewards = cfg.rewards || { 2: 10, 3: 30, 4: 200, 5: 10000 };
     const winCount = Math.max(0, Math.min(3, parseInt(cfg.winCount, 10) || 0));
 
-    // 3 次里随机挑 winCount 次中奖
     const positions = [0, 1, 2];
     for (let i = positions.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -650,7 +642,6 @@ function initRollingAddresses() {
   const queue = [];
 
   function pushNew() {
-    // 跳过 0 金额记录
     let rec = generateRecord();
     let attempts = 0;
     while (rec.amt <= 0 && attempts < 15) {
