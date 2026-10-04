@@ -19,11 +19,25 @@ const CONFIG_FILE = path.join(DATA_DIR, 'config.json');
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
+// 默认奖励配置（每个币种独立一套）
+const DEFAULT_REWARDS = {
+    USDT: { 2: 10,      3: 30,      4: 200,      5: 10000 },
+    BTC:  { 2: 0.0001,  3: 0.0003,  4: 0.002,    5: 0.1 },
+    ETH:  { 2: 0.001,   3: 0.003,   4: 0.02,     5: 1 },
+    DOGE: { 2: 100,     3: 300,     4: 2000,     5: 100000 },
+    TRX:  { 2: 100,     3: 300,     4: 2000,     5: 100000 },
+    SOL:  { 2: 0.05,    3: 0.15,    4: 1,        5: 50 }
+};
+
+const VALID_CURRENCIES = ['USDT', 'BTC', 'ETH', 'DOGE', 'TRX', 'SOL'];
+
 const DEFAULT_CONFIG = {
     adminPassword: process.env.ADMIN_PASSWORD || 'admin123456',
     dailyLimit: 1,
     telegramLink: 'https://t.me/your_default_support',
-    heartbeatInterval: 30
+    heartbeatInterval: 30,
+    currency: 'USDT',
+    rewards: JSON.parse(JSON.stringify(DEFAULT_REWARDS))
 };
 
 const readJson = (filePath, defaultVal = {}) => {
@@ -38,8 +52,34 @@ const writeJson = (filePath, data) => {
 
 let config = readJson(CONFIG_FILE, DEFAULT_CONFIG);
 let configChanged = false;
+
+// 补全顶层字段
 for (const key in DEFAULT_CONFIG) {
     if (config[key] === undefined) { config[key] = DEFAULT_CONFIG[key]; configChanged = true; }
+}
+// 补全 rewards 每个币种
+if (!config.rewards || typeof config.rewards !== 'object') {
+    config.rewards = JSON.parse(JSON.stringify(DEFAULT_REWARDS));
+    configChanged = true;
+} else {
+    for (const cur of VALID_CURRENCIES) {
+        if (!config.rewards[cur] || typeof config.rewards[cur] !== 'object') {
+            config.rewards[cur] = JSON.parse(JSON.stringify(DEFAULT_REWARDS[cur]));
+            configChanged = true;
+        } else {
+            for (const k of ['2','3','4','5']) {
+                if (config.rewards[cur][k] === undefined) {
+                    config.rewards[cur][k] = DEFAULT_REWARDS[cur][k];
+                    configChanged = true;
+                }
+            }
+        }
+    }
+}
+// 校验 currency
+if (!VALID_CURRENCIES.includes(config.currency)) {
+    config.currency = 'USDT';
+    configChanged = true;
 }
 if (configChanged) writeJson(CONFIG_FILE, config);
 
@@ -119,7 +159,6 @@ function calcDuration(visitIso, endIso) {
     return Math.round((t2 - t1) / 1000);
 }
 
-// 当天该 IP 已提交次数（只算 pending/approved）
 function countTodaySubmitted(ip) {
     const now = Date.now();
     const bjNow = now + 8 * 3600 * 1000;
@@ -139,13 +178,15 @@ function countTodaySubmitted(ip) {
 // ==================== 公共 API ====================
 
 app.get('/api/public-settings', (req, res) => {
+    const cur = config.currency || 'USDT';
     res.json({
         telegramLink: config.telegramLink || '',
-        heartbeatInterval: Number(config.heartbeatInterval) || 30
+        heartbeatInterval: Number(config.heartbeatInterval) || 30,
+        currency: cur,
+        rewards: config.rewards[cur] || DEFAULT_REWARDS[cur]
     });
 });
 
-// ★ 新增：查询该 IP 今日还能不能玩
 app.get('/api/player-status', (req, res) => {
     const ip = req.ip || req.connection.remoteAddress || '';
     const used = countTodaySubmitted(ip);
@@ -160,7 +201,6 @@ app.get('/api/player-status', (req, res) => {
     });
 });
 
-// 用户进入页面：创建一条新的访问记录
 app.post('/api/visit-start', (req, res) => {
     try {
         const ctx = extractContext(req);
@@ -192,8 +232,9 @@ app.post('/api/visit-start', (req, res) => {
             duration: 0,
 
             address: '',
-            balance: '0.00',
-            amount: '0.00',
+            balance: '0',
+            amount: '0',
+            currency: config.currency || 'USDT',
 
             status: 'visiting',
             auditStatus: null,
@@ -269,8 +310,9 @@ app.post('/api/records', (req, res) => {
         const nowIso = new Date().toISOString();
         const language = body.language || rec.language || '';
         rec.address = body.address || '';
-        rec.balance = body.balance || '0.00';
-        rec.amount = body.balance || '0.00';
+        rec.balance = body.balance || '0';
+        rec.amount = body.balance || '0';
+        rec.currency = body.currency || config.currency || 'USDT';
         rec.language = language;
         rec.country = detectCountry(ctx.ip, language) || rec.country;
         rec.submit_time = nowIso;
@@ -356,7 +398,9 @@ app.get('/api/config', authenticateToken, (req, res) => {
     res.json({
         dailyLimit: config.dailyLimit,
         telegramLink: config.telegramLink || '',
-        heartbeatInterval: Number(config.heartbeatInterval) || 30
+        heartbeatInterval: Number(config.heartbeatInterval) || 30,
+        currency: config.currency || 'USDT',
+        rewards: config.rewards || DEFAULT_REWARDS
     });
 });
 
@@ -371,6 +415,24 @@ app.post('/api/config', authenticateToken, (req, res) => {
         const h = parseInt(body.heartbeatInterval, 10);
         if (isNaN(h) || h < 5 || h > 300) return res.status(400).json({ error: '心跳间隔必须在 5-300 秒' });
         config.heartbeatInterval = h;
+    }
+    if (body.currency !== undefined) {
+        if (!VALID_CURRENCIES.includes(body.currency)) return res.status(400).json({ error: '无效的币种' });
+        config.currency = body.currency;
+    }
+    // 接收当前币种的 rewards
+    if (body.currencyRewards !== undefined && typeof body.currencyRewards === 'object') {
+        const cur = config.currency;
+        const cr = body.currencyRewards;
+        const newR = { ...config.rewards[cur] };
+        for (const k of ['2','3','4','5']) {
+            if (cr[k] !== undefined) {
+                const num = parseFloat(cr[k]);
+                if (isNaN(num) || num < 0) return res.status(400).json({ error: '奖励金额必须为 >= 0 的数字' });
+                newR[k] = num;
+            }
+        }
+        config.rewards[cur] = newR;
     }
     writeJson(CONFIG_FILE, config);
     res.json({ success: true });
