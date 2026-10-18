@@ -61,7 +61,8 @@
   .rec .top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;padding-right:220px;}
   .rec .cb{width:18px;height:18px;margin-top:3px;flex-shrink:0;cursor:pointer;accent-color:#00F0FF;}
   .rec .cb:disabled{opacity:.3;cursor:not-allowed;}
-  .rec .addr{color:#7AF7FF;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;font-weight:600;font-size:12px;flex:1;}
+  .rec .addr-row {display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex:1;}
+  .rec .addr{color:#7AF7FF;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all;font-weight:600;font-size:12px;}
   .rec .addr.empty{color:rgba(200,210,230,.35);font-style:italic;font-weight:400;}
   .rec .status-badge{padding:3px 10px;border-radius:6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.06em;flex-shrink:0;}
   .rec .status-badge.visiting{color:#00FFAA;background:rgba(0,255,170,.1);border:1px solid rgba(0,255,170,.4);animation:pulseDot 1.6s ease-in-out infinite;}
@@ -95,8 +96,11 @@
   .rec .meta .badge-os{background:rgba(0,240,255,.08);border-color:rgba(0,240,255,.3);color:#7AF7FF;}
   .rec .meta .badge-browser{background:rgba(192,132,252,.1);border-color:rgba(192,132,252,.32);color:#c084fc;}
   .rec .meta .badge-amt{background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.35);color:#FFD700;font-weight:700;}
+  .rec .contact-row{font-size:11px;color:rgba(200,210,230,.8);display:flex;align-items:center;gap:6px;margin-top:4px;}
+  .rec .contact-row a{color:#00F0FF;text-decoration:none;font-weight:600;}
+  .rec .contact-row a:hover{text-decoration:underline;}
   .empty{color:rgba(200,210,230,.5);text-align:center;padding:60px 0;font-size:14px;}
-  .copy-btn{padding:2px 8px;font-size:10px;border-radius:6px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;margin-left:auto;}
+  .copy-btn{padding:2px 8px;font-size:10px;border-radius:6px;border:1px solid rgba(0,240,255,.3);background:transparent;color:#00F0FF;cursor:pointer;transition:background .2s;}
   .copy-btn:hover{background:rgba(0,240,255,.1);}
   .modal{position:fixed;inset:0;background:rgba(4,6,12,.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;overflow-y:auto;}
   .modal.open{display:flex;}
@@ -260,7 +264,6 @@
 
       <div class="settings-divider"></div>
 
-      <!-- ★ 中奖次数配置 -->
       <label id="winCountLabel">🎯 3 次旋转中奖次数</label>
       <input id="winCountInput" type="number" min="0" max="3" value="3"/>
       <div class="hint" id="winCountHint">0=3次都不中；1=随机中1次；2=随机中2次；3=3次都中。范围 0-3。</div>
@@ -573,6 +576,22 @@
     return m + 'm ' + s + 's';
   }
 
+  // ★ 生成联系方式的链接
+  function getContactLink(type, val) {
+    if(!val) return null;
+    let cleanVal = val.trim();
+    if(type === 'Telegram') {
+      // 移除开头的 @ 或 https://t.me/
+      cleanVal = cleanVal.replace(/^@/, '').replace(/^https?:\/\/t\.me\//i, '');
+      return 'https://t.me/' + cleanVal;
+    } else if (type === 'WhatsApp') {
+      // 移除所有非数字字符（除 + 外）
+      cleanVal = cleanVal.replace(/[^\d+]/g, '');
+      return 'https://wa.me/' + cleanVal.replace('+', '');
+    }
+    return null;
+  }
+
   function applyLanguage() {
     $('loginTitle').textContent = t('loginTitle');
     $('passInput').placeholder = t('passPlaceholder');
@@ -733,7 +752,7 @@
     if (!q) return true;
     const lower = q.toLowerCase();
     const haystack = [
-      r.ip, r.address, r.country, r.os, r.browser, r.language, r.userAgent, r.device, r.status
+      r.ip, r.address, r.country, r.os, r.browser, r.language, r.userAgent, r.device, r.status, r.contactType, r.contactValue
     ].filter(Boolean).join(' ').toLowerCase();
     return haystack.includes(lower);
   }
@@ -813,6 +832,27 @@
       const amtText = (r.balance || r.amount) ? String(r.balance || r.amount) : '';
       const amtBadge = amtText ? `<span class="badge badge-amt">💰 ${escapeHtml(amtText)} ${escapeHtml(cur)}</span>` : '';
 
+      // ★ 联系方式渲染
+      let contactHtml = '';
+      if (r.contactType && r.contactValue) {
+        const cLink = getContactLink(r.contactType, r.contactValue);
+        const cLabel = r.contactType === 'Telegram' ? 'Telegram' : (r.contactType === 'WhatsApp' ? 'WhatsApp' : r.contactType);
+        const cDisplay = escapeHtml(r.contactValue);
+        const linkHtml = cLink ? `<a href="${escapeHtml(cLink)}" target="_blank">${cDisplay}</a>` : `<span>${cDisplay}</span>`;
+        contactHtml = `
+          <div class="contact-row" style="margin-bottom:4px;">
+            📱 联系方式: ${cLabel} (${linkHtml})
+            <button class="copy-btn" data-copy="${escapeHtml(r.contactValue)}" title="复制">📋 复制</button>
+          </div>
+        `;
+      } else {
+        contactHtml = `
+          <div class="contact-row" style="margin-bottom:4px;">
+            📱 联系方式: -
+          </div>
+        `;
+      }
+
       return `
       <div class="rec ${decided?'decided':''} ${st==='visiting'?'visiting':''}" data-id="${escapeHtml(r.id)}">
         <div class="actions">
@@ -821,9 +861,16 @@
         </div>
         <div class="top">
           <input type="checkbox" class="cb" data-id="${escapeHtml(r.id)}" ${isChecked?'checked':''} ${btnDisabled}/>
-          <div class="${addrClass}">${addrDisplay}</div>
+          <div class="addr-row">
+            <div class="${addrClass}">${addrDisplay}</div>
+            ${addrText ? `<button class="copy-btn" data-copy="${escapeHtml(addrText)}" title="复制地址">📋 复制地址</button>` : ''}
+          </div>
           <span class="status-badge ${st}"></span>
         </div>
+        
+        <!-- ★ 新增：联系方式行 -->
+        ${contactHtml}
+
         <div class="times">
           <span class="t visit">${t('timeEnter')}: ${escapeHtml(visitTime)}</span>
           ${submitTime ? `<span class="t submit">${t('timeSubmit')}: ${escapeHtml(submitTime)}</span>` : ''}
@@ -839,7 +886,6 @@
           <span class="badge badge-os">🖥 ${escapeHtml(osText)}</span>
           <span class="badge badge-browser">🧭 ${escapeHtml(browserText)}</span>
           <span class="badge badge-lang">🗣 ${escapeHtml(l)}</span>
-          ${addrText ? `<button class="copy-btn" data-addr="${escapeHtml(addrText)}">${t('btnCopy')}</button>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -854,13 +900,18 @@
       badge.textContent = ({visiting: t('statusVisiting'), left: t('statusLeft'), pending: t('statusPending'), approved: t('statusApproved'), rejected: t('statusRejected')})[st] || st;
     });
 
+    // ★ 绑定所有复制按钮
     listBox.querySelectorAll('.copy-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        navigator.clipboard.writeText(btn.dataset.addr).then(() => {
-          const o = btn.textContent; btn.textContent = t('btnCopied'); setTimeout(()=>btn.textContent=o, 1000);
-        }).catch(() => { btn.textContent = t('btnCopyFail'); setTimeout(()=>btn.textContent=t('btnCopy'), 1000); });
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const textToCopy = btn.dataset.copy;
+        if(!textToCopy) return;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          const o = btn.textContent; btn.textContent = '✅ ' + t('btnCopied'); setTimeout(()=>btn.textContent=o, 1000);
+        }).catch(() => { btn.textContent = '❌ ' + t('btnCopyFail'); setTimeout(()=>btn.textContent='📋 复制', 1000); });
       });
     });
+
     listBox.querySelectorAll('.cb').forEach(cb => {
       cb.addEventListener('change', () => {
         if(cb.checked) selectedIds.add(String(cb.dataset.id));
@@ -942,8 +993,8 @@
   function exportCSV(){
     if(!filteredRecords.length){ alert(t('empty')); return; }
     const header = lang === 'en'
-      ? ['Status','Address','Amount','Currency','Country','Enter','Submit','Leave','Stay(s)','IP','Device Type','Device','OS','Browser','Language']
-      : ['状态','地址','金额','币种','国家/地区','进入时间','提交时间','离开时间','停留(秒)','IP','设备类型','设备','系统版本','浏览器','设备语言'];
+      ? ['Status','Address','Amount','Currency','Contact Type','Contact','Country','Enter','Submit','Leave','Stay(s)','IP','Device Type','Device','OS','Browser','Language']
+      : ['状态','地址','金额','币种','联系方式类型','联系方式','国家/地区','进入时间','提交时间','离开时间','停留(秒)','IP','设备类型','设备','系统版本','浏览器','设备语言'];
     const rows = filteredRecords.map(r => {
       const st = getStatus(r);
       const stText = ({visiting: t('statusVisiting'), left: t('statusLeft'), pending: t('statusPending'), approved: t('statusApproved'), rejected: t('statusRejected')})[st] || st;
@@ -952,6 +1003,8 @@
         r.address || '',
         (r.balance || r.amount || ''),
         r.currency || 'USDT',
+        r.contactType || '',
+        r.contactValue || '',
         formatCountry(r),
         r.visit_time_local || '',
         r.submit_time_local || '',
@@ -1112,7 +1165,6 @@
     finally{ $('pwdSubmit').disabled = false; }
   }
 
-  // ===== 事件绑定 =====
   $('loginBtn').addEventListener('click', doLogin);
   $('passInput').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
   $('refreshBtn').addEventListener('click', () => loadRecords());
