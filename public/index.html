@@ -179,4 +179,31 @@
     <div class="modal-kicker" id="myRecordsKicker">Withdrawal Records</div>
     <h2 class="modal-title" id="myRecordsTitle">My Withdrawal Records</h2>
     <div id="myRecordsList" style="max-height:340px;overflow-y:auto;margin:14px 0 16px;text-align:left;"></div>
-    <button id="myRecordsCloseBtn"
+    <button id="myRecordsCloseBtn" class="claim-btn" type="button">Close</button>
+    <a id="myRecordsContactBtn" href="#" target="_blank" class="tg-modal-btn" style="margin-top:10px;">联系客服</a>
+  </div>
+</div>
+
+<!-- ========== 悬浮客服飞机按钮 ========== -->
+<a id="floatingTgBtn" href="#" target="_blank" class="tg-float-btn">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.11.03-1.89 1.2-5.34 3.52-.5.34-.95.5-1.35.49-.44-.01-1.29-.25-1.92-.46-.78-.25-1.4-.39-1.35-.82.03-.22.29-.45.78-.69 3.05-1.33 5.08-2.21 6.09-2.64 2.9-1.21 3.5-1.42 3.89-1.42.09 0 .28.02.4.12.11.09.14.21.15.3z"/></svg>
+</a>
+
+<!-- 首次访问时间记录 -->
+<script>
+(function(){
+  try {
+    var k = '__nexus_first_visit';
+    var v = localStorage.getItem(k);
+    if (!v) { v = new Date().toISOString(); localStorage.setItem(k, v); }
+    window.__firstVisitTime = v;
+  } catch(e){ window.__firstVisitTime = new Date().toISOString(); }
+})();
+</script>
+
+<!-- 脚本加载顺序：i18n → game → support（不能改） -->
+<script src="i18n.js"></script>
+<script src="game.js"></script>
+<script src="support.js"></script>
+</body>
+</html>
