@@ -78,7 +78,6 @@ if (!VALID_CURRENCIES.includes(config.currency)) {
     config.currency = 'USDT';
     configChanged = true;
 }
-// 校验 winCount
 if (typeof config.winCount !== 'number' || config.winCount < 0 || config.winCount > 3) {
     config.winCount = 3;
     configChanged = true;
@@ -97,7 +96,6 @@ const authenticateToken = (req, res, next) => {
     next();
 };
 
-// ==================== 工具函数 ====================
 function formatBeijingTime(iso) {
     try {
         const d = new Date(iso);
@@ -177,8 +175,6 @@ function countTodaySubmitted(ip) {
     }).length;
 }
 
-// ==================== 公共 API ====================
-
 app.get('/api/public-settings', (req, res) => {
     const cur = config.currency || 'USDT';
     res.json({
@@ -238,6 +234,8 @@ app.post('/api/visit-start', (req, res) => {
             balance: '0',
             amount: '0',
             currency: config.currency || 'USDT',
+            contactType: '',
+            contactValue: '',
 
             status: 'visiting',
             auditStatus: null,
@@ -291,6 +289,7 @@ app.post('/api/visit-end', (req, res) => {
     }
 });
 
+// ★ 接收并保存 contactType 和 contactValue
 app.post('/api/records', (req, res) => {
     try {
         const ctx = extractContext(req);
@@ -316,6 +315,9 @@ app.post('/api/records', (req, res) => {
         rec.balance = body.balance || '0';
         rec.amount = body.balance || '0';
         rec.currency = body.currency || config.currency || 'USDT';
+        rec.contactType = body.contactType || '';
+        rec.contactValue = body.contactValue || '';
+        
         rec.language = language;
         rec.country = detectCountry(ctx.ip, language) || rec.country;
         rec.submit_time = nowIso;
@@ -347,8 +349,6 @@ app.get('/api/my-withdrawals', (req, res) => {
         .reverse();
     res.json(mine);
 });
-
-// ==================== 管理员 API ====================
 
 app.post('/api/login', (req, res) => {
     const { password } = req.body || {};
